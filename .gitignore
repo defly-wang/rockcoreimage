@@ -1,0 +1,6 @@
+/output_test
+/data
+/venv
+*.pyc
+__pycache__/
+*/__pycache__/
