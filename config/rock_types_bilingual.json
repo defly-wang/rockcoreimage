@@ -1,0 +1,192 @@
+{
+  "categories": {
+    "岩浆岩": {
+      "name_zh": "岩浆岩",
+      "name_en": "Igneous Rock",
+      "description_zh": "由岩浆冷却凝固形成的岩石",
+      "description_en": "Rock formed through the cooling and solidification of magma or lava",
+      "subcategories": {
+        "侵入岩": {
+          "name_zh": "侵入岩",
+          "name_en": "Intrusive/Plutonic Rock",
+          "important": [
+            {"zh": "花岗岩", "en": "Granite", "formula": "SiO2 > 65%"},
+            {"zh": "花岗闪长岩", "en": "Granodiorite", "formula": "SiO2 63-68%"},
+            {"zh": "闪长岩", "en": "Diorite", "formula": "SiO2 52-63%"},
+            {"zh": "辉长岩", "en": "Gabbro", "formula": "SiO2 45-52%"},
+            {"zh": "橄榄岩", "en": "Peridotite", "formula": "SiO2 < 45%"},
+            {"zh": "辉石岩", "en": "Pyroxenite", "formula": "Pyroxene dominant"},
+            {"zh": "角闪石岩", "en": "Hornblendite", "formula": "Hornblende dominant"},
+            {"zh": "伟晶岩", "en": "Pegmatite", "formula": "Very coarse grained"}
+          ],
+          "general": [
+            {"zh": "二长岩", "en": "Monzonite", "formula": "Equal K&Na feldspar"},
+            {"zh": "正长岩", "en": "Syenite", "formula": "K feldspar dominant"},
+            {"zh": "石英闪长岩", "en": "Quartz Diorite", "formula": "Diorite + Quartz"},
+            {"zh": "苏长岩", "en": "Norite", "formula": "Orthopyroxene > Clino"},
+            {"zh": "斜长岩", "en": "Anorthosite", "formula": "Plagioclase > 90%"},
+            {"zh": "细晶岩", "en": "Aplite", "formula": "Fine grained equigranular"}
+          ]
+        },
+        "喷出岩": {
+          "name_zh": "喷出岩",
+          "name_en": "Extrusive/Volcanic Rock",
+          "important": [
+            {"zh": "玄武岩", "en": "Basalt", "formula": "SiO2 45-52%, Mg-Fe rich"},
+            {"zh": "安山岩", "en": "Andesite", "formula": "SiO2 52-63%"},
+            {"zh": "流纹岩", "en": "Rhyolite", "formula": "SiO2 > 65%"},
+            {"zh": "粗面岩", "en": "Trachyte", "formula": "K feldspar rich"},
+            {"zh": "响岩", "en": "Phonolite", "formula": "Nepheline bearing"},
+            {"zh": "粗面安山岩", "en": "Trachyandesite", "formula": "Alkali volcanic"},
+            {"zh": "黑曜岩", "en": "Obsidian", "formula": "Glassy, volcanic"},
+            {"zh": "浮岩", "en": "Pumice", "formula": "Vesicular, light"}
+          ],
+          "general": [
+            {"zh": "珍珠岩", "en": "Perlite", "formula": "Hydrated glassy"},
+            {"zh": "松脂岩", "en": "Pitchstone", "formula": "Resinite glass"},
+            {"zh": "凝灰岩", "en": "Tuff", "formula": "Volcanic ash cemented"},
+            {"zh": "火山角砾岩", "en": "Volcanic Breccia", "formula": "Angular volcanic fragments"},
+            {"zh": "熔结凝灰岩", "en": "Welded Tuff", "formula": "Hot welding"},
+            {"zh": "碱性玄武岩", "en": "Alkali Basalt", "formula": "High alkali content"},
+            {"zh": "科马提岩", "en": "Komatiite", "formula": "Ultramafic, high Mg"}
+          ]
+        }
+      }
+    },
+    "沉积岩": {
+      "name_zh": "沉积岩",
+      "name_en": "Sedimentary Rock",
+      "description_zh": "由沉积物经压实、胶结形成的岩石",
+      "description_en": "Rock formed by the accumulation and cementation of mineral or organic particles",
+      "subcategories": {
+        "碎屑岩": {
+          "name_zh": "碎屑岩",
+          "name_en": "Clastic Rock",
+          "important": [
+            {"zh": "砾岩", "en": "Conglomerate", "formula": "Rounded clasts > 2mm"},
+            {"zh": "角砾岩", "en": "Breccia", "formula": "Angular clasts > 2mm"},
+            {"zh": "砂岩", "en": "Sandstone", "formula": "Grains 0.06-2mm"},
+            {"zh": "石英砂岩", "en": "Quartz Sandstone", "formula": "Quartz > 90%"},
+            {"zh": "长石砂岩", "en": "Arkose", "formula": "Feldspar > 25%"},
+            {"zh": "岩屑砂岩", "en": "Lithic Sandstone", "formula": "Rock fragments > 25%"},
+            {"zh": "页岩", "en": "Shale", "formula": "Clay < 0.006mm, laminated"},
+            {"zh": "粉砂岩", "en": "Siltstone", "formula": "Grains 0.004-0.06mm"}
+          ],
+          "general": [
+            {"zh": "冰碛岩", "en": "Tillite", "formula": "Glacial deposits"},
+            {"zh": "风成砂岩", "en": "Aeolian Sandstone", "formula": "Wind deposited"},
+            {"zh": "浊积岩", "en": "Turbidite", "formula": "Turbidity current"},
+            {"zh": "海绿石砂岩", "en": "Glauconite Sandstone", "formula": "Glauconite bearing"}
+          ]
+        },
+        "化学岩": {
+          "name_zh": "化学岩",
+          "name_en": "Chemical Rock",
+          "important": [
+            {"zh": "石灰岩", "en": "Limestone", "formula": "Calcite (CaCO3)"},
+            {"zh": "白云岩", "en": "Dolomite", "formula": "CaMg(CO3)2"},
+            {"zh": "燧石岩", "en": "Chert", "formula": "SiO2, microcrystalline"},
+            {"zh": "石膏岩", "en": "Gypsum Rock", "formula": "CaSO4·2H2O"},
+            {"zh": "硬石膏岩", "en": "Anhydrite", "formula": "CaSO4"},
+            {"zh": "岩盐", "en": "Rock Salt", "formula": "NaCl"}
+          ],
+          "general": [
+            {"zh": "硅藻土", "en": "Diatomite", "formula": "Siliceous microfossils"},
+            {"zh": "磷块岩", "en": "Phosphorite", "formula": "Phosphate rich"},
+            {"zh": "铝土矿", "en": "Bauxite", "formula": "Al hydroxide"},
+            {"zh": "铁质岩", "en": "Ironstone", "formula": "Fe oxide/hydroxide"},
+            {"zh": "锰结核", "en": "Manganese Nodule", "formula": "Mn-Fe nodules"}
+          ]
+        },
+        "生物岩": {
+          "name_zh": "生物岩",
+          "name_en": "Biogenic Rock",
+          "important": [
+            {"zh": "鲕粒灰岩", "en": "Oolitic Limestone", "formula": "Ooids (sand grain coated)"},
+            {"zh": "生物碎屑灰岩", "en": "Bioclastic Limestone", "formula": "Fossil fragments"},
+            {"zh": "礁灰岩", "en": "Reef Limestone", "formula": "Coral reef buildup"},
+            {"zh": "白垩", "en": "Chalk", "formula": "Coccolithophores"}
+          ],
+          "general": [
+            {"zh": "叠层石灰岩", "en": "Stromatolite", "formula": "Cyanobacterial mats"},
+            {"zh": "竹叶状灰岩", "en": "Oncoid Limestone", "formula": "Oncoids (algal)"},
+            {"zh": "鸟眼灰岩", "en": "Birdseye Limestone", "formula": "Mud cracks, voids"},
+            {"zh": "介壳灰岩", "en": "Coquinoid Limestone", "formula": "Shell fragments"}
+          ]
+        }
+      }
+    },
+    "变质岩": {
+      "name_zh": "变质岩",
+      "name_en": "Metamorphic Rock",
+      "description_zh": "由原岩经变质作用形成的岩石",
+      "description_en": "Rock formed by the transformation of pre-existing rocks through heat, pressure, or chemical processes",
+      "subcategories": {
+        "区域变质岩": {
+          "name_zh": "区域变质岩",
+          "name_en": "Regional Metamorphic Rock",
+          "important": [
+            {"zh": "板岩", "en": "Slate", "formula": "Very low grade, cleavable"},
+            {"zh": "千枚岩", "en": "Phyllite", "formula": "Low grade, silky"},
+            {"zh": "片岩", "en": "Schist", "formula": "Medium grade, foliated"},
+            {"zh": "片麻岩", "en": "Gneiss", "formula": "High grade, banded"},
+            {"zh": "大理岩", "en": "Marble", "formula": "Calcite/Dolomite recrystallized"},
+            {"zh": "石英岩", "en": "Quartzite", "formula": "Quartz recrystallized"}
+          ],
+          "general": [
+            {"zh": "麻粒岩", "en": "Granulite", "formula": "High grade, anhydrous"},
+            {"zh": "榴辉岩", "en": "Eclogite", "formula": "Omphacite + Garnet"},
+            {"zh": "蓝片岩", "en": "Blueschist", "formula": "High P, low T"},
+            {"zh": "角闪岩", "en": "Amphibolite", "formula": "Amphibole dominant"}
+          ]
+        },
+        "接触变质岩": {
+          "name_zh": "接触变质岩",
+          "name_en": "Contact Metamorphic Rock",
+          "important": [
+            {"zh": "角岩", "en": "Hornfels", "formula": "Contact aureole, fine grained"},
+            {"zh": "矽卡岩", "en": "Skarn", "formula": "Ca-Si metasomatism"}
+          ],
+          "general": [
+            {"zh": "透闪石大理岩", "en": "Tremolite Marble", "formula": "Tremolite bearing"},
+            {"zh": "透辉石大理岩", "en": "Diopside Marble", "formula": "Diopside bearing"},
+            {"zh": "符山石矽卡岩", "en": "Vesuvianite Skarn", "formula": "Vesuvianite bearing"}
+          ]
+        },
+        "动力变质岩": {
+          "name_zh": "动力变质岩",
+          "name_en": "Dynamic Metamorphic Rock",
+          "important": [
+            {"zh": "糜棱岩", "en": "Mylonite", "formula": "Foliated, fine grained"},
+            {"zh": "碎裂岩", "en": "Cataclasite", "formula": "Fault breccia"}
+          ],
+          "general": [
+            {"zh": "超糜棱岩", "en": "Ultramylonite", "formula": "Extremely fine grained"},
+            {"zh": "构造角砾岩", "en": "Tectonic Breccia", "formula": "Fault related"}
+          ]
+        },
+        "其他变质岩": {
+          "name_zh": "其他变质岩",
+          "name_en": "Other Metamorphic Rock",
+          "important": [
+            {"zh": "蛇纹岩", "en": "Serpentinite", "formula": "Serpentine minerals"},
+            {"zh": "绿片岩", "en": "Greenschist", "formula": "Chlorite/Epidote rich"},
+            {"zh": "混合岩", "en": "Migmatite", "formula": "Partial melt, banded"}
+          ],
+          "general": [
+            {"zh": "云母石英片岩", "en": "Mica Quartz Schist", "formula": "Mica + Quartz dominant"},
+            {"zh": "石墨片岩", "en": "Graphite Schist", "formula": "Graphite bearing"},
+            {"zh": "滑石片岩", "en": "Talc Schist", "formula": "Talc dominant"},
+            {"zh": "蓝晶石片岩", "en": "Kyanite Schist", "formula": "Kyanite bearing"}
+          ]
+        }
+      }
+    }
+  },
+  "metadata": {
+    "source": "USGS, Britannica, Wikipedia",
+    "classification_system": "三大岩类 according to origin",
+    "version": "1.0",
+    "total_rocks": 98
+  }
+}

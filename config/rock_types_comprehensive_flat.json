@@ -1,0 +1,2536 @@
+{
+  "rocks": [
+    {
+      "name": "橄榄岩",
+      "name_en": "Peridotite",
+      "category": "岩浆岩",
+      "subcategory": "超基性侵入岩",
+      "subcategory_en": "Ultramafic Intrusive Rock",
+      "formula": "Olivine > 40%, Pyroxene dominant, SiO2 < 45%",
+      "importance": true,
+      "description_en": "Ultramafic intrusive rock composed mainly of olivine with pyroxene. Source of chromium, platinum, and other valuable metals.",
+      "description": "超基性侵入岩，主要由橄榄石和辉石组成。是铬、铂等金属的重要来源岩石。",
+      "aliases": [
+        "橄榄石"
+      ]
+    },
+    {
+      "name": "辉石岩",
+      "name_en": "Pyroxenite",
+      "category": "岩浆岩",
+      "subcategory": "超基性侵入岩",
+      "subcategory_en": "Ultramafic Intrusive Rock",
+      "formula": "Pyroxene > 90%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "角闪石岩",
+      "name_en": "Hornblendite",
+      "category": "岩浆岩",
+      "subcategory": "超基性侵入岩",
+      "subcategory_en": "Ultramafic Intrusive Rock",
+      "formula": "Hornblende > 90%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "金伯利岩",
+      "name_en": "Kimberlite",
+      "category": "岩浆岩",
+      "subcategory": "超基性侵入岩",
+      "subcategory_en": "Ultramafic Intrusive Rock",
+      "formula": "Olivine + Phlogopite + Cr-spinel, diamond-bearing",
+      "importance": true,
+      "description_en": "Ultramafic volcanic rock, primary source of diamonds. Kimberlite pipe eruptions bring diamonds from mantle.",
+      "description": "含钻石的超基性火山岩。金刚石的主要来源。",
+      "aliases": []
+    },
+    {
+      "name": "苦橄岩",
+      "name_en": "Picrite",
+      "category": "岩浆岩",
+      "subcategory": "超基性侵入岩",
+      "subcategory_en": "Ultramafic Intrusive Rock",
+      "formula": "High Mg olivine, basaltic",
+      "importance": false,
+      "description_en": "Ultramafic volcanic rock with high MgO content. Olivine-rich basaltic composition.",
+      "description": "高镁橄榄玄武岩，橄榄石丰富。",
+      "aliases": []
+    },
+    {
+      "name": "科马提岩",
+      "name_en": "Komatiite",
+      "category": "岩浆岩",
+      "subcategory": "超基性侵入岩",
+      "subcategory_en": "Ultramafic Intrusive Rock",
+      "formula": "Ultramafic, high Mg > 18%",
+      "importance": false,
+      "description_en": "Ultramafic volcanic rock with very high MgO (>18%). Ancient komatiite flows, rare in modern Earth.",
+      "description": "超基性火山岩，MgO含量高。古代科马提岩流。",
+      "aliases": []
+    },
+    {
+      "name": "玻基橄辉岩",
+      "name_en": " olivine-melilitite",
+      "category": "岩浆岩",
+      "subcategory": "超基性侵入岩",
+      "subcategory_en": "Ultramafic Intrusive Rock",
+      "formula": "Melilite + Olivine",
+      "importance": false,
+      "description_en": "Olivine melilitite with glassy matrix. Very rare ultramafic volcanic rock.",
+      "description": "橄榄辉石岩，玻璃质基质。稀有超基性火山岩。",
+      "aliases": []
+    },
+    {
+      "name": "辉长岩",
+      "name_en": "Gabbro",
+      "category": "岩浆岩",
+      "subcategory": "基性侵入岩",
+      "subcategory_en": "Mafic Intrusive Rock",
+      "formula": "Plagioclase + Pyroxene, SiO2 45-52%",
+      "importance": true,
+      "description_en": "Coarse-grained mafic intrusive rock composed of plagioclase and pyroxene. The plutonic equivalent of basalt, formed from slow magma cooling at depth.",
+      "description": "粗粒基性侵入岩，是玄武岩的深成对应岩石。主要由斜长石和辉石组成。",
+      "aliases": [
+        "辉长石"
+      ]
+    },
+    {
+      "name": "苏长岩",
+      "name_en": "Norite",
+      "category": "岩浆岩",
+      "subcategory": "基性侵入岩",
+      "subcategory_en": "Mafic Intrusive Rock",
+      "formula": "Orthopyroxene > Clinopyroxene",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "辉长玢岩",
+      "name_en": "Gabbro-porphyrite",
+      "category": "岩浆岩",
+      "subcategory": "基性侵入岩",
+      "subcategory_en": "Mafic Intrusive Rock",
+      "formula": "Porphyritic Gabbro",
+      "importance": true,
+      "description_en": "Porphyritic gabbro with large plagioclase and pyroxene crystals in finer groundmass.",
+      "description": "斑状辉长岩，斜长石和辉石斑晶。",
+      "aliases": [
+        "辉长斑岩"
+      ]
+    },
+    {
+      "name": "辉绿岩",
+      "name_en": "Diabase/Dolerite",
+      "category": "岩浆岩",
+      "subcategory": "基性侵入岩",
+      "subcategory_en": "Mafic Intrusive Rock",
+      "formula": "Ophitic texture, fine-grained",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "斜长岩",
+      "name_en": "Anorthosite",
+      "category": "岩浆岩",
+      "subcategory": "基性侵入岩",
+      "subcategory_en": "Mafic Intrusive Rock",
+      "formula": "Plagioclase > 90%",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "蚀变辉长岩",
+      "name_en": "Epidiorite",
+      "category": "岩浆岩",
+      "subcategory": "基性侵入岩",
+      "subcategory_en": "Mafic Intrusive Rock",
+      "formula": "Hornblende after Pyroxene",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "闪长岩",
+      "name_en": "Diorite",
+      "category": "岩浆岩",
+      "subcategory": "中性侵入岩",
+      "subcategory_en": "Intermediate Intrusive Rock",
+      "formula": "Plagioclase + Hornblende, SiO2 52-63%",
+      "importance": true,
+      "description_en": "Coarse-grained intermediate intrusive rock composed mainly of plagioclase and hornblende. Contains little or no quartz, dark-colored.",
+      "description": "中性侵入岩，主要由斜长石和角闪石组成。颜色较深，含少量或不含石英。",
+      "aliases": [
+        "闪长石"
+      ]
+    },
+    {
+      "name": "石英闪长岩",
+      "name_en": "Quartz Diorite",
+      "category": "岩浆岩",
+      "subcategory": "中性侵入岩",
+      "subcategory_en": "Intermediate Intrusive Rock",
+      "formula": "Diorite + Quartz 5-20%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "花岗闪长岩",
+      "name_en": "Granodiorite",
+      "category": "岩浆岩",
+      "subcategory": "中性侵入岩",
+      "subcategory_en": "Intermediate Intrusive Rock",
+      "formula": "Plagioclase > K-feldspar, SiO2 63-68%",
+      "importance": true,
+      "description_en": "Coarse-grained intrusive rock intermediate between granite and diorite. Contains quartz, plagioclase, and alkali feldspar with biotite and hornblende.",
+      "description": "花岗岩和闪长岩之间的过渡类型侵入岩。含石英、斜长石和碱性长石，以及黑云母和角闪石。",
+      "aliases": [
+        "花岗闪长石"
+      ]
+    },
+    {
+      "name": "英云闪长岩",
+      "name_en": "Tonalite",
+      "category": "岩浆岩",
+      "subcategory": "中性侵入岩",
+      "subcategory_en": "Intermediate Intrusive Rock",
+      "formula": "Quartz + Plagioclase, little K-feldspar",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "闪长玢岩",
+      "name_en": "Diorite-porphyrite",
+      "category": "岩浆岩",
+      "subcategory": "中性侵入岩",
+      "subcategory_en": "Intermediate Intrusive Rock",
+      "formula": "Porphyritic Diorite",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "石英二长岩",
+      "name_en": "Quartz Monzonite",
+      "category": "岩浆岩",
+      "subcategory": "中性侵入岩",
+      "subcategory_en": "Intermediate Intrusive Rock",
+      "formula": "Equal K-feldspar + Plagioclase",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "花岗岩",
+      "name_en": "Granite",
+      "category": "岩浆岩",
+      "subcategory": "酸性侵入岩",
+      "subcategory_en": "Felsic Intrusive Rock",
+      "formula": "Quartz + K-feldspar + Plagioclase + Mica, SiO2 > 65%",
+      "importance": true,
+      "description_en": "Coarse-grained intrusive igneous rock composed mainly of quartz, alkali feldspar, and plagioclase. Formed from slow cooling of magma beneath Earth's surface.",
+      "description": "粗粒侵入型火成岩，主要由石英、碱性长石和斜长石组成。颜色通常为浅色（灰白色、肉红色等），是大陆地壳中最常见的岩石之一。",
+      "aliases": [
+        "花岗岩类",
+        "花岗石",
+        "Granite"
+      ]
+    },
+    {
+      "name": "花岗斑岩",
+      "name_en": "Granite-porphyry",
+      "category": "岩浆岩",
+      "subcategory": "酸性侵入岩",
+      "subcategory_en": "Felsic Intrusive Rock",
+      "formula": "Porphyritic Granite",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "伟晶岩",
+      "name_en": "Pegmatite",
+      "category": "岩浆岩",
+      "subcategory": "酸性侵入岩",
+      "subcategory_en": "Felsic Intrusive Rock",
+      "formula": "Very coarse-grained, > 1cm crystals",
+      "importance": true,
+      "description_en": "Very coarse-grained igneous rock with crystals larger than 1 cm. Often contains rare minerals, gemstones, and pegmatitic gemstones.",
+      "description": "极粗粒火成岩，晶体大于1厘米。常含稀有矿物和宝石。",
+      "aliases": [
+        "伟晶花岗岩"
+      ]
+    },
+    {
+      "name": "细晶岩",
+      "name_en": "Aplite",
+      "category": "岩浆岩",
+      "subcategory": "酸性侵入岩",
+      "subcategory_en": "Felsic Intrusive Rock",
+      "formula": "Fine-grained, equigranular, Quartz + Feldspar",
+      "importance": true,
+      "description_en": "Fine-grained equigranular igneous rock composed mainly of quartz and feldspar. Aplite texture, light-colored.",
+      "description": "细粒等粒火成岩，由石英和长石组成。",
+      "aliases": [
+        "细晶花岗岩"
+      ]
+    },
+    {
+      "name": "二长花岗岩",
+      "name_en": "Monzogranite",
+      "category": "岩浆岩",
+      "subcategory": "酸性侵入岩",
+      "subcategory_en": "Felsic Intrusive Rock",
+      "formula": "K-feldspar = Plagioclase",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "钾长花岗岩",
+      "name_en": "Alkali-feldspar granite",
+      "category": "岩浆岩",
+      "subcategory": "酸性侵入岩",
+      "subcategory_en": "Felsic Intrusive Rock",
+      "formula": "K-feldspar > 90%",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "霓细花岗岩",
+      "name_en": "Alaskite",
+      "category": "岩浆岩",
+      "subcategory": "酸性侵入岩",
+      "subcategory_en": "Felsic Intrusive Rock",
+      "formula": "Alkali feldspar + Quartz, little dark minerals",
+      "importance": false,
+      "description_en": "Light-colored granite with alkali feldspar and quartz. Contains little dark-colored minerals.",
+      "description": "浅色花岗岩，碱性长石和石英为主，暗色矿物少。",
+      "aliases": []
+    },
+    {
+      "name": "正长岩",
+      "name_en": "Syenite",
+      "category": "岩浆岩",
+      "subcategory": "碱性侵入岩",
+      "subcategory_en": "Alkalic Intrusive Rock",
+      "formula": "K-feldspar dominant, little Quartz",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "石英正长岩",
+      "name_en": "Quartz Syenite",
+      "category": "岩浆岩",
+      "subcategory": "碱性侵入岩",
+      "subcategory_en": "Alkalic Intrusive Rock",
+      "formula": "Syenite + Quartz 5-20%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "二长岩",
+      "name_en": "Monzonite",
+      "category": "岩浆岩",
+      "subcategory": "碱性侵入岩",
+      "subcategory_en": "Alkalic Intrusive Rock",
+      "formula": "K-feldspar = Plagioclase, equal amounts",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "霞石正长岩",
+      "name_en": "Nepheline Syenite",
+      "category": "岩浆岩",
+      "subcategory": "碱性侵入岩",
+      "subcategory_en": "Alkalic Intrusive Rock",
+      "formula": "Nepheline > 10%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "霓霞岩",
+      "name_en": "Nephelinite",
+      "category": "岩浆岩",
+      "subcategory": "碱性侵入岩",
+      "subcategory_en": "Alkalic Intrusive Rock",
+      "formula": "Nepheline + Clinopyroxene",
+      "importance": false,
+      "description_en": "Nepheline-bearing ultramafic volcanic rock. Rare alkaline extrusive rock type.",
+      "description": "含霞石的超基性喷出岩。霓霞岩组成。",
+      "aliases": []
+    },
+    {
+      "name": "霞石岩",
+      "name_en": "Nephelinite",
+      "category": "岩浆岩",
+      "subcategory": "碱性侵入岩",
+      "subcategory_en": "Alkalic Intrusive Rock",
+      "formula": "Nepheline > 35%",
+      "importance": false,
+      "description_en": "Foid-bearing volcanic rock with nepheline >35%. Very rare alkaline volcanic rock.",
+      "description": "似长石含量大于35%的喷出岩。稀有碱性喷出岩。",
+      "aliases": []
+    },
+    {
+      "name": "碱玄岩",
+      "name_en": "Tephrite",
+      "category": "岩浆岩",
+      "subcategory": "碱性侵入岩",
+      "subcategory_en": "Alkalic Intrusive Rock",
+      "formula": "Feldspathoid + Plagioclase",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "响岩",
+      "name_en": "Phonolite",
+      "category": "岩浆岩",
+      "subcategory": "碱性侵入岩",
+      "subcategory_en": "Alkalic Intrusive Rock",
+      "formula": "Nepheline phonolite",
+      "importance": false,
+      "description_en": "Light-colored alkali volcanic rock containing feldspathoids (nepheline or leucite). Phonolitic texture with resonant sound when struck.",
+      "description": "碱性喷出岩，含似长石。音响结构。",
+      "aliases": [
+        "钠质响岩"
+      ]
+    },
+    {
+      "name": "玄武岩",
+      "name_en": "Basalt",
+      "category": "岩浆岩",
+      "subcategory": "基性喷出岩",
+      "subcategory_en": "Mafic Extrusive Rock",
+      "formula": "Plagioclase + Pyroxene, SiO2 45-52%",
+      "importance": true,
+      "description_en": "Fine-grained, dark-colored mafic extrusive volcanic rock composed primarily of plagioclase and pyroxene. The most abundant rock in Earth's oceanic crust.",
+      "description": "细粒基性喷出岩，主要由斜长石和辉石组成。颜色深暗（灰黑色、黑绿色），是地球上大洋中脊最主要的岩石。",
+      "aliases": [
+        "玄岩",
+        " basalt"
+      ]
+    },
+    {
+      "name": "玄武质安山岩",
+      "name_en": "Basaltic Andesite",
+      "category": "岩浆岩",
+      "subcategory": "基性喷出岩",
+      "subcategory_en": "Mafic Extrusive Rock",
+      "formula": "SiO2 52-57%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "碱性玄武岩",
+      "name_en": "Alkali Basalt",
+      "category": "岩浆岩",
+      "subcategory": "基性喷出岩",
+      "subcategory_en": "Mafic Extrusive Rock",
+      "formula": "High Na2O + K2O",
+      "importance": true,
+      "description_en": "Alkali basalt with high alkali content (Na2O + K2O > 3%). Typically found in ocean islands and continental rift zones.",
+      "description": "高碱玄武岩，Na2O+K2O含量高。常见于大洋岛屿和大陆裂谷。",
+      "aliases": [
+        "高钾玄武岩"
+      ]
+    },
+    {
+      "name": "拉斑玄武岩",
+      "name_en": "Tholeiitic Basalt",
+      "category": "岩浆岩",
+      "subcategory": "基性喷出岩",
+      "subcategory_en": "Mafic Extrusive Rock",
+      "formula": "Low Na2O, High CaO",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "橄榄玄武岩",
+      "name_en": "Oceanite",
+      "category": "岩浆岩",
+      "subcategory": "基性喷出岩",
+      "subcategory_en": "Mafic Extrusive Rock",
+      "formula": "High Olivine content",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "杏仁状玄武岩",
+      "name_en": "Amygdaloidal Basalt",
+      "category": "岩浆岩",
+      "subcategory": "基性喷出岩",
+      "subcategory_en": "Mafic Extrusive Rock",
+      "formula": "Vesicles filled with minerals",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "细粒玄武岩",
+      "name_en": "Dolerite",
+      "category": "岩浆岩",
+      "subcategory": "基性喷出岩",
+      "subcategory_en": "Mafic Extrusive Rock",
+      "formula": "Medium-grained basalt",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "安山岩",
+      "name_en": "Andesite",
+      "category": "岩浆岩",
+      "subcategory": "中性喷出岩",
+      "subcategory_en": "Intermediate Extrusive Rock",
+      "formula": "Plagioclase + Hornblende/Biotite, SiO2 52-63%",
+      "importance": true,
+      "description_en": "Intermediate extrusive volcanic rock, typically gray to dark gray. Composed mainly of plagioclase with hornblende or biotite. Common in volcanic arcs above subduction zones.",
+      "description": "中性喷出岩，呈灰色至深灰色。主要由斜长石和角闪石或黑云母组成。常见于火山弧地区。",
+      "aliases": [
+        "安山玄武岩"
+      ]
+    },
+    {
+      "name": "英安岩",
+      "name_en": "Dacite",
+      "category": "岩浆岩",
+      "subcategory": "中性喷出岩",
+      "subcategory_en": "Intermediate Extrusive Rock",
+      "formula": "Quartz + Plagioclase, SiO2 63-68%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "粗面安山岩",
+      "name_en": "Trachyandesite",
+      "category": "岩浆岩",
+      "subcategory": "中性喷出岩",
+      "subcategory_en": "Intermediate Extrusive Rock",
+      "formula": "Alkali feldspar + Plagioclase",
+      "importance": true,
+      "description_en": "Intermediate volcanic rock between andesite and trachyte. Contains both plagioclase and alkali feldspar.",
+      "description": "安山岩和粗面岩之间的过渡类型。",
+      "aliases": [
+        "安粗岩"
+      ]
+    },
+    {
+      "name": "安山质凝灰岩",
+      "name_en": "Andesitic Tuff",
+      "category": "岩浆岩",
+      "subcategory": "中性喷出岩",
+      "subcategory_en": "Intermediate Extrusive Rock",
+      "formula": "Volcanic ash, intermediate composition",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "角闪安山岩",
+      "name_en": "Hornblende Andesite",
+      "category": "岩浆岩",
+      "subcategory": "中性喷出岩",
+      "subcategory_en": "Intermediate Extrusive Rock",
+      "formula": "Hornblende phenocrysts",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "辉石安山岩",
+      "name_en": "Pyroxene Andesite",
+      "category": "岩浆岩",
+      "subcategory": "中性喷出岩",
+      "subcategory_en": "Intermediate Extrusive Rock",
+      "formula": "Pyroxene phenocrysts",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "云母安山岩",
+      "name_en": "Biotite Andesite",
+      "category": "岩浆岩",
+      "subcategory": "中性喷出岩",
+      "subcategory_en": "Intermediate Extrusive Rock",
+      "formula": "Biotite phenocrysts",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "流纹岩",
+      "name_en": "Rhyolite",
+      "category": "岩浆岩",
+      "subcategory": "酸性喷出岩",
+      "subcategory_en": "Felsic Extrusive Rock",
+      "formula": "Quartz + K-feldspar, SiO2 > 65%",
+      "importance": true,
+      "description_en": "Light-colored felsic extrusive volcanic rock, the volcanic equivalent of granite. Composed of quartz and alkali feldspar with fine-grained to glassy texture.",
+      "description": "酸性喷出岩，是花岗岩的火山对应岩石。颜色浅，主要由石英和碱性长石组成，常具流纹构造。",
+      "aliases": [
+        "流纹斑岩"
+      ]
+    },
+    {
+      "name": "石英粗面岩",
+      "name_en": "Quartz Trachyte",
+      "category": "岩浆岩",
+      "subcategory": "酸性喷出岩",
+      "subcategory_en": "Felsic Extrusive Rock",
+      "formula": "Quartz + Alkali feldspar",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "粗面岩",
+      "name_en": "Trachyte",
+      "category": "岩浆岩",
+      "subcategory": "酸性喷出岩",
+      "subcategory_en": "Felsic Extrusive Rock",
+      "formula": "Alkali feldspar, little Quartz",
+      "importance": true,
+      "description_en": "Light-colored volcanic rock dominated by alkali feldspar. Trachytic texture with aligned feldspar crystals.",
+      "description": "浅色碱性喷出岩，碱性长石为主。具粗面结构。",
+      "aliases": [
+        "粗面流纹岩"
+      ]
+    },
+    {
+      "name": "黑曜岩",
+      "name_en": "Obsidian",
+      "category": "岩浆岩",
+      "subcategory": "酸性喷出岩",
+      "subcategory_en": "Felsic Extrusive Rock",
+      "formula": "Volcanic glass, glassy texture",
+      "importance": true,
+      "description_en": "Volcanic glass with completely glassy texture. Black or dark green color with conchoidal fracture. Forms from rapid lava cooling.",
+      "description": "火山玻璃，完全玻璃质，无晶质。呈黑色或深绿色，贝壳状断口。",
+      "aliases": [
+        "黑曜石",
+        "火山玻璃"
+      ]
+    },
+    {
+      "name": "浮岩",
+      "name_en": "Pumice",
+      "category": "岩浆岩",
+      "subcategory": "酸性喷出岩",
+      "subcategory_en": "Felsic Extrusive Rock",
+      "formula": "Vesicular, frothy volcanic glass",
+      "importance": false,
+      "description_en": "Light-colored, extremely porous volcanic glass. Formed from frothy lava with rapid gas escape during eruption.",
+      "description": "多孔火山玻璃，比重极小，可浮于水面。火山泡沫急剧冷却形成。",
+      "aliases": [
+        "泡沫岩",
+        "轻石"
+      ]
+    },
+    {
+      "name": "珍珠岩",
+      "name_en": "Perlite",
+      "category": "岩浆岩",
+      "subcategory": "酸性喷出岩",
+      "subcategory_en": "Felsic Extrusive Rock",
+      "formula": "Hydrated volcanic glass",
+      "importance": false,
+      "description_en": "Hydrated volcanic glass with concentric crack patterns (perlitic structure). Expands when heated rapidly.",
+      "description": "含水火山玻璃，球状裂纹。加热时膨胀形成膨胀珍珠岩。",
+      "aliases": []
+    },
+    {
+      "name": "松脂岩",
+      "name_en": "Pitchstone",
+      "category": "岩浆岩",
+      "subcategory": "酸性喷出岩",
+      "subcategory_en": "Felsic Extrusive Rock",
+      "formula": "Resinite, dull glassy",
+      "importance": false,
+      "description_en": "Volcanic glass with resinous or waxy luster. Contains 5-10% water, duller than obsidian.",
+      "description": "树脂光泽火山玻璃，含水5-10%。",
+      "aliases": []
+    },
+    {
+      "name": "流纹质凝灰岩",
+      "name_en": "Rhyolitic Tuff",
+      "category": "岩浆岩",
+      "subcategory": "酸性喷出岩",
+      "subcategory_en": "Felsic Extrusive Rock",
+      "formula": "Rhyolite ash, welded",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "火山角砾岩",
+      "name_en": "Volcanic Breccia",
+      "category": "岩浆岩",
+      "subcategory": "火山碎屑岩",
+      "subcategory_en": "Volcaniclastic Rock",
+      "formula": "> 64mm angular fragments",
+      "importance": true,
+      "description_en": "Volcanic breccia with angular fragments larger than 64mm in volcanic matrix. Pyroclastic origin with coarse fragments.",
+      "description": "火山碎屑岩，角砾状碎屑大于64毫米。",
+      "aliases": [
+        "火山集块岩"
+      ]
+    },
+    {
+      "name": "凝灰岩",
+      "name_en": "Tuff",
+      "category": "岩浆岩",
+      "subcategory": "火山碎屑岩",
+      "subcategory_en": "Volcaniclastic Rock",
+      "formula": "< 64mm volcanic fragments",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "熔结凝灰岩",
+      "name_en": "Welded Tuff",
+      "category": "岩浆岩",
+      "subcategory": "火山碎屑岩",
+      "subcategory_en": "Volcaniclastic Rock",
+      "formula": "Hot ash fused together",
+      "importance": true,
+      "description_en": "Welded tuff formed by hot volcanic ash that fused together during deposition. Features flattened pumice fragments (fiamme).",
+      "description": "火山碎屑岩，炽热火山灰熔接形成。",
+      "aliases": [
+        "焊接凝灰岩"
+      ]
+    },
+    {
+      "name": "火山集块岩",
+      "name_en": "Volcanic Agglomerate",
+      "category": "岩浆岩",
+      "subcategory": "火山碎屑岩",
+      "subcategory_en": "Volcaniclastic Rock",
+      "formula": "> 64mm chaotic fragments",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "晶屑凝灰岩",
+      "name_en": "Crystal Tuff",
+      "category": "岩浆岩",
+      "subcategory": "火山碎屑岩",
+      "subcategory_en": "Volcaniclastic Rock",
+      "formula": "Quartz + Feldspar crystals",
+      "importance": false,
+      "description_en": "Tuff composed mainly of crystal fragments (quartz, feldspar) and volcanic glass. Common in explosive volcanic regions.",
+      "description": "火山碎屑岩，主要由晶屑（石英、长石）组成。",
+      "aliases": [
+        "晶屑凝灰岩"
+      ]
+    },
+    {
+      "name": "玻屑凝灰岩",
+      "name_en": "Vitric Tuff",
+      "category": "岩浆岩",
+      "subcategory": "火山碎屑岩",
+      "subcategory_en": "Volcaniclastic Rock",
+      "formula": "Volcanic glass shards",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "岩屑凝灰岩",
+      "name_en": "Lithic Tuff",
+      "category": "岩浆岩",
+      "subcategory": "火山碎屑岩",
+      "subcategory_en": "Volcaniclastic Rock",
+      "formula": "Rock fragments",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "砾岩",
+      "name_en": "Conglomerate",
+      "category": "沉积岩",
+      "subcategory": "砾岩",
+      "subcategory_en": "Conglomerate/Breccia",
+      "formula": "Rounded clasts > 2mm, > 30% matrix",
+      "importance": true,
+      "description_en": "Coarse-grained sedimentary rock with rounded clasts larger than 2mm in finer matrix. Conglomerate type.",
+      "description": "粗粒沉积岩，圆形砾石大于2毫米。",
+      "aliases": [
+        "圆砾岩"
+      ]
+    },
+    {
+      "name": "角砾岩",
+      "name_en": "Breccia",
+      "category": "沉积岩",
+      "subcategory": "砾岩",
+      "subcategory_en": "Conglomerate/Breccia",
+      "formula": "Angular clasts > 2mm",
+      "importance": true,
+      "description_en": "Coarse-grained sedimentary rock with angular clasts. Formed by mechanical fragmentation near source area.",
+      "description": "粗粒沉积岩，角状砾石大于2毫米。近源碎屑沉积的标志。",
+      "aliases": [
+        "棱角砾岩"
+      ]
+    },
+    {
+      "name": "细砾岩",
+      "name_en": "Microconglomerate",
+      "category": "沉积岩",
+      "subcategory": "砾岩",
+      "subcategory_en": "Conglomerate/Breccia",
+      "formula": "Pebbles 2-4mm",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "中砾岩",
+      "name_en": "Pebbly Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砾岩",
+      "subcategory_en": "Conglomerate/Breccia",
+      "formula": "Pebbles 4-64mm in sandstone",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "冰碛岩",
+      "name_en": "Tillite",
+      "category": "沉积岩",
+      "subcategory": "砾岩",
+      "subcategory_en": "Conglomerate/Breccia",
+      "formula": "Glacial deposit, unsorted",
+      "importance": false,
+      "description_en": "Glacial deposit (tillite) with unsorted mix of boulders, gravel, sand, and clay. Evidence of ancient glaciation.",
+      "description": "冰川沉积形成的砾岩。未分选。",
+      "aliases": [
+        "冰碛物"
+      ]
+    },
+    {
+      "name": "泥砾岩",
+      "name_en": "Puddingstone",
+      "category": "沉积岩",
+      "subcategory": "砾岩",
+      "subcategory_en": "Conglomerate/Breccia",
+      "formula": "Contrast colored clasts",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "钙质砾岩",
+      "name_en": "Calcareous Conglomerate",
+      "category": "沉积岩",
+      "subcategory": "砾岩",
+      "subcategory_en": "Conglomerate/Breccia",
+      "formula": "Calcite cement",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "基底式砾岩",
+      "name_en": "Intrafield Conglomerate",
+      "category": "沉积岩",
+      "subcategory": "砾岩",
+      "subcategory_en": "Conglomerate/Breccia",
+      "formula": "Matrix supported",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "石英砂岩",
+      "name_en": "Quartz Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Quartz > 90%",
+      "importance": true,
+      "description_en": "Sandstone composed almost entirely of quartz grains (>90%). Well-sorted, mature sedimentary rock.",
+      "description": "砂岩，几乎全部由石英颗粒组成。成熟度高的沉积岩。",
+      "aliases": [
+        "石英砂岩"
+      ]
+    },
+    {
+      "name": "长石砂岩",
+      "name_en": "Arkose",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Feldspar > 25%",
+      "importance": true,
+      "description_en": "Sandstone with significant feldspar content (>25%). Arkose type, indicates rapid erosion of granitic source terrain.",
+      "description": "砂岩，长石含量大于25%。快速侵蚀花岗岩来源的标志。",
+      "aliases": [
+        "长石砂岩"
+      ]
+    },
+    {
+      "name": "岩屑砂岩",
+      "name_en": "Lithic Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Rock fragments > 25%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "长石石英砂岩",
+      "name_en": "Feldspathic Quartz Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Quartz + Feldspar",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "杂砂岩",
+      "name_en": "Greywacke",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Poorly sorted, mud matrix > 15%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "净砂岩",
+      "name_en": "Arkose",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Well-sorted, clean",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "海绿石砂岩",
+      "name_en": "Glauconite Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Glauconite green grains",
+      "importance": false,
+      "description_en": "Sandstone containing glauconite green grains. Forms in marine shelf environments.",
+      "description": "含海绿石的砂岩。绿色海绿石颗粒。",
+      "aliases": [
+        "海绿石砂"
+      ]
+    },
+    {
+      "name": "钙质砂岩",
+      "name_en": "Calcareous Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Calcite cement",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "铁质砂岩",
+      "name_en": "Ferruginous Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Iron oxide cement",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "云母砂岩",
+      "name_en": "Micaceous Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Mica flakes",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "风成砂岩",
+      "name_en": "Aeolian Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Cross-bedding, well-sorted",
+      "importance": false,
+      "description_en": "Sandstone deposited by wind. Characterized by large-scale cross-bedding and well-sorted grains.",
+      "description": "风成沉积形成的砂岩。大型交错层理。",
+      "aliases": [
+        "风成岩"
+      ]
+    },
+    {
+      "name": "浊积砂岩",
+      "name_en": "Turbidite Sandstone",
+      "category": "沉积岩",
+      "subcategory": "砂岩",
+      "subcategory_en": "Sandstone",
+      "formula": "Graded bedding",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "粉砂岩",
+      "name_en": "Siltstone",
+      "category": "沉积岩",
+      "subcategory": "粉砂岩",
+      "subcategory_en": "Siltstone",
+      "formula": "Grains 0.004-0.06mm",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "泥质粉砂岩",
+      "name_en": "Argillaceous Siltstone",
+      "category": "沉积岩",
+      "subcategory": "粉砂岩",
+      "subcategory_en": "Siltstone",
+      "formula": "Clay + Silt",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "钙质粉砂岩",
+      "name_en": "Calcareous Siltstone",
+      "category": "沉积岩",
+      "subcategory": "粉砂岩",
+      "subcategory_en": "Siltstone",
+      "formula": "Calcite cement",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "铁质粉砂岩",
+      "name_en": "Ferruginous Siltstone",
+      "category": "沉积岩",
+      "subcategory": "粉砂岩",
+      "subcategory_en": "Siltstone",
+      "formula": "Iron rich",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "炭质粉砂岩",
+      "name_en": "Carbonaceous Siltstone",
+      "category": "沉积岩",
+      "subcategory": "粉砂岩",
+      "subcategory_en": "Siltstone",
+      "formula": "Organic matter",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "页岩",
+      "name_en": "Shale",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "Clay < 0.004mm, laminated, fissile",
+      "importance": true,
+      "description_en": "Fine-grained sedimentary rock composed of clay and silt-sized particles. Characterized by lamination and fissility.",
+      "description": "细粒沉积岩，由粘土和粉砂级颗粒组成。具层理和页理。",
+      "aliases": [
+        "泥页岩",
+        "片岩"
+      ]
+    },
+    {
+      "name": "泥岩",
+      "name_en": "Mudstone",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "Clay/silt, massive, non-fissile",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "钙质页岩",
+      "name_en": "Calcareous Shale",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "Calcite 10-50%",
+      "importance": true,
+      "description_en": "Shale containing 10-50% calcium carbonate. Calcareous shale type.",
+      "description": "含碳酸钙的页岩。钙质10-50%。",
+      "aliases": [
+        "灰质页岩"
+      ]
+    },
+    {
+      "name": "炭质页岩",
+      "name_en": "Carbonaceous Shale",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "Organic matter 5-20%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "油页岩",
+      "name_en": "Oil Shale",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "Organic matter, kerogen-rich",
+      "importance": true,
+      "description_en": "Organic-rich shale containing kerogen. Can be processed to extract shale oil.",
+      "description": "含油页岩，富含油母质。可提取页岩油。",
+      "aliases": [
+        "油母页岩"
+      ]
+    },
+    {
+      "name": "硅质页岩",
+      "name_en": "Siliceous Shale",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "SiO2 > 50%",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "铁质页岩",
+      "name_en": "Ferriferous Shale",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "Iron oxide rich",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "铝土页岩",
+      "name_en": "Aluminous Shale",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "High Al2O3",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "绿页岩",
+      "name_en": "Green Shale",
+      "category": "沉积岩",
+      "subcategory": "泥岩",
+      "subcategory_en": "Mudstone/Shale",
+      "formula": "Glauconite bearing",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "石灰岩",
+      "name_en": "Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Calcite > 50%",
+      "importance": true,
+      "description_en": "Sedimentary rock composed primarily of calcite (CaCO3). Formed by accumulation of shell fragments, coral, or chemical precipitation.",
+      "description": "沉积岩，主要由碳酸钙（方解石）组成。形成于海洋生物残骸堆积或化学沉淀。",
+      "aliases": [
+        "石灰石",
+        "灰岩",
+        "石灰"
+      ]
+    },
+    {
+      "name": "生物碎屑灰岩",
+      "name_en": "Bioclastic Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Fossil fragments",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "鲕粒灰岩",
+      "name_en": "Oolitic Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Ooids (sand coated grains)",
+      "importance": true,
+      "description_en": "Limestone composed of ooids (sand-sized coated grains). Ooids form by accretion of calcite around nucleus.",
+      "description": "石灰岩，由鲕粒（砂粒大小的包壳颗粒）组成。",
+      "aliases": [
+        "鲕状灰岩",
+        "鱼子石"
+      ]
+    },
+    {
+      "name": "砾屑灰岩",
+      "name_en": "Calcirudite",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Clasts > 2mm, calcite",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "砂屑灰岩",
+      "name_en": "Calcarenite",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Grains 0.06-2mm, calcite",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "微晶灰岩",
+      "name_en": "Micrite",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Microscopic crystals, fine",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "结晶灰岩",
+      "name_en": "Crystalline Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Recrystallized",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "白云岩",
+      "name_en": "Dolomite",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "CaMg(CO3)2, dolomite > 50%",
+      "importance": true,
+      "description_en": "Dolomitic sedimentary rock composed mainly of dolomite (CaMg(CO3)2). Forms by alteration of limestone.",
+      "description": "白云石沉积岩，主要成分为白云石(白云石CaMg(CO3)2)。由石灰岩蚀变形成。",
+      "aliases": [
+        "白云石",
+        "dolostone"
+      ]
+    },
+    {
+      "name": "礁灰岩",
+      "name_en": "Reef Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Coral/Algal framework",
+      "importance": false,
+      "description_en": "Limestone built by coral reef framework. Forms from reef-building organisms in warm shallow seas.",
+      "description": "石灰岩，由珊瑚礁格架组成。珊瑚礁建造。",
+      "aliases": [
+        "珊瑚灰岩",
+        "生物岩"
+      ]
+    },
+    {
+      "name": "叠层石灰岩",
+      "name_en": "Stromatolite",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Cyanobacterial mats",
+      "importance": false,
+      "description_en": "Limestone formed by cyanobacterial mats. Stromatolite structures show layered microbial growth.",
+      "description": "石灰岩，由蓝藻垫层形成。叠层石构造。",
+      "aliases": [
+        "叠层石",
+        "层状石灰岩"
+      ]
+    },
+    {
+      "name": "竹叶状灰岩",
+      "name_en": "Oncoid Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Oncoids (algal coated)",
+      "importance": false,
+      "description_en": "Limestone with oncoid pebbles (algal-coated grains). Wackestone to packstone texture.",
+      "description": "竹叶状石灰岩，叠瓦状砾屑。",
+      "aliases": [
+        "竹叶石"
+      ]
+    },
+    {
+      "name": "豹皮灰岩",
+      "name_en": "Spotted Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Dolomite spots",
+      "importance": false,
+      "description_en": "Limestone with dolomitic spots or mottling. Spotted limestone pattern.",
+      "description": "斑点石灰岩，白云石斑点。",
+      "aliases": [
+        "豹斑石灰岩"
+      ]
+    },
+    {
+      "name": "鸟眼灰岩",
+      "name_en": "Birdseye Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Mud cracks, vugs",
+      "importance": false,
+      "description_en": "Limestone with bird's eye voids (mud cracks). Limestone with fenestral porosity.",
+      "description": "鸟眼石灰岩，泥裂和孔洞。",
+      "aliases": [
+        "鸟眼石"
+      ]
+    },
+    {
+      "name": "风暴岩",
+      "name_en": "Storm Limestone",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Hummocky cross-bedding",
+      "importance": false,
+      "description_en": "Limestone deposited by storm activity. Features hummocky cross-bedding and storm layers.",
+      "description": "风暴沉积形成的石灰岩。风暴递变层理。",
+      "aliases": [
+        "风暴沉积岩"
+      ]
+    },
+    {
+      "name": "白垩",
+      "name_en": "Chalk",
+      "category": "沉积岩",
+      "subcategory": "石灰岩",
+      "subcategory_en": "Limestone",
+      "formula": "Coccolithophores, soft",
+      "importance": false,
+      "description_en": "Soft, porous limestone composed of microscopic marine plankton shells (coccolithophores). Chalk deposits.",
+      "description": "柔软多孔石灰岩，由微体海洋浮游生物（颗石藻）壳体组成。",
+      "aliases": [
+        "白垩岩",
+        "chalk"
+      ]
+    },
+    {
+      "name": "燧石岩",
+      "name_en": "Chert",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Microcrystalline SiO2, chalcedony",
+      "importance": true,
+      "description_en": "Hard, fine-grained sedimentary rock composed of microcrystalline quartz (chert). Often occurs in nodules or layers.",
+      "description": "硅质沉积岩，由微晶石英（燧石）组成。常呈结核或夹层产出。",
+      "aliases": [
+        "燧石",
+        "火石"
+      ]
+    },
+    {
+      "name": "碧玉岩",
+      "name_en": "Jasper",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Red chert, Fe2O3",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "玉髓岩",
+      "name_en": "Chalcedony",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Cryptocrystalline SiO2",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "石英岩",
+      "name_en": "Silicite",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Quartz sandstones, SiO2 cemented",
+      "importance": true,
+      "description_en": "Metamorphic rock formed from quartz sandstone. Hard, tough, composed of interlocking quartz grains.",
+      "description": "变质岩，由石英砂岩变质形成。坚硬、坚韧，由结合在一起的石英颗粒组成。",
+      "aliases": [
+        "石英石",
+        "quartzite"
+      ]
+    },
+    {
+      "name": "放射虫硅质岩",
+      "name_en": "Radiolarite",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Radiolarian fossils",
+      "importance": false,
+      "description_en": "Siliceous sedimentary rock composed of radiolarian fossils. Forms in deep marine environments.",
+      "description": "放射虫硅质沉积岩。放射虫化石。",
+      "aliases": [
+        "放射虫岩"
+      ]
+    },
+    {
+      "name": "硅藻土",
+      "name_en": "Diatomite",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Diatom frustules",
+      "importance": false,
+      "description_en": "Light-colored, porous sedimentary rock composed of diatom frustules. Forms in freshwater and marine environments.",
+      "description": "硅质沉积岩，由硅藻壳体组成。硅藻化石。",
+      "aliases": [
+        "硅藻岩",
+        "diatomite"
+      ]
+    },
+    {
+      "name": "海绵岩",
+      "name_en": "Spongolite",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Sponge spicules",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "蛋白石",
+      "name_en": "Opaline Rock",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Opal-CT",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "碧玉",
+      "name_en": "Jasperoid",
+      "category": "沉积岩",
+      "subcategory": "硅质岩",
+      "subcategory_en": "Siliceous Rock",
+      "formula": "Massive chert, hydrothermal",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "石膏岩",
+      "name_en": "Gypsum Rock",
+      "category": "沉积岩",
+      "subcategory": "蒸发岩",
+      "subcategory_en": "Evaporite",
+      "formula": "CaSO4·2H2O",
+      "importance": true,
+      "description_en": "Evaporite rock composed of gypsum (CaSO4·2H2O). Forms by precipitation from evaporating seawater.",
+      "description": "蒸发岩，主要成分为石膏(石膏CaSO4·2H2O)。海水分馏蒸发形成。",
+      "aliases": [
+        "石膏",
+        "gypsum rock"
+      ]
+    },
+    {
+      "name": "硬石膏岩",
+      "name_en": "Anhydrite",
+      "category": "沉积岩",
+      "subcategory": "蒸发岩",
+      "subcategory_en": "Evaporite",
+      "formula": "CaSO4",
+      "importance": true,
+      "description_en": "Evaporite rock composed of anhydrite (CaSO4). Forms in deep burial evaporite sequences.",
+      "description": "蒸发岩，主要成分为硬石膏(无水石膏CaSO4)。深埋蒸发岩序列中产出。",
+      "aliases": [
+        "硬石膏",
+        "anhydrite"
+      ]
+    },
+    {
+      "name": "岩盐",
+      "name_en": "Rock Salt",
+      "category": "沉积岩",
+      "subcategory": "蒸发岩",
+      "subcategory_en": "Evaporite",
+      "formula": "Halite, NaCl",
+      "importance": true,
+      "description_en": "Evaporite rock composed of halite (NaCl). Forms by precipitation from evaporating seawater.",
+      "description": "蒸发岩，主要成分为氯化钠。海水分馏蒸发形成。",
+      "aliases": [
+        "石盐",
+        "halite"
+      ]
+    },
+    {
+      "name": "钾盐岩",
+      "name_en": "Sylviteite",
+      "category": "沉积岩",
+      "subcategory": "蒸发岩",
+      "subcategory_en": "Evaporite",
+      "formula": "Sylvite, KCl",
+      "importance": true,
+      "description_en": "Evaporite rock composed of sylvite (KCl). Important source of potassium for fertilizers.",
+      "description": "蒸发岩，主要成分为氯化钾。钾肥来源。",
+      "aliases": [
+        "钾盐",
+        "sylvite"
+      ]
+    },
+    {
+      "name": "芒硝",
+      "name_en": "Thenardite",
+      "category": "沉积岩",
+      "subcategory": "蒸发岩",
+      "subcategory_en": "Evaporite",
+      "formula": "Na2SO4",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "无水芒硝",
+      "name_en": "Thenardite",
+      "category": "沉积岩",
+      "subcategory": "蒸发岩",
+      "subcategory_en": "Evaporite",
+      "formula": "Anhydrous Na2SO4",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "泻利盐",
+      "name_en": "Epsomite",
+      "category": "沉积岩",
+      "subcategory": "蒸发岩",
+      "subcategory_en": "Evaporite",
+      "formula": "MgSO4·7H2O",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "硼砂",
+      "name_en": "Borax",
+      "category": "沉积岩",
+      "subcategory": "蒸发岩",
+      "subcategory_en": "Evaporite",
+      "formula": "Na2B4O7·10H2O",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "赤铁矿",
+      "name_en": "Hematite Rock",
+      "category": "沉积岩",
+      "subcategory": "铁锰岩",
+      "subcategory_en": "Iron-Manganese Rock",
+      "formula": "Fe2O3, iron ore",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "磁铁矿",
+      "name_en": "Magnetite Rock",
+      "category": "沉积岩",
+      "subcategory": "铁锰岩",
+      "subcategory_en": "Iron-Manganese Rock",
+      "formula": "Fe3O4, iron ore",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "菱铁矿",
+      "name_en": "Siderite Rock",
+      "category": "沉积岩",
+      "subcategory": "铁锰岩",
+      "subcategory_en": "Iron-Manganese Rock",
+      "formula": "FeCO3",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "褐铁矿",
+      "name_en": "Limonite Rock",
+      "category": "沉积岩",
+      "subcategory": "铁锰岩",
+      "subcategory_en": "Iron-Manganese Rock",
+      "formula": "FeOOH, iron ore",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "锰结核",
+      "name_en": "Manganese Nodule",
+      "category": "沉积岩",
+      "subcategory": "铁锰岩",
+      "subcategory_en": "Iron-Manganese Rock",
+      "formula": "Mn-Fe oxides, nodules",
+      "importance": false,
+      "description_en": "Manganese nodules on deep ocean floor. Contains manganese, iron, and other metals.",
+      "description": "锰铁氧化物结核。深海多金属结核。",
+      "aliases": [
+        "锰矿",
+        "manganese nodule"
+      ]
+    },
+    {
+      "name": "磷块岩",
+      "name_en": "Phosphorite",
+      "category": "沉积岩",
+      "subcategory": "铁锰岩",
+      "subcategory_en": "Iron-Manganese Rock",
+      "formula": "Phosphate > 50%",
+      "importance": false,
+      "description_en": "Sedimentary rock with phosphate content >50%. Important source of phosphorus for fertilizers.",
+      "description": "磷酸盐含量大于50%的沉积岩。磷矿石。",
+      "aliases": [
+        "磷矿石",
+        "phosphorite"
+      ]
+    },
+    {
+      "name": "铝土矿",
+      "name_en": "Bauxite",
+      "category": "沉积岩",
+      "subcategory": "铁锰岩",
+      "subcategory_en": "Iron-Manganese Rock",
+      "formula": "Al(OH)3, aluminum ore",
+      "importance": false,
+      "description_en": "Aluminum ore rock composed of aluminum hydroxides (gibbsite, boehmite). Primary source of aluminum.",
+      "description": "铝氢氧化物沉积岩。铝矿石。",
+      "aliases": [
+        "铝土",
+        "bauxite"
+      ]
+    },
+    {
+      "name": "黄铁矿",
+      "name_en": "Pyrite Rock",
+      "category": "沉积岩",
+      "subcategory": "铁锰岩",
+      "subcategory_en": "Iron-Manganese Rock",
+      "formula": "FeS2",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "煤",
+      "name_en": "Coal",
+      "category": "沉积岩",
+      "subcategory": "可燃有机岩",
+      "subcategory_en": "Combustible Organic Rock",
+      "formula": "Organic matter, C > 50%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "褐煤",
+      "name_en": "Lignite",
+      "category": "沉积岩",
+      "subcategory": "可燃有机岩",
+      "subcategory_en": "Combustible Organic Rock",
+      "formula": "Low rank coal, brown",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "无烟煤",
+      "name_en": "Anthracite",
+      "category": "沉积岩",
+      "subcategory": "可燃有机岩",
+      "subcategory_en": "Combustible Organic Rock",
+      "formula": "High rank, C > 90%",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "油页岩",
+      "name_en": "Oil Shale",
+      "category": "沉积岩",
+      "subcategory": "可燃有机岩",
+      "subcategory_en": "Combustible Organic Rock",
+      "formula": "Kerogen, liquid hydrocarbons",
+      "importance": true,
+      "description_en": "Organic-rich shale containing kerogen. Can be processed to extract shale oil.",
+      "description": "含油页岩，富含油母质。可提取页岩油。",
+      "aliases": [
+        "油母页岩"
+      ]
+    },
+    {
+      "name": "烟煤",
+      "name_en": "Bituminous Coal",
+      "category": "沉积岩",
+      "subcategory": "可燃有机岩",
+      "subcategory_en": "Combustible Organic Rock",
+      "formula": "C 75-90%",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "煤矸石",
+      "name_en": "Coal Waste",
+      "category": "沉积岩",
+      "subcategory": "可燃有机岩",
+      "subcategory_en": "Combustible Organic Rock",
+      "formula": "Carbonaceous shale",
+      "importance": false,
+      "description_en": "Carbonaceous shale associated with coal seams. Mining waste product.",
+      "description": "煤中页岩夹石。煤层伴生岩石。",
+      "aliases": [
+        "煤渣",
+        "coal waste"
+      ]
+    },
+    {
+      "name": "碳质页岩",
+      "name_en": "Carbonaceous Shale",
+      "category": "沉积岩",
+      "subcategory": "可燃有机岩",
+      "subcategory_en": "Combustible Organic Rock",
+      "formula": "C 5-20%",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "板岩",
+      "name_en": "Slate",
+      "category": "变质岩",
+      "subcategory": "低压低温变质岩",
+      "subcategory_en": "Low P-T Metamorphic Rock",
+      "formula": "Very low grade, slaty cleavage",
+      "importance": true,
+      "description_en": "Fine-grained, low-grade metamorphic rock with slaty cleavage. Lowest grade metamorphic rock from shale.",
+      "description": "细粒低级变质岩，板岩劈裂。最低级别的变质岩。",
+      "aliases": [
+        "板石",
+        "slate"
+      ]
+    },
+    {
+      "name": "千枚岩",
+      "name_en": "Phyllite",
+      "category": "变质岩",
+      "subcategory": "低压低温变质岩",
+      "subcategory_en": "Low P-T Metamorphic Rock",
+      "formula": "Low grade, silky sheen, fine-grained",
+      "importance": true,
+      "description_en": "Fine-grained phyllosilicate rock with silky sheen. Low-grade metamorphic equivalent of shale.",
+      "description": "细粒绢云母片岩，丝绢光泽。低级变质岩的产物。",
+      "aliases": [
+        "千枚状岩",
+        "phyllite"
+      ]
+    },
+    {
+      "name": "低级片岩",
+      "name_en": "Low-grade Schist",
+      "category": "变质岩",
+      "subcategory": "低压低温变质岩",
+      "subcategory_en": "Low P-T Metamorphic Rock",
+      "formula": "Chlorite, sericite, schistose",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "硬绿泥石板岩",
+      "name_en": "Chloritoid Slates",
+      "category": "变质岩",
+      "subcategory": "低压低温变质岩",
+      "subcategory_en": "Low P-T Metamorphic Rock",
+      "formula": "Chloritoid bearing",
+      "importance": false,
+      "description_en": "Slate containing chloritoid minerals. Low-grade metamorphic rock.",
+      "description": "含硬绿泥石的板岩。低级变质岩。",
+      "aliases": [
+        "硬绿泥板岩"
+      ]
+    },
+    {
+      "name": "炭质板岩",
+      "name_en": "Carbonaceous Slate",
+      "category": "变质岩",
+      "subcategory": "低压低温变质岩",
+      "subcategory_en": "Low P-T Metamorphic Rock",
+      "formula": "Graphite bearing",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "片岩",
+      "name_en": "Schist",
+      "category": "变质岩",
+      "subcategory": "中压变质岩",
+      "subcategory_en": "Medium P-T Metamorphic Rock",
+      "formula": "Medium grade, visible minerals, foliated",
+      "importance": true,
+      "description_en": "Foliated metamorphic rock with visible platy or elongate minerals (mica, chlorite). Schistose texture developed.",
+      "description": "片状变质岩，可见片状或拉长的云母等矿物。片理发育。",
+      "aliases": [
+        "片状岩",
+        "schist"
+      ]
+    },
+    {
+      "name": "云母片岩",
+      "name_en": "Mica Schist",
+      "category": "变质岩",
+      "subcategory": "中压变质岩",
+      "subcategory_en": "Medium P-T Metamorphic Rock",
+      "formula": "Mica dominant, quartz, foliated",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "绿片岩",
+      "name_en": "Greenschist",
+      "category": "变质岩",
+      "subcategory": "中压变质岩",
+      "subcategory_en": "Medium P-T Metamorphic Rock",
+      "formula": "Chlorite + Epidote + Actinolite",
+      "importance": true,
+      "description_en": "Low-grade metamorphic rock dominated by chlorite and epidote. Greenschist facies metamorphism.",
+      "description": "低级变质岩，以绿泥石和绿帘石为主。绿片岩相。",
+      "aliases": [
+        "绿片石",
+        "greenschist"
+      ]
+    },
+    {
+      "name": "片麻岩",
+      "name_en": "Gneiss",
+      "category": "变质岩",
+      "subcategory": "中压变质岩",
+      "subcategory_en": "Medium P-T Metamorphic Rock",
+      "formula": "High grade, banded, alternating light/dark",
+      "importance": true,
+      "description_en": "Banded metamorphic rock with alternating light and dark layers. High-grade regional metamorphism product.",
+      "description": "条带状变质岩，浅色和暗色条带交替。高等级区域变质作用形成。",
+      "aliases": [
+        "片麻石",
+        "gneiss"
+      ]
+    },
+    {
+      "name": "石英片岩",
+      "name_en": "Quartz Schist",
+      "category": "变质岩",
+      "subcategory": "中压变质岩",
+      "subcategory_en": "Medium P-T Metamorphic Rock",
+      "formula": "Quartz dominant, schistose",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "钙质片岩",
+      "name_en": "Calc-schist",
+      "category": "变质岩",
+      "subcategory": "中压变质岩",
+      "subcategory_en": "Medium P-T Metamorphic Rock",
+      "formula": "Calcite/Dolomite + Mica",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "云母石英片岩",
+      "name_en": "Mica Quartz Schist",
+      "category": "变质岩",
+      "subcategory": "中压变质岩",
+      "subcategory_en": "Medium P-T Metamorphic Rock",
+      "formula": "Quartz + Mica",
+      "importance": false,
+      "description_en": "Schist dominated by mica and quartz. Well-developed schistosity from regional metamorphism.",
+      "description": "以云母和石英为主的片岩。片理发育的区域变质产物。",
+      "aliases": [
+        "云母片岩"
+      ]
+    },
+    {
+      "name": "蓝片岩",
+      "name_en": "Blueschist",
+      "category": "变质岩",
+      "subcategory": "高压变质岩",
+      "subcategory_en": "High P-T Metamorphic Rock",
+      "formula": "Glaucophane, high P/low T",
+      "importance": true,
+      "description_en": "High-pressure, low-temperature metamorphic rock with glaucophane. Blueschist facies.",
+      "description": "高压低温变质岩，含蓝闪石。蓝片岩相。",
+      "aliases": [
+        "蓝片石",
+        "blueschist"
+      ]
+    },
+    {
+      "name": "榴辉岩",
+      "name_en": "Eclogite",
+      "category": "变质岩",
+      "subcategory": "高压变质岩",
+      "subcategory_en": "High P-T Metamorphic Rock",
+      "formula": "Omphacite + Garnet, ultrahigh P",
+      "importance": true,
+      "description_en": "Ultra-high pressure metamorphic rock composed of omphacite and garnet. Eclogite facies.",
+      "description": "超高压力变质岩，由绿辉石和石榴石组成榴辉岩相。",
+      "aliases": [
+        "榴辉石",
+        "eclogite"
+      ]
+    },
+    {
+      "name": "麻粒岩",
+      "name_en": "Granulite",
+      "category": "变质岩",
+      "subcategory": "高压变质岩",
+      "subcategory_en": "High P-T Metamorphic Rock",
+      "formula": "High T, anhydrous, granulite facies",
+      "importance": true,
+      "description_en": "High-grade metamorphic rock without hydrous minerals. Granulite facies, anhydrous mineral assemblage.",
+      "description": "高级变质岩，无水矿物。麻粒岩相。",
+      "aliases": [
+        "麻粒石",
+        "granulite"
+      ]
+    },
+    {
+      "name": "角闪岩",
+      "name_en": "Amphibolite",
+      "category": "变质岩",
+      "subcategory": "高压变质岩",
+      "subcategory_en": "High P-T Metamorphic Rock",
+      "formula": "Hornblende + Plagioclase, medium P-T",
+      "importance": true,
+      "description_en": "Medium to high-grade metamorphic rock dominated by hornblende and plagioclase. Amphibolite facies.",
+      "description": "中高级变质岩，以角闪石和斜长石为主。角闪岩相。",
+      "aliases": [
+        "角闪石岩",
+        "amphibolite"
+      ]
+    },
+    {
+      "name": "蓝晶石片岩",
+      "name_en": "Kyanite Schist",
+      "category": "变质岩",
+      "subcategory": "高压变质岩",
+      "subcategory_en": "High P-T Metamorphic Rock",
+      "formula": "Kyanite bearing",
+      "importance": false,
+      "description_en": "Schist containing kyanite crystals. High-pressure metamorphic mineral assemblage.",
+      "description": "含蓝晶石的片岩。高压变质矿物组合。",
+      "aliases": [
+        "蓝晶石片岩"
+      ]
+    },
+    {
+      "name": "硅线石片麻岩",
+      "name_en": "Sillimanite Gneiss",
+      "category": "变质岩",
+      "subcategory": "高压变质岩",
+      "subcategory_en": "High P-T Metamorphic Rock",
+      "formula": "Sillimanite bearing",
+      "importance": false,
+      "description_en": "Gneiss containing sillimanite crystals. High-grade metamorphic mineral.",
+      "description": "含硅线石的片麻岩。高压变质矿物。",
+      "aliases": [
+        "硅线石片麻石"
+      ]
+    },
+    {
+      "name": "十字石片岩",
+      "name_en": "Staurolite Schist",
+      "category": "变质岩",
+      "subcategory": "高压变质岩",
+      "subcategory_en": "High P-T Metamorphic Rock",
+      "formula": "Staurolite bearing",
+      "importance": false,
+      "description_en": "Schist containing staurolite crystals. Medium-grade metamorphic mineral.",
+      "description": "含十字石的片岩。中级变质矿物。",
+      "aliases": [
+        "十字石片"
+      ]
+    },
+    {
+      "name": "角岩",
+      "name_en": "Hornfels",
+      "category": "变质岩",
+      "subcategory": "接触变质岩",
+      "subcategory_en": "Contact Metamorphic Rock",
+      "formula": "Contact aureole, fine-grained, non-foliated",
+      "importance": true,
+      "description_en": "Fine-grained, non-foliated contact metamorphic rock. Forms in thermal aureole around intrusions.",
+      "description": "细粒非片状接触变质岩。在侵入体热晕中形成。",
+      "aliases": [
+        "角石",
+        "hornfels"
+      ]
+    },
+    {
+      "name": "大理岩",
+      "name_en": "Marble",
+      "category": "变质岩",
+      "subcategory": "接触变质岩",
+      "subcategory_en": "Contact Metamorphic Rock",
+      "formula": "Calcite/Dolomite recrystallized, coarse",
+      "importance": true,
+      "description_en": "Metamorphic rock formed by recrystallization of limestone or dolomite. Composed of interlocking calcite or dolomite crystals.",
+      "description": "变质岩，由石灰岩或白云岩重结晶形成。由互相结合的方解石或白云石晶体组成。",
+      "aliases": [
+        "大理石",
+        "marble"
+      ]
+    },
+    {
+      "name": "石英岩",
+      "name_en": "Quartzite",
+      "category": "变质岩",
+      "subcategory": "接触变质岩",
+      "subcategory_en": "Contact Metamorphic Rock",
+      "formula": "Quartz recrystallized, interlocking",
+      "importance": true,
+      "description_en": "Metamorphic rock formed from quartz sandstone. Hard, tough, composed of interlocking quartz grains.",
+      "description": "变质岩，由石英砂岩变质形成。坚硬、坚韧，由结合在一起的石英颗粒组成。",
+      "aliases": [
+        "石英石",
+        "quartzite"
+      ]
+    },
+    {
+      "name": "矽卡岩",
+      "name_en": "Skarn",
+      "category": "变质岩",
+      "subcategory": "接触变质岩",
+      "subcategory_en": "Contact Metamorphic Rock",
+      "formula": "Ca-Si metasomatism, garnet + pyroxene",
+      "importance": true,
+      "description_en": "Calcium-rich metamorphic rock formed by contact metasomatism. Associated with ore deposits.",
+      "description": "钙质接触交代变质岩。与成矿作用密切相关。",
+      "aliases": [
+        "矽卡石",
+        "skarn"
+      ]
+    },
+    {
+      "name": "透闪石大理岩",
+      "name_en": "Tremolite Marble",
+      "category": "变质岩",
+      "subcategory": "接触变质岩",
+      "subcategory_en": "Contact Metamorphic Rock",
+      "formula": "Tremolite in marble",
+      "importance": false,
+      "description_en": "Marble containing tremolite crystals. Contact metamorphic rock in calcareous strata.",
+      "description": "含透闪石晶体的大理岩。接触变质岩。",
+      "aliases": [
+        "透闪石大理石"
+      ]
+    },
+    {
+      "name": "透辉石大理岩",
+      "name_en": "Diopside Marble",
+      "category": "变质岩",
+      "subcategory": "接触变质岩",
+      "subcategory_en": "Contact Metamorphic Rock",
+      "formula": "Diopside in marble",
+      "importance": false,
+      "description_en": "Marble containing diopside crystals. High-temperature contact metamorphic rock.",
+      "description": "含透辉石晶体的大理岩。高温接触变质岩。",
+      "aliases": [
+        "透辉石大理石"
+      ]
+    },
+    {
+      "name": "符山石矽卡岩",
+      "name_en": "Vesuvianite Skarn",
+      "category": "变质岩",
+      "subcategory": "接触变质岩",
+      "subcategory_en": "Contact Metamorphic Rock",
+      "formula": "Vesuvianite bearing",
+      "importance": false,
+      "description_en": "Skarn containing vesuvianite crystals. Contact metamorphic rock with garnet and pyroxene.",
+      "description": "含符山石的矽卡岩。接触变质岩。",
+      "aliases": [
+        "符山石卡岩"
+      ]
+    },
+    {
+      "name": "钙质角岩",
+      "name_en": "Calc-silicate Hornfels",
+      "category": "变质岩",
+      "subcategory": "接触变质岩",
+      "subcategory_en": "Contact Metamorphic Rock",
+      "formula": "Ca-silicate minerals",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "糜棱岩",
+      "name_en": "Mylonite",
+      "category": "变质岩",
+      "subcategory": "动力变质岩",
+      "subcategory_en": "Dynamic Metamorphic Rock",
+      "formula": "Foliated, fine-grained, porphyroclasts",
+      "importance": true,
+      "description_en": "Fine-grained, foliated rock formed by dynamic metamorphism in fault zones. Mylonitic texture with porphyroclasts.",
+      "description": "细粒片状动力变质岩。在断层带中由动态变质作用形成。",
+      "aliases": [
+        "糜棱石",
+        "mylonite"
+      ]
+    },
+    {
+      "name": "碎裂岩",
+      "name_en": "Cataclasite",
+      "category": "变质岩",
+      "subcategory": "动力变质岩",
+      "subcategory_en": "Dynamic Metamorphic Rock",
+      "formula": "Fragmented, angular, fault-related",
+      "importance": true,
+      "description_en": "Cohesive fault rock with angular fragments. Formed by brecciation in fault zones.",
+      "description": "粘结断层岩，角状碎块。在断层带中由碎裂作用形成。",
+      "aliases": [
+        "碎裂石",
+        "cataclasite"
+      ]
+    },
+    {
+      "name": "超糜棱岩",
+      "name_en": "Ultramylonite",
+      "category": "变质岩",
+      "subcategory": "动力变质岩",
+      "subcategory_en": "Dynamic Metamorphic Rock",
+      "formula": "Extremely fine-grained, recrystallized",
+      "importance": true,
+      "description_en": "Extremely fine-grained mylonite. Complete recrystallization in fault zones.",
+      "description": "极细粒糜棱岩。重结晶作用。",
+      "aliases": [
+        "超糜棱石"
+      ]
+    },
+    {
+      "name": "构造角砾岩",
+      "name_en": "Tectonic Breccia",
+      "category": "变质岩",
+      "subcategory": "动力变质岩",
+      "subcategory_en": "Dynamic Metamorphic Rock",
+      "formula": "Angular fragments, fault zone",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "玻化岩",
+      "name_en": "Pseudotachylite",
+      "category": "变质岩",
+      "subcategory": "动力变质岩",
+      "subcategory_en": "Dynamic Metamorphic Rock",
+      "formula": "Glass, frictional melting",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "片麻糜棱岩",
+      "name_en": "Gneissic Mylonite",
+      "category": "变质岩",
+      "subcategory": "动力变质岩",
+      "subcategory_en": "Dynamic Metamorphic Rock",
+      "formula": "Banded mylonite",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "蛇纹岩",
+      "name_en": "Serpentinite",
+      "category": "变质岩",
+      "subcategory": "交代变质岩",
+      "subcategory_en": "Metasomatic Rock",
+      "formula": "Serpentine minerals, ultramafic",
+      "importance": true,
+      "description_en": "Metamorphic rock composed of serpentine minerals. Formed by hydration of ultramafic rocks.",
+      "description": "变质岩，由蛇纹石矿物组成。由超基性岩水化形成。",
+      "aliases": [
+        "蛇纹石",
+        "serpentinite"
+      ]
+    },
+    {
+      "name": "混合岩",
+      "name_en": "Migmatite",
+      "category": "变质岩",
+      "subcategory": "交代变质岩",
+      "subcategory_en": "Metasomatic Rock",
+      "formula": "Partial melt, leucosome + mesosome",
+      "importance": true,
+      "description_en": "Banded rock formed by partial melting (migmatite). Alternating leucosome and melanosome bands.",
+      "description": "条带状岩石，由部分熔融形成。浅色体和暗色体交替。",
+      "aliases": [
+        "混合岩石",
+        "migmatite"
+      ]
+    },
+    {
+      "name": "交代岩",
+      "name_en": "Metasomatite",
+      "category": "变质岩",
+      "subcategory": "交代变质岩",
+      "subcategory_en": "Metasomatic Rock",
+      "formula": "Chemical alteration, hydrothermal",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "滑石片岩",
+      "name_en": "Talc Schist",
+      "category": "变质岩",
+      "subcategory": "交代变质岩",
+      "subcategory_en": "Metasomatic Rock",
+      "formula": "Talc dominant, soft",
+      "importance": false,
+      "description_en": "Schist dominated by talc. Low-grade metamorphic rock, very soft.",
+      "description": "以滑石为主的片岩。低级变质岩。",
+      "aliases": [
+        "滑石片"
+      ]
+    },
+    {
+      "name": "菱镁矿",
+      "name_en": "Magnesite",
+      "category": "变质岩",
+      "subcategory": "交代变质岩",
+      "subcategory_en": "Metasomatic Rock",
+      "formula": "MgCO3, serpentinization",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "石墨片岩",
+      "name_en": "Graphite Schist",
+      "category": "变质岩",
+      "subcategory": "交代变质岩",
+      "subcategory_en": "Metasomatic Rock",
+      "formula": "Graphite bearing",
+      "importance": false,
+      "description_en": "Schist containing graphite flakes. Metamorphosed organic carbonaceous material.",
+      "description": "含石墨的片岩。碳质变质岩。",
+      "aliases": [
+        "石墨片",
+        "石墨片岩"
+      ]
+    },
+    {
+      "name": "阳起石片岩",
+      "name_en": "Actinolite Schist",
+      "category": "变质岩",
+      "subcategory": "交代变质岩",
+      "subcategory_en": "Metasomatic Rock",
+      "formula": "Actinolite bearing",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "石英岩",
+      "name_en": "Quartzite",
+      "category": "变质岩",
+      "subcategory": "其他变质岩",
+      "subcategory_en": "Other Metamorphic Rock",
+      "formula": "Quartz recrystallized, metamorphosed sandstone",
+      "importance": true,
+      "description_en": "Metamorphic rock formed from quartz sandstone. Hard, tough, composed of interlocking quartz grains.",
+      "description": "变质岩，由石英砂岩变质形成。坚硬、坚韧，由结合在一起的石英颗粒组成。",
+      "aliases": [
+        "石英石",
+        "quartzite"
+      ]
+    },
+    {
+      "name": "大理岩",
+      "name_en": "Marble",
+      "category": "变质岩",
+      "subcategory": "其他变质岩",
+      "subcategory_en": "Other Metamorphic Rock",
+      "formula": "Recrystallized carbonate, metamorphosed limestone",
+      "importance": true,
+      "description_en": "Metamorphic rock formed by recrystallization of limestone or dolomite. Composed of interlocking calcite or dolomite crystals.",
+      "description": "变质岩，由石灰岩或白云岩重结晶形成。由互相结合的方解石或白云石晶体组成。",
+      "aliases": [
+        "大理石",
+        "marble"
+      ]
+    },
+    {
+      "name": "角岩",
+      "name_en": "Hornfels",
+      "category": "变质岩",
+      "subcategory": "其他变质岩",
+      "subcategory_en": "Other Metamorphic Rock",
+      "formula": "Fine-grained contact metamorphic rock",
+      "importance": true,
+      "description_en": "Fine-grained, non-foliated contact metamorphic rock. Forms in thermal aureole around intrusions.",
+      "description": "细粒非片状接触变质岩。在侵入体热晕中形成。",
+      "aliases": [
+        "角石",
+        "hornfels"
+      ]
+    },
+    {
+      "name": "硅质岩",
+      "name_en": "Metaquartzite",
+      "category": "变质岩",
+      "subcategory": "其他变质岩",
+      "subcategory_en": "Other Metamorphic Rock",
+      "formula": "Metamorphosed chert/siliceous rock",
+      "importance": true,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "钠长片岩",
+      "name_en": "Albite Schist",
+      "category": "变质岩",
+      "subcategory": "其他变质岩",
+      "subcategory_en": "Other Metamorphic Rock",
+      "formula": "Albite bearing",
+      "importance": false,
+      "description_en": "Schist containing albite feldspar. Low-grade metamorphic rock.",
+      "description": "含钠长石的片岩。低级变质岩。",
+      "aliases": [
+        "钠长石片岩"
+      ]
+    },
+    {
+      "name": "眼球状混合岩",
+      "name_en": "Augen Gneiss",
+      "category": "变质岩",
+      "subcategory": "其他变质岩",
+      "subcategory_en": "Other Metamorphic Rock",
+      "formula": "K-feldspar augen",
+      "importance": false,
+      "description_en": "Augen gneiss with large potassium feldspar augen. Mylonitic texture with porphyroclasts.",
+      "description": "眼球状混合岩，钾长石眼球。",
+      "aliases": [
+        "眼球状混合石"
+      ]
+    },
+    {
+      "name": "红柱石角岩",
+      "name_en": "Andalusite Hornfels",
+      "category": "变质岩",
+      "subcategory": "其他变质岩",
+      "subcategory_en": "Other Metamorphic Rock",
+      "formula": "Andalusite bearing",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
+      "name": "符山石岩",
+      "name_en": "Vesuvianite Rock",
+      "category": "变质岩",
+      "subcategory": "其他变质岩",
+      "subcategory_en": "Other Metamorphic Rock",
+      "formula": "Vesuvianite dominant",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    }
+  ],
+  "metadata": {
+    "total": 192,
+    "sources": [
+      "USGS (United States Geological Survey)",
+      "中国地质调查局",
+      "Geology.com",
+      "Britannica",
+      "中国科学院"
+    ],
+    "version": "2.0"
+  }
+}

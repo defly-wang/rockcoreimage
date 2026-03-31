@@ -1,0 +1,669 @@
+{
+  "alterations": [
+    {
+      "name": "绢云母化",
+      "name_en": "Sericitization",
+      "category": "热液蚀变",
+      "importance": true,
+      "minerals": [
+        "绢云母",
+        "白云母",
+        "伊利石"
+      ],
+      "description": "热液作用使长石等矿物转变为绢云母的蚀变过程。常与黄铁矿化、黄铜矿化伴生，是寻找含金石英脉的重要标志。",
+      "description_en": "Hydrothermal alteration where feldspar is converted to sericite. Often associated with pyrite and chalcopyrite mineralization. Important indicator for gold-bearing quartz veins.",
+      "aliases": [
+        "绢云母蚀变",
+        "白云母化",
+        "伊利石化"
+      ]
+    },
+    {
+      "name": "绿泥石化",
+      "name_en": "Chloritization",
+      "category": "热液蚀变",
+      "importance": true,
+      "minerals": [
+        "绿泥石",
+        "绿帘石",
+        "阳起石"
+      ],
+      "description": "铁镁质矿物被绿泥石替代的蚀变作用。常见于基性火山岩和侵入岩中，是寻找铜矿床的重要标志。",
+      "description_en": "Replacement of ferromagnesian minerals by chlorite. Common in basic volcanic rocks and intrusives. Important indicator for copper deposits.",
+      "aliases": [
+        "绿泥石蚀变",
+        "绿帘石化",
+        "青磐岩化"
+      ]
+    },
+    {
+      "name": "硅化",
+      "name_en": "Silicification",
+      "category": "热液蚀变",
+      "importance": true,
+      "minerals": [
+        "石英",
+        "玉髓",
+        "蛋白石"
+      ],
+      "description": "热液携带的二氧化硅沉淀交代岩石的蚀变作用。可形成硅化带或石英脉，是金矿等热液矿床的重要找矿标志。",
+      "description_en": "Silica precipitation and replacement by hydrothermal fluids. Forms silicified zones or quartz veins. Important indicator for hydrothermal gold deposits.",
+      "aliases": [
+        "硅化作用",
+        "石英化",
+        "次生石英岩化"
+      ]
+    },
+    {
+      "name": "黄铁矿化",
+      "name_en": "Pyritization",
+      "category": "热液蚀变",
+      "importance": true,
+      "minerals": [
+        "黄铁矿",
+        "磁黄铁矿"
+      ],
+      "description": "热液作用使硫化物沉淀的蚀变现象。常与金矿、铜矿伴生，是寻找多金属矿床的重要标志。",
+      "description_en": "Sulfide precipitation by hydrothermal fluids. Often associated with gold and copper deposits. Important indicator for polymetallic deposits.",
+      "aliases": [
+        "黄铁矿蚀变",
+        "黄铁矿化作用"
+      ]
+    },
+    {
+      "name": "碳酸盐化",
+      "name_en": "Carbonatization",
+      "category": "热液蚀变",
+      "importance": true,
+      "minerals": [
+        "方解石",
+        "白云石",
+        "菱铁矿"
+      ],
+      "description": "热液作用使岩石发生碳酸盐化的蚀变过程。常与铅锌矿、金矿伴生，是重要的找矿标志。",
+      "description_en": "Hydrothermal alteration resulting in carbonate minerals. Often associated with lead-zinc and gold deposits. Important exploration indicator.",
+      "aliases": [
+        "碳酸盐化作用",
+        "方解石化",
+        "白云石化"
+      ]
+    },
+    {
+      "name": "萤石化",
+      "name_en": "Fluoritization",
+      "category": "热液蚀变",
+      "importance": true,
+      "minerals": [
+        "萤石"
+      ],
+      "description": "热液作用使萤石沉淀的蚀变现象。常与铅锌矿、稀土矿伴生，是重要的找矿标志。",
+      "description_en": "Fluorite precipitation by hydrothermal fluids. Often associated with lead-zinc and rare earth deposits. Important exploration indicator.",
+      "aliases": [
+        "萤石化作用",
+        "氟石化"
+      ]
+    },
+    {
+      "name": "钠长石化",
+      "name_en": "Albitization",
+      "category": "热液蚀变",
+      "importance": true,
+      "minerals": [
+        "钠长石"
+      ],
+      "description": "热液带入钠使斜长石转变为钠长石的过程。常见于碱性花岗岩和某些铜矿床中。",
+      "description_en": "Conversion of plagioclase to albite by sodium-rich hydrothermal fluids. Common in alkaline granites and some copper deposits.",
+      "aliases": [
+        "钠长石化作用",
+        "钠化"
+      ]
+    },
+    {
+      "name": "钾长石化",
+      "name_en": "Potassium Feldspathization",
+      "category": "热液蚀变",
+      "importance": true,
+      "minerals": [
+        "钾长石",
+        "正长石",
+        "微斜长石"
+      ],
+      "description": "热液带入钾使岩石发生钾长石化。常与斑岩铜矿、金矿伴生，是重要的找矿标志。",
+      "description_en": "Introduction of potassium by hydrothermal fluids causing K-feldspar formation. Often associated with porphyry copper and gold deposits.",
+      "aliases": [
+        "钾长石化作用",
+        "钾化",
+        "正长石化"
+      ]
+    },
+    {
+      "name": "黑云母化",
+      "name_en": "Biotitization",
+      "category": "热液蚀变",
+      "importance": false,
+      "minerals": [
+        "黑云母"
+      ],
+      "description": "热液作用使岩石产生黑云母的蚀变过程。",
+      "description_en": "Hydrothermal alteration producing biotite minerals in host rocks.",
+      "aliases": [
+        "黑云母化作用"
+      ]
+    },
+    {
+      "name": "角闪石化",
+      "name_en": "Hornblendization",
+      "category": "热液蚀变",
+      "importance": false,
+      "minerals": [
+        "角闪石"
+      ],
+      "description": "热液作用使岩石产生角闪石的蚀变过程。",
+      "description_en": "Formation of hornblende through hydrothermal alteration.",
+      "aliases": [
+        "角闪石化作用"
+      ]
+    },
+    {
+      "name": "绿帘石化",
+      "name_en": "Epidotization",
+      "category": "热液蚀变",
+      "importance": false,
+      "minerals": [
+        "绿帘石",
+        "黝帘石"
+      ],
+      "description": "热液作用使岩石发生绿帘石化。常见于基性火山岩的蚀变带中。",
+      "description_en": "Hydrothermal alteration producing epidote minerals. Common in altered basic volcanic rocks.",
+      "aliases": [
+        "绿帘石化作用"
+      ]
+    },
+    {
+      "name": "电气石化",
+      "name_en": "Tourmalinization",
+      "category": "热液蚀变",
+      "importance": false,
+      "minerals": [
+        "电气石"
+      ],
+      "description": "热液作用使岩石产生电气石的蚀变过程。常与锡矿、黑钨矿伴生。",
+      "description_en": "Formation of tourmaline through hydrothermal fluids. Often associated with tin and wolframite deposits.",
+      "aliases": [
+        "电气石化作用"
+      ]
+    },
+    {
+      "name": "白云母化",
+      "name_en": "Muscovitization",
+      "category": "热液蚀变",
+      "importance": false,
+      "minerals": [
+        "白云母"
+      ],
+      "description": "热液作用使岩石产生白云母的蚀变过程。",
+      "description_en": "Hydrothermal alteration producing muscovite in host rocks.",
+      "aliases": [
+        "白云母化作用"
+      ]
+    },
+    {
+      "name": "石榴石化",
+      "name_en": "Garnetization",
+      "category": "接触变质蚀变",
+      "importance": true,
+      "minerals": [
+        "石榴石",
+        "钙铝榴石",
+        "铁铝榴石"
+      ],
+      "description": "矽卡岩中常见的蚀变矿物组合。石榴石的出现指示接触交代变质作用，是寻找铁矿、铜矿的重要标志。",
+      "description_en": "Common alteration mineral in skarn. Garnet presence indicates contact metasomatism. Important indicator for iron and copper deposits.",
+      "aliases": [
+        "石榴石化作用",
+        "石榴子石化"
+      ]
+    },
+    {
+      "name": "透辉石化",
+      "name_en": "Diopsidization",
+      "category": "接触变质蚀变",
+      "importance": true,
+      "minerals": [
+        "透辉石"
+      ],
+      "description": "矽卡岩中常见的单斜辉石蚀变矿物。常与铁矿、铜矿伴生。",
+      "description_en": "Common monoclonic pyroxene in skarn. Often associated with iron and copper deposits.",
+      "aliases": [
+        "透辉石化作用"
+      ]
+    },
+    {
+      "name": "透闪石化",
+      "name_en": "Tremolitization",
+      "category": "接触变质蚀变",
+      "importance": true,
+      "minerals": [
+        "透闪石"
+      ],
+      "description": "接触变质带常见的角闪石族矿物。常与大理岩、矽卡岩伴生。",
+      "description_en": "Common amphibole in contact metamorphic zones. Often associated with marble and skarn.",
+      "aliases": [
+        "透闪石化作用"
+      ]
+    },
+    {
+      "name": "符山石化",
+      "name_en": "Vesuvianitization",
+      "category": "接触变质蚀变",
+      "importance": false,
+      "minerals": [
+        "符山石"
+      ],
+      "description": "矽卡岩中常见的蚀变矿物，指示高温接触变质作用。",
+      "description_en": "Common skarn mineral indicating high-temperature contact metamorphism.",
+      "aliases": [
+        "符山石化作用"
+      ]
+    },
+    {
+      "name": "蛇纹石化",
+      "name_en": "Serpentinization",
+      "category": "水化蚀变",
+      "importance": true,
+      "minerals": [
+        "蛇纹石",
+        "纤蛇纹石",
+        "利蛇纹石"
+      ],
+      "description": "超基性岩的水化蚀变作用，使橄榄石转变为蛇纹石。常与石棉、滑石伴生，可作为找矿线索。",
+      "description_en": "Hydration alteration of ultramafic rocks, converting olivine to serpentine. Often associated with asbestos and talc deposits.",
+      "aliases": [
+        "蛇纹石化作用",
+        "蛇纹岩化"
+      ]
+    },
+    {
+      "name": "滑石化",
+      "name_en": "Talcization",
+      "category": "水化蚀变",
+      "importance": true,
+      "minerals": [
+        "滑石"
+      ],
+      "description": "超基性岩经蚀变形成滑石的矿物组合。常与蛇纹石、石棉伴生。",
+      "description_en": "Alteration of ultramafic rocks forming talc. Often associated with serpentine and asbestos.",
+      "aliases": [
+        "滑石化作用"
+      ]
+    },
+    {
+      "name": "伊利石化",
+      "name_en": "Illitization",
+      "category": "粘土蚀变",
+      "importance": true,
+      "minerals": [
+        "伊利石"
+      ],
+      "description": "粘土矿物蚀变类型，常由长石蚀变形成。指示中等温度热液作用。",
+      "description_en": "Clay mineral alteration type, commonly from feldspar alteration. Indicates moderate temperature hydrothermal activity.",
+      "aliases": [
+        "伊利石化作用",
+        "水云母化"
+      ]
+    },
+    {
+      "name": "高岭石化",
+      "name_en": "Kaolinization",
+      "category": "粘土蚀变",
+      "importance": true,
+      "minerals": [
+        "高岭石",
+        "地开石",
+        "珍珠陶土"
+      ],
+      "description": "酸性热液使长石蚀变成高岭石的粘土化过程。常与金矿、钨矿伴生。",
+      "description_en": "Acid hydrothermal alteration converting feldspar to kaolin clay. Often associated with gold and tungsten deposits.",
+      "aliases": [
+        "高岭石化作用",
+        "高岭土化",
+        "陶土化"
+      ]
+    },
+    {
+      "name": "蒙脱石化",
+      "name_en": "Montmorillonitization",
+      "category": "粘土蚀变",
+      "importance": false,
+      "minerals": [
+        "蒙脱石"
+      ],
+      "description": "火山凝灰岩等岩石的粘土化蚀变，形成蒙脱石。",
+      "description_en": "Clay alteration of volcanic tuff forming montmorillonite.",
+      "aliases": [
+        "蒙脱石化作用"
+      ]
+    },
+    {
+      "name": "叶蜡石化",
+      "name_en": "Pyrophyllitization",
+      "category": "高级粘土蚀变",
+      "importance": true,
+      "minerals": [
+        "叶蜡石"
+      ],
+      "description": "高级粘土矿物蚀变，形成叶蜡石。指示高温热液作用，常与金矿伴生。",
+      "description_en": "Advanced clay mineral alteration forming pyrophyllite. Indicates high-temperature hydrothermal activity, often associated with gold.",
+      "aliases": [
+        "叶蜡石化作用"
+      ]
+    },
+    {
+      "name": "明矾石化",
+      "name_en": "Alunitization",
+      "category": "硫酸盐蚀变",
+      "importance": false,
+      "minerals": [
+        "明矾石"
+      ],
+      "description": "酸性热液形成的硫酸盐矿物蚀变。",
+      "description_en": "Sulfate mineral alteration formed by acidic hydrothermal fluids.",
+      "aliases": [
+        "明矾石化作用"
+      ]
+    },
+    {
+      "name": "重晶石化",
+      "name_en": "Baritization",
+      "category": "硫酸盐蚀变",
+      "importance": false,
+      "minerals": [
+        "重晶石"
+      ],
+      "description": "热液作用使重晶石沉淀的蚀变现象。常与铅锌矿伴生。",
+      "description_en": "Barium sulfate precipitation by hydrothermal fluids. Often associated with lead-zinc deposits.",
+      "aliases": [
+        "重晶石化作用",
+        "重石"
+      ]
+    },
+    {
+      "name": "硬石膏化",
+      "name_en": "Anhydritization",
+      "category": "硫酸盐蚀变",
+      "importance": false,
+      "minerals": [
+        "硬石膏"
+      ],
+      "description": "热液作用形成硬石膏的蚀变过程。",
+      "description_en": "Formation of anhydrite through hydrothermal alteration.",
+      "aliases": [
+        "硬石膏化作用"
+      ]
+    },
+    {
+      "name": "磁铁矿化",
+      "name_en": "Magnetitization",
+      "category": "氧化物蚀变",
+      "importance": true,
+      "minerals": [
+        "磁铁矿"
+      ],
+      "description": "热液作用使铁元素形成磁铁矿的蚀变。常与铁矿、斑岩铜矿伴生。",
+      "description_en": "Formation of magnetite by iron precipitation from hydrothermal fluids. Often associated with iron and porphyry copper deposits.",
+      "aliases": [
+        "磁铁矿化作用",
+        "磁铁化"
+      ]
+    },
+    {
+      "name": "赤铁矿化",
+      "name_en": "Hematitization",
+      "category": "氧化物蚀变",
+      "importance": false,
+      "minerals": [
+        "赤铁矿",
+        "镜铁矿"
+      ],
+      "description": "氧化条件下形成的铁氧化物蚀变。",
+      "description_en": "Iron oxide alteration formed under oxidation conditions.",
+      "aliases": [
+        "赤铁矿化作用",
+        "铁染"
+      ]
+    },
+    {
+      "name": "钛铁矿化",
+      "name_en": "Ilmenitization",
+      "category": "氧化物蚀变",
+      "importance": false,
+      "minerals": [
+        "钛铁矿"
+      ],
+      "description": "热液作用形成钛铁矿的蚀变过程。",
+      "description_en": "Formation of ilmenite through hydrothermal alteration.",
+      "aliases": [
+        "钛铁矿化作用"
+      ]
+    },
+    {
+      "name": "闪锌矿化",
+      "name_en": "Sphaleritization",
+      "category": "硫化物蚀变",
+      "importance": true,
+      "minerals": [
+        "闪锌矿"
+      ],
+      "description": "热液作用使锌硫化物沉淀的蚀变现象。是最重要的铅锌矿找矿标志之一。",
+      "description_en": "Zinc sulfide precipitation by hydrothermal fluids. One of the most important lead-zinc exploration indicators.",
+      "aliases": [
+        "闪锌矿化作用"
+      ]
+    },
+    {
+      "name": "方铅矿化",
+      "name_en": "Galenitization",
+      "category": "硫化物蚀变",
+      "importance": true,
+      "minerals": [
+        "方铅矿"
+      ],
+      "description": "热液作用使铅硫化物沉淀的蚀变现象。常与闪锌矿伴生，形成铅锌矿床。",
+      "description_en": "Lead sulfide precipitation by hydrothermal fluids. Often associated with sphalerite forming lead-zinc deposits.",
+      "aliases": [
+        "方铅矿化作用"
+      ]
+    },
+    {
+      "name": "黄铜矿化",
+      "name_en": "Chalcopyritization",
+      "category": "硫化物蚀变",
+      "importance": true,
+      "minerals": [
+        "黄铜矿"
+      ],
+      "description": "热液作用使铜硫化物沉淀的蚀变现象。斑岩铜矿的重要找矿标志。",
+      "description_en": "Copper sulfide precipitation by hydrothermal fluids. Important indicator for porphyry copper deposits.",
+      "aliases": [
+        "黄铜矿化作用"
+      ]
+    },
+    {
+      "name": "辉钼矿化",
+      "name_en": "Molybdenitization",
+      "category": "硫化物蚀变",
+      "importance": true,
+      "minerals": [
+        "辉钼矿"
+      ],
+      "description": "热液作用使钼硫化物沉淀的蚀变现象。常与斑岩铜矿伴生。",
+      "description_en": "Molybdenum sulfide precipitation by hydrothermal fluids. Often associated with porphyry copper deposits.",
+      "aliases": [
+        "辉钼矿化作用",
+        "辉钼石化"
+      ]
+    },
+    {
+      "name": "辉锑矿化",
+      "name_en": "Stibnitzation",
+      "category": "硫化物蚀变",
+      "importance": true,
+      "minerals": [
+        "辉锑矿"
+      ],
+      "description": "热液作用使锑硫化物沉淀的蚀变现象。锑矿床的重要找矿标志。",
+      "description_en": "Antimony sulfide precipitation by hydrothermal fluids. Important indicator for antimony deposits.",
+      "aliases": [
+        "辉锑矿化作用"
+      ]
+    },
+    {
+      "name": "毒砂化",
+      "name_en": "Arsenopyritization",
+      "category": "硫化物蚀变",
+      "importance": true,
+      "minerals": [
+        "毒砂"
+      ],
+      "description": "热液作用形成的含砧矿物。常与金矿、钨矿伴生，是重要的找矿标志。",
+      "description_en": "Arsenic-bearing mineral formed by hydrothermal fluids. Often associated with gold and tungsten deposits.",
+      "aliases": [
+        "毒砂化作用",
+        "砷黄铁矿化"
+      ]
+    },
+    {
+      "name": "雌黄化",
+      "name_en": "Realgarization",
+      "category": "硫化物蚀变",
+      "importance": false,
+      "minerals": [
+        "雌黄"
+      ],
+      "description": "低温热液形成的砷硫化物矿物。",
+      "description_en": "Arsenic sulfide mineral formed by low-temperature hydrothermal fluids.",
+      "aliases": [
+        "雌黄化作用"
+      ]
+    },
+    {
+      "name": "雄黄化",
+      "name_en": "Orpimentation",
+      "category": "硫化物蚀变",
+      "importance": false,
+      "minerals": [
+        "雄黄"
+      ],
+      "description": "低温热液形成的砷硫化物矿物，常与雌黄伴生。",
+      "description_en": "Arsenic sulfide mineral formed by low-temperature hydrothermal fluids, often associated with realgar.",
+      "aliases": [
+        "雄黄化作用"
+      ]
+    },
+    {
+      "name": "辰砂化",
+      "name_en": "Cinnabaritization",
+      "category": "硫化物蚀变",
+      "importance": true,
+      "minerals": [
+        "辰砂"
+      ],
+      "description": "低温热液形成的汞硫化物矿物。是最重要的汞矿找矿标志。",
+      "description_en": "Mercury sulfide formed by low-temperature hydrothermal fluids. Most important indicator for mercury deposits.",
+      "aliases": [
+        "辰砂化作用",
+        "朱砂化"
+      ]
+    },
+    {
+      "name": "辉银矿化",
+      "name_en": "Argentitization",
+      "category": "硫化物蚀变",
+      "importance": true,
+      "minerals": [
+        "辉银矿"
+      ],
+      "description": "热液作用形成的银硫化物矿物。常与方铅矿、闪锌矿伴生。",
+      "description_en": "Silver sulfide formed by hydrothermal fluids. Often associated with galena and sphalerite.",
+      "aliases": [
+        "辉银矿化作用",
+        "银矿化"
+      ]
+    },
+    {
+      "name": "次生石英岩化",
+      "name_en": " Quartzitization",
+      "category": "硅化蚀变",
+      "importance": true,
+      "minerals": [
+        "石英"
+      ],
+      "description": "强烈硅化作用形成的次生石英岩。是金矿、钨矿的重要找矿标志。",
+      "description_en": "Intense silicification forming secondary quartzite. Important indicator for gold and tungsten deposits.",
+      "aliases": [
+        "次生石英岩化作用",
+        "硅化"
+      ]
+    },
+    {
+      "name": "蛋白石化",
+      "name_en": "Opalization",
+      "category": "硅化蚀变",
+      "importance": false,
+      "minerals": [
+        "蛋白石"
+      ],
+      "description": "低温热液形成的非晶质二氧化硅矿物。",
+      "description_en": "Amorphous silica mineral formed by low-temperature hydrothermal fluids.",
+      "aliases": [
+        "蛋白石化作用"
+      ]
+    },
+    {
+      "name": "玉髓化",
+      "name_en": "Chalcedonization",
+      "category": "硅化蚀变",
+      "importance": false,
+      "minerals": [
+        "玉髓"
+      ],
+      "description": "低温热液形成的隐晶质二氧化硅矿物。",
+      "description_en": "Cryptocrystalline silica formed by low-temperature hydrothermal fluids.",
+      "aliases": [
+        "玉髓化作用"
+      ]
+    },
+    {
+      "name": "褪色作用",
+      "name_en": "Bleaching",
+      "category": "其他蚀变",
+      "importance": false,
+      "minerals": [],
+      "description": "热液使岩石褪色，主要是铁镁质矿物被移除的蚀变过程。",
+      "description_en": "Removal of iron and magnesium minerals causing rock discoloration.",
+      "aliases": [
+        "褪色化作用"
+      ]
+    },
+    {
+      "name": "赤铁矿化(蚀变)",
+      "name_en": "Ferrugination",
+      "category": "其他蚀变",
+      "importance": false,
+      "minerals": [
+        "赤铁矿"
+      ],
+      "description": "岩石中铁元素氧化形成的赤铁矿化。",
+      "description_en": "Iron oxidation forming hematite in host rocks.",
+      "aliases": [
+        "铁染作用",
+        "氧化铁化"
+      ]
+    }
+  ],
+  "metadata": {
+    "total": 43,
+    "source": "USGS, Geology Science, 中国地质调查局",
+    "version": "1.0"
+  }
+}
