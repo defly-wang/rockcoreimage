@@ -344,3 +344,98 @@ class DataProcessor(QObject):
             'start_depth': 0,
             'end_depth': 0
         }
+    
+    def analyze_alteration(self, json_file, alteration_config_file, output_file):
+        with open(alteration_config_file, 'r', encoding='utf-8') as f:
+            alteration_config = json.load(f)
+        
+        alterations = alteration_config.get('alterations', [])
+        
+        alteration_keywords = {}
+        for alt in alterations:
+            alt_name = alt['name']
+            keywords = [alt_name]
+            keywords.extend(alt.get('aliases', []))
+            alteration_keywords[alt_name] = {
+                'keywords': set(keywords),
+                'category': alt.get('category', ''),
+                'importance': alt.get('importance', False)
+            }
+        
+        alteration_keywords = dict(sorted(alteration_keywords.items(), key=lambda x: -len(x[1]['keywords'])))
+        
+        self.progress_updated.emit(0, "正在加载数据...")
+        
+        with open(json_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        total = len(data)
+        
+        def detect_alterations(lithology):
+            if not lithology:
+                return []
+            detected = []
+            lithology_lower = lithology.lower()
+            for alt_name, alt_info in alteration_keywords.items():
+                for keyword in alt_info['keywords']:
+                    if keyword and keyword.lower() in lithology_lower:
+                        detected.append(alt_name)
+                        break
+            return detected
+        
+        alteration_stats = {}
+        total_alterations = 0
+        
+        for idx, item in enumerate(data):
+            if idx % 100 == 0:
+                self.progress_updated.emit(int(idx / total * 80), f"正在分析蚀变... {idx}/{total}")
+            
+            lithology = item.get('lithology', '')
+            
+            detected = detect_alterations(lithology)
+            item['蚀变类型'] = ", ".join(detected) if detected else ""
+            
+            for alt_name in detected:
+                if alt_name not in alteration_stats:
+                    alteration_stats[alt_name] = {
+                        'category': alteration_keywords[alt_name]['category'],
+                        'importance': alteration_keywords[alt_name]['importance'],
+                        'count': 0
+                    }
+                alteration_stats[alt_name]['count'] += 1
+                total_alterations += 1
+        
+        self.progress_updated.emit(90, "正在统计结果...")
+        
+        importance_stats = {
+            'important': {},
+            'other': {}
+        }
+        category_stats = {}
+        
+        for alt_name, info in alteration_stats.items():
+            target = importance_stats['important'] if info['importance'] else importance_stats['other']
+            target[alt_name] = info['count']
+            
+            if info['category'] not in category_stats:
+                category_stats[info['category']] = 0
+            category_stats[info['category']] += info['count']
+        
+        self.progress_updated.emit(95, "正在保存文件...")
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        self.progress_updated.emit(100, "蚀变分析完成")
+        
+        stats = {
+            'total_records': total,
+            'records_with_alteration': sum(1 for item in data if item.get('蚀变类型')),
+            'total_alterations': total_alterations,
+            'alteration_types': len(alteration_stats),
+            'important_alterations': importance_stats['important'],
+            'other_alterations': importance_stats['other'],
+            'category_stats': category_stats
+        }
+        
+        self.processing_finished.emit(output_file, stats)

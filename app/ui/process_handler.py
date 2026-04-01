@@ -290,3 +290,137 @@ class ProcessHandler:
         self.main_window.process_btn.setEnabled(True)
         self.main_window.classify_btn.setEnabled(True)
         self.main_window.status_bar.showMessage("分类完成")
+    
+    def start_alteration_analysis(self):
+        from PyQt6.QtWidgets import QFileDialog
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择岩性分析后的JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        project_root = os.path.dirname(app_dir)
+        alteration_config_file = os.path.join(project_root, 'config', 'alteration_types.json')
+        
+        if not os.path.exists(alteration_config_file):
+            QMessageBox.warning(self.main_window, "错误", f"找不到蚀变配置文件: {alteration_config_file}\n请检查config目录是否存在")
+            return
+        
+        output_file = json_file.replace('.json', '_alteration.json')
+        
+        self.main_window.process_btn.setEnabled(False)
+        self.main_window.classify_btn.setEnabled(False)
+        if hasattr(self.main_window, 'alteration_btn'):
+            self.main_window.alteration_btn.setEnabled(False)
+        self.main_window.process_status_label.setText("正在初始化...")
+        self.main_window.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #FF9800;
+            padding: 8px;
+            background-color: #FFF3E0;
+            border: 1px solid #FF9800;
+            border-radius: 4px;
+        """)
+        self.main_window.process_progress.setValue(0)
+        self.main_window.process_log.clear()
+        self.main_window.process_log.append("开始蚀变分析...")
+        
+        try:
+            self.main_window.data_processor.progress_updated.disconnect()
+            self.main_window.data_processor.processing_finished.disconnect()
+            self.main_window.data_processor.error_occurred.disconnect()
+        except TypeError:
+            pass
+        
+        self.main_window.data_processor.progress_updated.connect(self.on_alteration_progress)
+        self.main_window.data_processor.processing_finished.connect(self.on_alteration_finished)
+        self.main_window.data_processor.error_occurred.connect(self.on_processing_error)
+        
+        from threading import Thread
+        self.main_window.alteration_thread = Thread(
+            target=self.main_window.data_processor.analyze_alteration,
+            args=(json_file, alteration_config_file, output_file),
+            daemon=True
+        )
+        self.main_window.alteration_thread.start()
+    
+    def on_alteration_progress(self, value, message):
+        self.main_window.process_progress.setValue(value)
+        self.main_window.process_log.append(message)
+        self.main_window.status_bar.showMessage(message)
+        self.main_window.process_status_label.setText(message)
+    
+    def on_alteration_finished(self, output_file, stats):
+        self.main_window.process_progress.setValue(100)
+        
+        records_with_alt = stats.get('records_with_alteration', 0)
+        total_records = stats.get('total_records', 0)
+        total_alterations = stats.get('total_alterations', 0)
+        alteration_types = stats.get('alteration_types', 0)
+        
+        self.main_window.process_status_label.setText(f"蚀变分析完成 - {records_with_alt}/{total_records} 条含蚀变")
+        self.main_window.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #4CAF50;
+            padding: 8px;
+            background-color: #E8F5E9;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        """)
+        
+        self.main_window.process_log.append(f"蚀变分析完成!")
+        self.main_window.process_log.append(f"总记录数: {total_records}")
+        self.main_window.process_log.append(f"含蚀变记录: {records_with_alt} 条")
+        self.main_window.process_log.append(f"蚀变类型数: {alteration_types} 种")
+        self.main_window.process_log.append(f"总蚀变次数: {total_alterations}")
+        self.main_window.process_log.append(f"输出文件: {output_file}")
+        
+        important_alterations = stats.get('important_alterations', {})
+        other_alterations = stats.get('other_alterations', {})
+        category_stats = stats.get('category_stats', {})
+        
+        all_alts = {}
+        for name, count in important_alterations.items():
+            all_alts[name] = count
+        for name, count in other_alterations.items():
+            all_alts[name] = count
+        
+        total_rows = len(all_alts)
+        if category_stats:
+            total_rows += 1
+        
+        self.main_window.process_table.setColumnCount(4)
+        self.main_window.process_table.setHorizontalHeaderLabels(["蚀变类型", "分类", "重要性", "出现次数"])
+        self.main_window.process_table.setColumnWidth(0, 120)
+        self.main_window.process_table.setColumnWidth(1, 120)
+        self.main_window.process_table.setColumnWidth(2, 80)
+        self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+        self.main_window.process_table.setRowCount(total_rows)
+        
+        row = 0
+        for alt_name, count in sorted(all_alts.items(), key=lambda x: -x[1]):
+            importance = "重要" if alt_name in important_alterations else "一般"
+            category = category_stats.get(alt_name, '') if alt_name in important_alterations else ''
+            self.main_window.process_table.setItem(row, 0, QTableWidgetItem(alt_name))
+            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(category))
+            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(importance))
+            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(str(count)))
+            row += 1
+        
+        if category_stats:
+            categories_str = "; ".join([f"{cat}: {cnt}" for cat, cnt in sorted(category_stats.items(), key=lambda x: -x[1])])
+            self.main_window.process_table.setItem(row, 0, QTableWidgetItem("按分类统计"))
+            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(categories_str))
+            self.main_window.process_table.setItem(row, 2, QTableWidgetItem("-"))
+            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(str(sum(category_stats.values()))))
+        
+        self.main_window.process_table.resizeRowsToContents()
+        
+        self.main_window.process_btn.setEnabled(True)
+        self.main_window.classify_btn.setEnabled(True)
+        if hasattr(self.main_window, 'alteration_btn'):
+            self.main_window.alteration_btn.setEnabled(True)
+        self.main_window.status_bar.showMessage("蚀变分析完成")

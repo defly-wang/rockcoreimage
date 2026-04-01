@@ -156,6 +156,25 @@ class ProcessPage:
         main_window.classify_btn.clicked.connect(main_window.process_handler.start_lithology_classify)
         button_layout.addWidget(main_window.classify_btn)
         
+        main_window.alteration_btn = QPushButton("蚀变分析")
+        main_window.alteration_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 12px 20px;
+            }
+            QPushButton:hover {
+                background-color: #7B1FA2;
+            }
+            QPushButton:disabled {
+                background-color: #BDBDBD;
+            }
+        """)
+        main_window.alteration_btn.clicked.connect(main_window.process_handler.start_alteration_analysis)
+        button_layout.addWidget(main_window.alteration_btn)
+        
         button_panel.setLayout(button_layout)
         layout.addWidget(button_panel)
         
