@@ -17,6 +17,60 @@ class DataProcessor(QObject):
         self.source_dir = ""
         self.output_dir = ""
         
+    def classify_lithology(self, json_file, config_file, output_file):
+        with open(config_file, 'r', encoding='utf-8') as f:
+            rock_types = json.load(f)
+        
+        rocks = set()
+        for rock in rock_types['rocks']:
+            rocks.add(rock['name'])
+            rocks.update(rock.get('aliases', []))
+        rocks = sorted(rocks, key=lambda x: -len(x))
+        
+        self.progress_updated.emit(0, "正在加载数据...")
+        
+        with open(json_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        total = len(data)
+        
+        def extract_last_keyword(lithology):
+            lithology = lithology.strip()
+            for rock in rocks:
+                if lithology.endswith(rock):
+                    return rock
+            return ''
+        
+        mapping = {}
+        for idx, item in enumerate(data):
+            if idx % 100 == 0:
+                self.progress_updated.emit(int(idx / total * 100), f"正在分类... {idx}/{total}")
+            
+            lithology = item.get('lithology', '')
+            keyword = extract_last_keyword(lithology)
+            item['岩性名称'] = keyword
+            
+            if keyword:
+                if keyword not in mapping:
+                    mapping[keyword] = 0
+                mapping[keyword] += 1
+        
+        self.progress_updated.emit(95, "正在保存文件...")
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        self.progress_updated.emit(100, "分类完成")
+        
+        stats = {
+            'total': total,
+            'matched': sum(mapping.values()),
+            'types': len(mapping),
+            'mapping': mapping
+        }
+        
+        self.processing_finished.emit(output_file, stats)
+        
     def process(self, source_dir, output_dir):
         self.source_dir = source_dir
         self.output_dir = output_dir
@@ -24,33 +78,62 @@ class DataProcessor(QObject):
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(os.path.join(output_dir, 'images'), exist_ok=True)
         
+        self.progress_updated.emit(0, "正在扫描项目目录...")
+        
         project_dirs = [d for d in os.listdir(source_dir) 
                       if os.path.isdir(os.path.join(source_dir, d)) and not d.startswith('.')]
         
         total_projects = len(project_dirs)
+        if total_projects == 0:
+            self.progress_updated.emit(100, "未找到项目")
+            self.processing_finished.emit("", {'total_images': 0, 'total_projects': 0})
+            return
+        
+        self.progress_updated.emit(5, f"共发现 {total_projects} 个项目")
+        
         all_data = []
         
         for idx, project in enumerate(sorted(project_dirs)):
+            progress_base = int(10 + (idx / total_projects) * 80)
             self.progress_updated.emit(
-                int(idx / total_projects * 100),
-                f"处理项目: {project}"
+                progress_base,
+                f"处理项目 [{idx+1}/{total_projects}]: {project}"
             )
             
             project_path = os.path.join(source_dir, project)
+            
+            self.progress_updated.emit(
+                progress_base,
+                f"正在读取项目 {project} 的Excel文件..."
+            )
             
             excel_files = [f for f in os.listdir(project_path) 
                          if f.endswith('.xlsx') and not f.startswith('~') and not f.startswith('.~')]
             
             if not excel_files:
+                self.progress_updated.emit(
+                    progress_base,
+                    f"项目 {project} 无Excel文件，跳过"
+                )
                 continue
             
             excel_path = os.path.join(project_path, excel_files[0])
             
             try:
+                self.progress_updated.emit(
+                    progress_base + 2,
+                    f"正在解析 {excel_files[0]}..."
+                )
                 project_data = self.process_project(project, project_path, excel_path)
                 all_data.extend(project_data)
+                self.progress_updated.emit(
+                    progress_base + 5,
+                    f"项目 {project} 处理完成，获取 {len(project_data)} 条记录"
+                )
             except Exception as e:
                 self.error_occurred.emit(f"处理项目 {project} 时出错: {str(e)}")
+        
+        self.progress_updated.emit(95, "正在保存数据文件...")
         
         output_file = os.path.join(output_dir, 'image_descriptions.json')
         with open(output_file, 'w', encoding='utf-8') as f:

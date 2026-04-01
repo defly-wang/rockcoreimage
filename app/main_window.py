@@ -1,20 +1,11 @@
 import os
 import sys
-import json
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QListWidget, QListWidgetItem, QStackedWidget, QFrame, QFileDialog,
-    QComboBox, QSpinBox, QDoubleSpinBox, QProgressBar, QTextEdit,
-    QScrollArea, QGridLayout, QGroupBox, QCheckBox, QSlider, QDialog,
-    QDialogButtonBox, QMessageBox, QSplitter, QStatusBar, QMenuBar,
-    QMenu
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget,
+    QMenuBar, QMenu, QStatusBar, QFileDialog, QMessageBox
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
-from PyQt6.QtGui import QIcon, QPixmap, QAction, QFont, QColor, QPalette
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QAction
 
 from app.modules.data_cleaner import DataCleaner
 from app.modules.preprocessor import ImagePreprocessor
@@ -22,13 +13,14 @@ from app.modules.trainer import ModelTrainer
 from app.modules.recognizer import ImageRecognizer
 from app.modules.data_processor import DataProcessor
 
-
-class ClickableLabel(QLabel):
-    clicked = pyqtSignal()
-    
-    def mousePressEvent(self, event):
-        self.clicked.emit()
-        super().mousePressEvent(event)
+from app.ui.widgets import ClickableLabel
+from app.ui.sidebar import Sidebar
+from app.ui.home_page import HomePage
+from app.ui.data_page import DataPage
+from app.ui.process_page import ProcessPage
+from app.ui.preprocess_page import PreprocessPage
+from app.ui.training_page import TrainingPage
+from app.ui.recognition_page import RecognitionPage
 
 
 class MainWindow(QMainWindow):
@@ -69,18 +61,18 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        self.sidebar = self.create_sidebar()
+        self.sidebar = Sidebar.create(self)
         main_layout.addWidget(self.sidebar)
         
         self.content_widget = QStackedWidget()
         main_layout.addWidget(self.content_widget, 1)
         
-        self.content_widget.addWidget(self.create_home_page())
-        self.content_widget.addWidget(self.create_data_page())
-        self.content_widget.addWidget(self.create_process_page())
-        self.content_widget.addWidget(self.create_preprocess_page())
-        self.content_widget.addWidget(self.create_training_page())
-        self.content_widget.addWidget(self.create_recognition_page())
+        self.content_widget.addWidget(HomePage.create(self))
+        self.content_widget.addWidget(DataPage.create(self))
+        self.content_widget.addWidget(ProcessPage.create(self))
+        self.content_widget.addWidget(PreprocessPage.create(self))
+        self.content_widget.addWidget(TrainingPage.create(self))
+        self.content_widget.addWidget(RecognitionPage.create(self))
         
         central_widget.setLayout(main_layout)
         
@@ -107,47 +99,6 @@ class MainWindow(QMainWindow):
         about_action = QAction("关于", self)
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
-    
-    def create_sidebar(self):
-        sidebar = QFrame()
-        sidebar.setFixedWidth(220)
-        sidebar.setStyleSheet("background-color: #1E3A5F;")
-        
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 20, 0, 20)
-        layout.setSpacing(5)
-        
-        title_label = QLabel("岩心图像识别")
-        title_label.setStyleSheet("color: white; font-size: 18px; font-weight: bold; padding: 10px;")
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title_label)
-        
-        layout.addSpacing(20)
-        
-        buttons = [
-            ("首页", 0),
-            ("数据管理", 1),
-            ("数据处理", 2),
-            ("图像预处理", 3),
-            ("模型训练", 4),
-            ("图像识别", 5),
-        ]
-        
-        self.nav_buttons = []
-        for text, page_idx in buttons:
-            btn = QPushButton(text)
-            btn.setFixedHeight(45)
-            btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.clicked.connect(lambda checked=False, idx=page_idx: self.navigate_to_page(idx))
-            self.nav_buttons.append(btn)
-            layout.addWidget(btn)
-        
-        layout.addStretch()
-        
-        sidebar.setLayout(layout)
-        self.update_nav_buttons()
-        
-        return sidebar
     
     def update_nav_buttons(self):
         for i, btn in enumerate(self.nav_buttons):
@@ -185,209 +136,26 @@ class MainWindow(QMainWindow):
         self.update_nav_buttons()
         self.status_bar.showMessage(f"当前: {self.nav_buttons[page_idx].text()}")
     
-    def create_home_page(self):
-        page = QWidget()
-        layout = QVBoxLayout()
-        layout.setContentsMargins(40, 40, 40, 40)
-        layout.setSpacing(20)
-        
-        title = QLabel("欢迎使用岩心图像识别系统")
-        title.setStyleSheet("font-size: 28px; font-weight: bold; color: #1E3A5F;")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
-        
-        layout.addSpacing(30)
-        
-        info_card = QFrame()
-        info_card.setStyleSheet("""
-            QFrame {
-                background-color: white;
-                border-radius: 8px;
-                border: 1px solid #E0E0E0;
-            }
-        """)
-        info_layout = QVBoxLayout()
-        
-        intro_text = QLabel("""
-            <h3>功能概述</h3>
-            <ul style="font-size: 14px; line-height: 1.8;">
-                <li><b>数据管理</b> - 导入、浏览和管理岩心图像数据集</li>
-                <li><b>数据清洗</b> - 自动检测模糊、损坏或重复的图像</li>
-                <li><b>图像预处理</b> - 归一化、尺寸调整和数据增强</li>
-                <li><b>模型训练</b> - 使用预训练深度学习模型进行训练</li>
-                <li><b>图像识别</b> - 对岩心图像进行分类识别</li>
-            </ul>
-        """)
-        intro_text.setStyleSheet("color: #333;")
-        info_layout.addWidget(intro_text)
-        info_card.setLayout(info_layout)
-        layout.addWidget(info_card)
-        
-        layout.addStretch()
-        
-        quick_start = QGroupBox("快速开始")
-        quick_layout = QHBoxLayout()
-        
-        btn1 = QPushButton("导入数据集")
-        btn1.clicked.connect(lambda: self.navigate_to_page(1))
-        quick_layout.addWidget(btn1)
-        
-        btn2 = QPushButton("开始训练")
-        btn2.clicked.connect(lambda: self.navigate_to_page(4))
-        quick_layout.addWidget(btn2)
-        
-        btn3 = QPushButton("图像识别")
-        btn3.clicked.connect(lambda: self.navigate_to_page(5))
-        quick_layout.addWidget(btn3)
-        
-        quick_start.setLayout(quick_layout)
-        layout.addWidget(quick_start)
-        
-        page.setLayout(layout)
-        return page
-    
-    def create_data_page(self):
-        page = QWidget()
-        layout = QHBoxLayout()
-        
-        left_panel = QFrame()
-        left_panel.setFixedWidth(250)
-        left_layout = QVBoxLayout()
-        
-        import_btn = QPushButton("导入图像")
-        import_btn.clicked.connect(self.import_images)
-        left_layout.addWidget(import_btn)
-        
-        import_folder_btn = QPushButton("导入文件夹")
-        import_folder_btn.clicked.connect(self.import_folder)
-        left_layout.addWidget(import_folder_btn)
-        
-        left_layout.addSpacing(10)
-        
-        clean_btn = QPushButton("数据清洗")
-        clean_btn.clicked.connect(self.start_data_cleaning)
-        left_layout.addWidget(clean_btn)
-        
-        left_layout.addSpacing(10)
-        
-        self.category_list = QListWidget()
-        self.category_list.itemClicked.connect(self.on_category_clicked)
-        left_layout.addWidget(QLabel("类别列表:"))
-        left_layout.addWidget(self.category_list)
-        
-        left_panel.setLayout(left_layout)
-        
-        right_panel = QWidget()
-        right_layout = QVBoxLayout()
-        
-        self.image_grid = QScrollArea()
-        self.image_grid.setWidgetResizable(True)
-        self.image_grid.setStyleSheet("border: none;")
-        
-        self.image_grid_content = QWidget()
-        self.image_grid_layout = QGridLayout()
-        self.image_grid_content.setLayout(self.image_grid_layout)
-        self.image_grid.setWidget(self.image_grid_content)
-        
-        right_layout.addWidget(self.image_grid)
-        
-        self.data_progress = QProgressBar()
-        self.data_progress.setVisible(False)
-        right_layout.addWidget(self.data_progress)
-        
-        right_panel.setLayout(right_layout)
-        
-        layout.addWidget(left_panel)
-        layout.addWidget(right_panel, 1)
-        
-        page.setLayout(layout)
-        return page
-    
-    def create_process_page(self):
-        page = QWidget()
-        layout = QHBoxLayout()
-        
-        left_panel = QFrame()
-        left_panel.setFixedWidth(300)
-        left_layout = QVBoxLayout()
-        
-        source_group = QGroupBox("数据源")
-        source_layout = QVBoxLayout()
-        
-        select_source_btn = QPushButton("选择数据目录")
-        select_source_btn.clicked.connect(self.select_source_directory)
-        source_layout.addWidget(select_source_btn)
-        
-        self.source_path_label = QLabel("未选择")
-        self.source_path_label.setStyleSheet("color: #666; font-size: 12px; word-wrap: break-word;")
-        source_layout.addWidget(self.source_path_label)
-        
-        source_group.setLayout(source_layout)
-        left_layout.addWidget(source_group)
-        
-        output_group = QGroupBox("输出目录")
-        output_layout = QVBoxLayout()
-        
-        select_output_btn = QPushButton("选择输出目录")
-        select_output_btn.clicked.connect(self.select_output_directory)
-        output_layout.addWidget(select_output_btn)
-        
-        self.output_path_label = QLabel("未选择")
-        self.output_path_label.setStyleSheet("color: #666; font-size: 12px; word-wrap: break-word;")
-        output_layout.addWidget(self.output_path_label)
-        
-        output_group.setLayout(output_layout)
-        left_layout.addWidget(output_group)
-        
-        process_btn = QPushButton("开始处理")
-        process_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                padding: 10px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-        """)
-        process_btn.clicked.connect(self.start_data_processing)
-        left_layout.addWidget(process_btn)
-        
-        left_panel.setLayout(left_layout)
-        
-        right_panel = QWidget()
-        right_layout = QVBoxLayout()
-        
-        self.process_log = QTextEdit()
-        self.process_log.setReadOnly(True)
-        right_layout.addWidget(QLabel("处理日志:"))
-        right_layout.addWidget(self.process_log)
-        
-        self.process_progress = QProgressBar()
-        right_layout.addWidget(self.process_progress)
-        
-        right_panel.setLayout(right_layout)
-        
-        layout.addWidget(left_panel)
-        layout.addWidget(right_panel, 1)
-        
-        page.setLayout(layout)
-        return page
+    def show_about(self):
+        QMessageBox.about(self, "关于", 
+            "岩心图像识别系统 RockCoreImage\n\n"
+            "基于PyQt6和PyTorch开发的岩心图像分类识别系统\n\n"
+            "支持预训练模型: ResNet, VGG, EfficientNet\n\n"
+            "版本: 1.0.0"
+        )
     
     def select_source_directory(self):
         folder = QFileDialog.getExistingDirectory(self, "选择数据目录")
         if folder:
             self.source_directory = folder
-            self.source_path_label.setText(folder)
+            self.source_path_label.setText(os.path.basename(folder))
             self.process_log.append(f"已选择数据源: {folder}")
     
     def select_output_directory(self):
         folder = QFileDialog.getExistingDirectory(self, "选择输出目录")
         if folder:
             self.output_directory = folder
-            self.output_path_label.setText(folder)
+            self.output_path_label.setText(os.path.basename(folder))
             self.process_log.append(f"已选择输出目录: {folder}")
     
     def start_data_processing(self):
@@ -399,355 +167,214 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "警告", "请先选择输出目录")
             return
         
+        self.process_status_label.setText("正在初始化...")
+        self.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #FF9800;
+            padding: 8px;
+            background-color: #FFF3E0;
+            border: 1px solid #FF9800;
+            border-radius: 4px;
+        """)
+        self.process_progress.setValue(0)
+        self.process_log.clear()
         self.process_log.append("开始处理数据...")
+        
+        try:
+            self.data_processor.progress_updated.disconnect()
+            self.data_processor.processing_finished.disconnect()
+            self.data_processor.error_occurred.disconnect()
+        except TypeError:
+            pass
         
         self.data_processor.progress_updated.connect(self.on_processing_progress)
         self.data_processor.processing_finished.connect(self.on_processing_finished)
         self.data_processor.error_occurred.connect(self.on_processing_error)
         
-        self.data_processor.process(self.source_directory, self.output_directory)
+        from threading import Thread
+        self.process_thread = Thread(
+            target=self.data_processor.process,
+            args=(self.source_directory, self.output_directory),
+            daemon=True
+        )
+        self.process_thread.start()
     
     def on_processing_progress(self, value, message):
         self.process_progress.setValue(value)
         self.process_log.append(message)
         self.status_bar.showMessage(message)
+        
+        if value < 30:
+            self.process_status_label.setText("正在扫描项目...")
+            self.process_status_label.setStyleSheet("""
+                font-size: 14px;
+                font-weight: bold;
+                color: #2196F3;
+                padding: 8px;
+                background-color: #E3F2FD;
+                border: 1px solid #2196F3;
+                border-radius: 4px;
+            """)
+        elif value < 90:
+            self.process_status_label.setText("正在处理数据...")
+            self.process_status_label.setStyleSheet("""
+                font-size: 14px;
+                font-weight: bold;
+                color: #FF9800;
+                padding: 8px;
+                background-color: #FFF3E0;
+                border: 1px solid #FF9800;
+                border-radius: 4px;
+            """)
+        else:
+            self.process_status_label.setText("正在保存结果...")
+            self.process_status_label.setStyleSheet("""
+                font-size: 14px;
+                font-weight: bold;
+                color: #9C27B0;
+                padding: 8px;
+                background-color: #F3E5F5;
+                border: 1px solid #9C27B0;
+                border-radius: 4px;
+            """)
     
     def on_processing_finished(self, output_file, stats):
+        self.process_progress.setValue(100)
+        
+        if stats.get('total_images', 0) > 0:
+            self.process_status_label.setText(f"处理完成 - 共 {stats['total_images']} 张图片，{stats['total_projects']} 个项目")
+            self.process_status_label.setStyleSheet("""
+                font-size: 14px;
+                font-weight: bold;
+                color: #4CAF50;
+                padding: 8px;
+                background-color: #E8F5E9;
+                border: 1px solid #4CAF50;
+                border-radius: 4px;
+            """)
+            self.classify_btn.setEnabled(True)
+            self.classify_output_file = output_file
+        else:
+            self.process_status_label.setText("处理完成 - 未找到数据")
+            self.process_status_label.setStyleSheet("""
+                font-size: 14px;
+                font-weight: bold;
+                color: #9E9E9E;
+                padding: 8px;
+                background-color: #F5F5F5;
+                border: 1px solid #9E9E9E;
+                border-radius: 4px;
+            """)
+        
         self.process_log.append(f"处理完成!")
-        self.process_log.append(f"共处理图片: {stats['total_images']} 张")
-        self.process_log.append(f"项目数量: {stats['total_projects']} 个")
+        self.process_log.append(f"共处理图片: {stats.get('total_images', 0)} 张")
+        self.process_log.append(f"项目数量: {stats.get('total_projects', 0)} 个")
         self.process_log.append(f"描述文件: {output_file}")
         
-        QMessageBox.information(self, "处理完成", 
-            f"共处理图片: {stats['total_images']} 张\n"
-            f"项目数量: {stats['total_projects']} 个\n"
-            f"描述文件: {output_file}")
+        self.status_bar.showMessage("处理完成")
+        
+        if stats.get('total_images', 0) > 0:
+            QMessageBox.information(self, "处理完成", 
+                f"共处理图片: {stats['total_images']} 张\n"
+                f"项目数量: {stats['total_projects']} 个\n"
+                f"描述文件: {output_file}")
     
     def on_processing_error(self, error_msg):
         self.process_log.append(f"错误: {error_msg}")
     
-    def create_preprocess_page(self):
-        page = QWidget()
-        layout = QHBoxLayout()
+    def start_lithology_classify(self):
+        if hasattr(self, 'classify_output_file') and self.classify_output_file:
+            json_file = self.classify_output_file
+            reply = QMessageBox.question(
+                self, "确认", 
+                f"使用之前生成的文件?\n{json_file}\n\n点击'是'使用该文件，点击'否'选择其他文件",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            if reply == QMessageBox.StandardButton.No:
+                json_file, _ = QFileDialog.getOpenFileName(
+                    self, "选择JSON文件", "", "JSON文件 (*.json)"
+                )
+                if not json_file:
+                    return
+        else:
+            json_file, _ = QFileDialog.getOpenFileName(
+                self, "选择JSON文件", "", "JSON文件 (*.json)"
+            )
+            if not json_file:
+                return
         
-        left_panel = QFrame()
-        left_panel.setFixedWidth(300)
-        left_layout = QVBoxLayout()
+        config_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', 'rock_types_flat.json')
+        output_file = json_file.replace('.json', '_classified.json')
         
-        size_group = QGroupBox("图像尺寸")
-        size_layout = QVBoxLayout()
-        self.size_combo = QComboBox()
-        self.size_combo.addItems(["224x224", "256x256", "512x512", "自定义"])
-        size_layout.addWidget(QLabel("目标尺寸:"))
-        self.size_combo.addItem("224x224")
-        self.size_combo.addItem("256x256")
-        self.size_combo.addItem("512x512")
-        size_layout.addWidget(self.size_combo)
-        size_group.setLayout(size_layout)
-        left_layout.addWidget(size_group)
-        
-        augment_group = QGroupBox("数据增强")
-        augment_layout = QVBoxLayout()
-        self.augment_flip = QCheckBox("随机翻转")
-        self.augment_flip.setChecked(True)
-        augment_layout.addWidget(self.augment_flip)
-        
-        self.augment_rotate = QCheckBox("随机旋转")
-        self.augment_rotate.setChecked(True)
-        augment_layout.addWidget(self.augment_rotate)
-        
-        self.augment_color = QCheckBox("颜色抖动")
-        self.augment_color.setChecked(True)
-        augment_layout.addWidget(self.augment_color)
-        
-        self.augment_noise = QCheckBox("添加噪声")
-        augment_layout.addWidget(self.augment_noise)
-        augment_group.setLayout(augment_layout)
-        left_layout.addWidget(augment_group)
-        
-        preview_btn = QPushButton("预览增强效果")
-        preview_btn.clicked.connect(self.preview_augmentation)
-        left_layout.addWidget(preview_btn)
-        
-        apply_btn = QPushButton("应用预处理")
-        apply_btn.clicked.connect(self.apply_preprocessing)
-        left_layout.addWidget(apply_btn)
-        
-        left_panel.setLayout(left_layout)
-        
-        right_panel = QWidget()
-        right_layout = QVBoxLayout()
-        
-        self.preview_label = QLabel("预览区域")
-        self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.preview_label.setStyleSheet("""
-            background-color: #f0f0f0;
-            border: 2px dashed #ccc;
-            min-height: 400px;
+        self.process_status_label.setText("正在初始化...")
+        self.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #FF9800;
+            padding: 8px;
+            background-color: #FFF3E0;
+            border: 1px solid #FF9800;
+            border-radius: 4px;
         """)
-        right_layout.addWidget(self.preview_label)
+        self.process_progress.setValue(0)
+        self.process_log.clear()
+        self.process_log.append("开始岩性分类...")
         
-        page.setLayout(layout)
-        return page
-    
-    def create_training_page(self):
-        page = QWidget()
-        layout = QHBoxLayout()
+        try:
+            self.data_processor.progress_updated.disconnect()
+            self.data_processor.processing_finished.disconnect()
+            self.data_processor.error_occurred.disconnect()
+        except TypeError:
+            pass
         
-        left_panel = QFrame()
-        left_panel.setFixedWidth(300)
-        left_layout = QVBoxLayout()
+        self.data_processor.progress_updated.connect(self.on_classify_progress)
+        self.data_processor.processing_finished.connect(self.on_classify_finished)
+        self.data_processor.error_occurred.connect(self.on_processing_error)
         
-        data_group = QGroupBox("数据集")
-        data_layout = QVBoxLayout()
-        
-        select_data_btn = QPushButton("选择数据集")
-        select_data_btn.clicked.connect(self.select_training_data)
-        data_layout.addWidget(select_data_btn)
-        
-        self.data_path_label = QLabel("未选择数据集")
-        self.data_path_label.setStyleSheet("color: #666; font-size: 12px;")
-        data_layout.addWidget(self.data_path_label)
-        
-        data_group.setLayout(data_layout)
-        left_layout.addWidget(data_group)
-        
-        model_group = QGroupBox("模型设置")
-        model_layout = QVBoxLayout()
-        
-        model_layout.addWidget(QLabel("预训练模型:"))
-        self.model_combo = QComboBox()
-        self.model_combo.addItems(["ResNet18", "ResNet50", "VGG16", "EfficientNet-B0"])
-        model_layout.addWidget(self.model_combo)
-        
-        model_layout.addWidget(QLabel("学习率:"))
-        self.lr_spin = QDoubleSpinBox()
-        self.lr_spin.setRange(0.00001, 0.1)
-        self.lr_spin.setValue(0.001)
-        self.lr_spin.setDecimals(5)
-        model_layout.addWidget(self.lr_spin)
-        
-        model_layout.addWidget(QLabel("批次大小:"))
-        self.batch_spin = QSpinBox()
-        self.batch_spin.setRange(8, 128)
-        self.batch_spin.setValue(32)
-        model_layout.addWidget(self.batch_spin)
-        
-        model_layout.addWidget(QLabel("训练轮数:"))
-        self.epoch_spin = QSpinBox()
-        self.epoch_spin.setRange(1, 200)
-        self.epoch_spin.setValue(20)
-        model_layout.addWidget(self.epoch_spin)
-        
-        model_group.setLayout(model_layout)
-        left_layout.addWidget(model_group)
-        
-        train_btn = QPushButton("开始训练")
-        train_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                padding: 10px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-        """)
-        train_btn.clicked.connect(self.start_training)
-        left_layout.addWidget(train_btn)
-        
-        left_panel.setLayout(left_layout)
-        
-        right_panel = QWidget()
-        right_layout = QVBoxLayout()
-        
-        self.training_log = QTextEdit()
-        self.training_log.setReadOnly(True)
-        self.training_log.setMaximumHeight(150)
-        right_layout.addWidget(QLabel("训练日志:"))
-        right_layout.addWidget(self.training_log)
-        
-        self.loss_plot = QLabel("训练曲线区域")
-        self.loss_plot.setStyleSheet("background-color: white; border: 1px solid #ddd;")
-        self.loss_plot.setMinimumHeight(250)
-        right_layout.addWidget(QLabel("损失曲线:"))
-        right_layout.addWidget(self.loss_plot)
-        
-        self.train_progress = QProgressBar()
-        right_layout.addWidget(self.train_progress)
-        
-        page.setLayout(layout)
-        return page
-    
-    def create_recognition_page(self):
-        page = QWidget()
-        layout = QHBoxLayout()
-        
-        left_panel = QFrame()
-        left_panel.setFixedWidth(300)
-        left_layout = QVBoxLayout()
-        
-        model_group = QGroupBox("模型")
-        model_layout = QVBoxLayout()
-        
-        load_model_btn = QPushButton("加载模型")
-        load_model_btn.clicked.connect(self.load_model_for_recognition)
-        model_layout.addWidget(load_model_btn)
-        
-        self.model_label = QLabel("未加载模型")
-        self.model_label.setStyleSheet("color: #666; font-size: 12px;")
-        model_layout.addWidget(self.model_label)
-        
-        model_group.setLayout(model_layout)
-        left_layout.addWidget(model_group)
-        
-        input_group = QGroupBox("输入")
-        input_layout = QVBoxLayout()
-        
-        single_btn = QPushButton("单图识别")
-        single_btn.clicked.connect(self.recognize_single_image)
-        input_layout.addWidget(single_btn)
-        
-        batch_btn = QPushButton("批量识别")
-        batch_btn.clicked.connect(self.recognize_batch_images)
-        input_layout.addWidget(batch_btn)
-        
-        input_group.setLayout(input_layout)
-        left_layout.addWidget(input_group)
-        
-        export_group = QGroupBox("导出")
-        export_layout = QVBoxLayout()
-        
-        export_csv_btn = QPushButton("导出为CSV")
-        export_csv_btn.clicked.connect(lambda: self.export_recognition_results('csv'))
-        export_layout.addWidget(export_csv_btn)
-        
-        export_json_btn = QPushButton("导出为JSON")
-        export_json_btn.clicked.connect(lambda: self.export_recognition_results('json'))
-        export_layout.addWidget(export_json_btn)
-        
-        export_group.setLayout(export_layout)
-        left_layout.addWidget(export_group)
-        
-        left_panel.setLayout(left_layout)
-        
-        right_panel = QWidget()
-        right_layout = QVBoxLayout()
-        
-        result_group = QGroupBox("识别结果")
-        result_layout = QVBoxLayout()
-        
-        self.result_image_label = QLabel("图像预览")
-        self.result_image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.result_image_label.setStyleSheet("""
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            min-height: 300px;
-        """)
-        result_layout.addWidget(self.result_image_label)
-        
-        self.result_label = QLabel("预测结果: --")
-        self.result_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #1E3A5F;")
-        result_layout.addWidget(self.result_label)
-        
-        self.confidence_label = QLabel("置信度: --")
-        self.confidence_label.setStyleSheet("font-size: 14px; color: #666;")
-        result_layout.addWidget(self.confidence_label)
-        
-        result_group.setLayout(result_layout)
-        right_layout.addWidget(result_group)
-        
-        self.recognition_results = QTextEdit()
-        self.recognition_results.setReadOnly(True)
-        self.recognition_results.setMaximumHeight(150)
-        right_layout.addWidget(QLabel("识别详情:"))
-        right_layout.addWidget(self.recognition_results)
-        
-        page.setLayout(layout)
-        return page
-    
-    def apply_stylesheet(self):
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #F5F7FA;
-            }
-            QPushButton {
-                background-color: #1E3A5F;
-                color: white;
-                border: none;
-                padding: 10px 15px;
-                border-radius: 6px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #2D5A87;
-            }
-            QPushButton:pressed {
-                background-color: #152d4a;
-            }
-            QGroupBox {
-                font-weight: bold;
-                border: 1px solid #E0E0E0;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-            QListWidget {
-                border: 1px solid #E0E0E0;
-                border-radius: 4px;
-                background-color: white;
-            }
-            QListWidget::item:selected {
-                background-color: #1E3A5F;
-                color: white;
-            }
-            QProgressBar {
-                border: 1px solid #E0E0E0;
-                border-radius: 4px;
-                text-align: center;
-            }
-            QProgressBar::chunk {
-                background-color: #4CAF50;
-            }
-            QTextEdit {
-                border: 1px solid #E0E0E0;
-                border-radius: 4px;
-                background-color: white;
-            }
-            QComboBox {
-                border: 1px solid #E0E0E0;
-                border-radius: 4px;
-                padding: 5px;
-                background-color: white;
-            }
-            QSpinBox, QDoubleSpinBox {
-                border: 1px solid #E0E0E0;
-                border-radius: 4px;
-                padding: 5px;
-                background-color: white;
-            }
-            QCheckBox {
-                spacing: 8px;
-            }
-            QLabel {
-                color: #333;
-            }
-        """)
-    
-    def show_about(self):
-        QMessageBox.about(self, "关于", 
-            "岩心图像识别系统 RockCoreImage\n\n"
-            "基于PyQt6和PyTorch开发的岩心图像分类识别系统\n\n"
-            "支持预训练模型: ResNet, VGG, EfficientNet\n\n"
-            "版本: 1.0.0"
+        from threading import Thread
+        self.classify_thread = Thread(
+            target=self.data_processor.classify_lithology,
+            args=(json_file, config_file, output_file),
+            daemon=True
         )
+        self.classify_thread.start()
+    
+    def on_classify_progress(self, value, message):
+        self.process_progress.setValue(value)
+        self.process_log.append(message)
+        self.status_bar.showMessage(message)
+        
+        self.process_status_label.setText(message)
+    
+    def on_classify_finished(self, output_file, stats):
+        self.process_progress.setValue(100)
+        
+        self.process_status_label.setText(f"分类完成 - 匹配 {stats['matched']}/{stats['total']} 条")
+        self.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #4CAF50;
+            padding: 8px;
+            background-color: #E8F5E9;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        """)
+        
+        self.process_log.append(f"分类完成!")
+        self.process_log.append(f"总记录数: {stats['total']}")
+        self.process_log.append(f"匹配成功: {stats['matched']} 条")
+        self.process_log.append(f"匹配种类: {stats['types']} 种")
+        self.process_log.append(f"输出文件: {output_file}")
+        
+        self.status_bar.showMessage("分类完成")
+        
+        mapping_text = "\n".join([f"  {k}: {v}" for k, v in sorted(stats['mapping'].items(), key=lambda x: -x[1])])
+        QMessageBox.information(self, "分类完成", 
+            f"总记录数: {stats['total']}\n"
+            f"匹配成功: {stats['matched']} 条\n"
+            f"匹配种类: {stats['types']} 种\n\n"
+            f"分类统计:\n{mapping_text}")
     
     def import_images(self):
         files, _ = QFileDialog.getOpenFileNames(
@@ -780,6 +407,7 @@ class MainWindow(QMainWindow):
                 item.widget().deleteLater()
         
         cols = 4
+        from PyQt6.QtWidgets import QFrame
         for i, img_path in enumerate(self.image_paths[:20]):
             row = i // cols
             col = i % cols
@@ -788,6 +416,7 @@ class MainWindow(QMainWindow):
             frame.setStyleSheet("background-color: white; border: 1px solid #ddd; border-radius: 4px;")
             layout = QVBoxLayout()
             
+            from PyQt6.QtGui import QPixmap
             label = QLabel()
             pixmap = QPixmap(img_path)
             if pixmap.width() > 150:
@@ -993,3 +622,76 @@ class MainWindow(QMainWindow):
         
         if path:
             QMessageBox.information(self, "完成", f"结果已导出到: {path}")
+    
+    def apply_stylesheet(self):
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #F5F7FA;
+            }
+            QPushButton {
+                background-color: #1E3A5F;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #2D5A87;
+            }
+            QPushButton:pressed {
+                background-color: #152d4a;
+            }
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #E0E0E0;
+                border-radius: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+            QListWidget {
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+                background-color: white;
+            }
+            QListWidget::item:selected {
+                background-color: #1E3A5F;
+                color: white;
+            }
+            QProgressBar {
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+                text-align: center;
+            }
+            QProgressBar::chunk {
+                background-color: #4CAF50;
+            }
+            QTextEdit {
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+                background-color: white;
+            }
+            QComboBox {
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+                padding: 5px;
+                background-color: white;
+            }
+            QSpinBox, QDoubleSpinBox {
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+                padding: 5px;
+                background-color: white;
+            }
+            QCheckBox {
+                spacing: 8px;
+            }
+            QLabel {
+                color: #333;
+            }
+        """)
