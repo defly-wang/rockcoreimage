@@ -56,10 +56,9 @@ class ProcessPage:
             }
         """)
         main_window.process_table.setWordWrap(True)
-        main_window.process_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         main_window.process_table.setColumnWidth(0, 120)
         main_window.process_table.setColumnWidth(1, 80)
-        main_window.process_table.setColumnWidth(2, 250)
+        main_window.process_table.horizontalHeader().setStretchLastSection(True)
         main_window.process_table.resizeRowsToContents()
         
         right_layout.addWidget(QLabel("统计表格:"))
@@ -87,7 +86,7 @@ class ProcessPage:
                 background-color: #2D5A87;
             }
         """)
-        select_source_btn.clicked.connect(main_window.select_source_directory)
+        select_source_btn.clicked.connect(main_window.process_handler.select_source_directory)
         button_layout.addWidget(select_source_btn)
         
         main_window.source_path_label = QLabel("未选择")
@@ -107,7 +106,7 @@ class ProcessPage:
                 background-color: #2D5A87;
             }
         """)
-        select_output_btn.clicked.connect(main_window.select_output_directory)
+        select_output_btn.clicked.connect(main_window.process_handler.select_output_directory)
         button_layout.addWidget(select_output_btn)
         
         main_window.output_path_label = QLabel("未选择")
@@ -129,7 +128,7 @@ class ProcessPage:
                 background-color: #45a049;
             }
         """)
-        process_btn.clicked.connect(main_window.start_data_processing)
+        process_btn.clicked.connect(main_window.process_handler.start_data_processing)
         button_layout.addWidget(process_btn)
         
         main_window.classify_btn = QPushButton("岩性分类")
@@ -148,7 +147,7 @@ class ProcessPage:
                 background-color: #BDBDBD;
             }
         """)
-        main_window.classify_btn.clicked.connect(main_window.start_lithology_classify)
+        main_window.classify_btn.clicked.connect(main_window.process_handler.start_lithology_classify)
         main_window.classify_btn.setEnabled(False)
         button_layout.addWidget(main_window.classify_btn)
         
