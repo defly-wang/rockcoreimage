@@ -383,40 +383,40 @@ class ProcessHandler:
         with open(output_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        rock_mapping = {}
-        for item in data:
-            rock_name = item.get('岩性名称', '') or '未分类'
-            if rock_name not in rock_mapping:
-                rock_mapping[rock_name] = {
-                    'lithologies': set(),
-                    'count': 0,
-                    'alterations': set()
-                }
-            rock_mapping[rock_name]['lithologies'].add(item.get('lithology', ''))
-            rock_mapping[rock_name]['count'] += 1
-            alt = item.get('蚀变类型', '')
-            if alt:
-                rock_mapping[rock_name]['alterations'].add(alt)
+        records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', '')) for item in data]
+        records.sort(key=lambda x: (x[0], x[1]))
         
         self.main_window.process_table.setColumnCount(5)
         self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "原始岩性", "蚀变类型"])
         self.main_window.process_table.setColumnWidth(0, 100)
         self.main_window.process_table.setColumnWidth(1, 60)
         self.main_window.process_table.setColumnWidth(2, 60)
-        self.main_window.process_table.setColumnWidth(3, 200)
+        self.main_window.process_table.setColumnWidth(3, 250)
         self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
-        self.main_window.process_table.setRowCount(len(rock_mapping))
         
-        row = 0
-        for rock_name, info in sorted(rock_mapping.items(), key=lambda x: -x[1]['count']):
-            lithologies_str = ", ".join(sorted(info['lithologies']))
-            alterations_str = ", ".join(sorted(info['alterations'])) if info['alterations'] else "-"
+        rock_groups = {}
+        for rock_name, lithology, alteration in records:
+            if rock_name not in rock_groups:
+                rock_groups[rock_name] = {}
+            if lithology not in rock_groups[rock_name]:
+                rock_groups[rock_name][lithology] = {'count': 0, 'alterations': set()}
+            rock_groups[rock_name][lithology]['count'] += 1
+            if alteration:
+                rock_groups[rock_name][lithology]['alterations'].add(alteration)
+        
+        rows = []
+        for rock_name in sorted(rock_groups.keys()):
+            for lithology, info in rock_groups[rock_name].items():
+                alterations_str = ", ".join(sorted(info['alterations'])) if info['alterations'] else "-"
+                rows.append((rock_name, str(info['count']), "1", lithology, alterations_str))
+        
+        self.main_window.process_table.setRowCount(len(rows))
+        for row, (rock_name, count, _, lithology, alteration) in enumerate(rows):
             self.main_window.process_table.setItem(row, 0, QTableWidgetItem(rock_name))
-            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(str(info['count'])))
-            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(str(len(info['lithologies']))))
-            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(lithologies_str))
-            self.main_window.process_table.setItem(row, 4, QTableWidgetItem(alterations_str))
-            row += 1
+            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(count))
+            self.main_window.process_table.setItem(row, 2, QTableWidgetItem("1"))
+            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(lithology))
+            self.main_window.process_table.setItem(row, 4, QTableWidgetItem(alteration))
         
         self.main_window.process_table.resizeRowsToContents()
         
