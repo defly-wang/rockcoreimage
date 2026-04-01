@@ -353,6 +353,8 @@ class ProcessHandler:
         self.main_window.process_status_label.setText(message)
     
     def on_alteration_finished(self, output_file, stats):
+        import json
+        
         self.main_window.process_progress.setValue(100)
         
         records_with_alt = stats.get('records_with_alteration', 0)
@@ -378,44 +380,43 @@ class ProcessHandler:
         self.main_window.process_log.append(f"总蚀变次数: {total_alterations}")
         self.main_window.process_log.append(f"输出文件: {output_file}")
         
-        important_alterations = stats.get('important_alterations', {})
-        other_alterations = stats.get('other_alterations', {})
-        category_stats = stats.get('category_stats', {})
+        with open(output_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
         
-        all_alts = {}
-        for name, count in important_alterations.items():
-            all_alts[name] = count
-        for name, count in other_alterations.items():
-            all_alts[name] = count
+        rock_mapping = {}
+        for item in data:
+            rock_name = item.get('岩性名称', '') or '未分类'
+            if rock_name not in rock_mapping:
+                rock_mapping[rock_name] = {
+                    'lithologies': set(),
+                    'count': 0,
+                    'alterations': set()
+                }
+            rock_mapping[rock_name]['lithologies'].add(item.get('lithology', ''))
+            rock_mapping[rock_name]['count'] += 1
+            alt = item.get('蚀变类型', '')
+            if alt:
+                rock_mapping[rock_name]['alterations'].add(alt)
         
-        total_rows = len(all_alts)
-        if category_stats:
-            total_rows += 1
-        
-        self.main_window.process_table.setColumnCount(4)
-        self.main_window.process_table.setHorizontalHeaderLabels(["蚀变类型", "分类", "重要性", "出现次数"])
-        self.main_window.process_table.setColumnWidth(0, 120)
-        self.main_window.process_table.setColumnWidth(1, 120)
-        self.main_window.process_table.setColumnWidth(2, 80)
+        self.main_window.process_table.setColumnCount(5)
+        self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "原始岩性", "蚀变类型"])
+        self.main_window.process_table.setColumnWidth(0, 100)
+        self.main_window.process_table.setColumnWidth(1, 60)
+        self.main_window.process_table.setColumnWidth(2, 60)
+        self.main_window.process_table.setColumnWidth(3, 200)
         self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
-        self.main_window.process_table.setRowCount(total_rows)
+        self.main_window.process_table.setRowCount(len(rock_mapping))
         
         row = 0
-        for alt_name, count in sorted(all_alts.items(), key=lambda x: -x[1]):
-            importance = "重要" if alt_name in important_alterations else "一般"
-            category = category_stats.get(alt_name, '') if alt_name in important_alterations else ''
-            self.main_window.process_table.setItem(row, 0, QTableWidgetItem(alt_name))
-            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(category))
-            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(importance))
-            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(str(count)))
+        for rock_name, info in sorted(rock_mapping.items(), key=lambda x: -x[1]['count']):
+            lithologies_str = ", ".join(sorted(info['lithologies']))
+            alterations_str = ", ".join(sorted(info['alterations'])) if info['alterations'] else "-"
+            self.main_window.process_table.setItem(row, 0, QTableWidgetItem(rock_name))
+            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(str(info['count'])))
+            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(str(len(info['lithologies']))))
+            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(lithologies_str))
+            self.main_window.process_table.setItem(row, 4, QTableWidgetItem(alterations_str))
             row += 1
-        
-        if category_stats:
-            categories_str = "; ".join([f"{cat}: {cnt}" for cat, cnt in sorted(category_stats.items(), key=lambda x: -x[1])])
-            self.main_window.process_table.setItem(row, 0, QTableWidgetItem("按分类统计"))
-            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(categories_str))
-            self.main_window.process_table.setItem(row, 2, QTableWidgetItem("-"))
-            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(str(sum(category_stats.values()))))
         
         self.main_window.process_table.resizeRowsToContents()
         
