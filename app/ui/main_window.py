@@ -260,6 +260,9 @@ class MainWindow(QMainWindow):
             
             self.process_table.setColumnCount(3)
             self.process_table.setHorizontalHeaderLabels(["岩性名称", "图片数", "岩性描述"])
+            self.process_table.setColumnWidth(0, 120)
+            self.process_table.setColumnWidth(1, 80)
+            self.process_table.setColumnWidth(2, 300)
             
             sorted_lith = sorted(lithology_stats.items(), key=lambda x: -x[1]['count'])
             self.process_table.setRowCount(len(sorted_lith))
@@ -267,10 +270,10 @@ class MainWindow(QMainWindow):
             for i, (lith_name, info) in enumerate(sorted_lith):
                 self.process_table.setItem(i, 0, QTableWidgetItem(lith_name))
                 self.process_table.setItem(i, 1, QTableWidgetItem(str(info['count'])))
-                desc = info['description'][:50] + "..." if len(info['description']) > 50 else info['description']
+                desc = info['description']
                 self.process_table.setItem(i, 2, QTableWidgetItem(desc.replace('\n', ' ')))
             
-            self.process_table.resizeColumnsToContents()
+            self.process_table.resizeRowsToContents()
         else:
             self.process_status_label.setText("处理完成 - 未找到数据")
             self.process_status_label.setStyleSheet("""
@@ -399,6 +402,10 @@ class MainWindow(QMainWindow):
         
         self.process_table.setColumnCount(4)
         self.process_table.setHorizontalHeaderLabels(["标准岩性", "对应原始岩性", "图片数", "分类数"])
+        self.process_table.setColumnWidth(0, 100)
+        self.process_table.setColumnWidth(1, 350)
+        self.process_table.setColumnWidth(2, 80)
+        self.process_table.setColumnWidth(3, 80)
         self.process_table.setRowCount(total_rows)
         
         row = 0
@@ -418,7 +425,7 @@ class MainWindow(QMainWindow):
             self.process_table.setItem(row, 2, QTableWidgetItem(str(unmatched_count)))
             self.process_table.setItem(row, 3, QTableWidgetItem(str(len(unmatched))))
         
-        self.process_table.resizeColumnsToContents()
+        self.process_table.resizeRowsToContents()
         
         self.status_bar.showMessage("分类完成")
     

@@ -56,7 +56,10 @@ class ProcessPage:
             }
         """)
         main_window.process_table.setWordWrap(True)
-        main_window.process_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        main_window.process_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        main_window.process_table.setColumnWidth(0, 120)
+        main_window.process_table.setColumnWidth(1, 80)
+        main_window.process_table.setColumnWidth(2, 250)
         main_window.process_table.resizeRowsToContents()
         
         right_layout.addWidget(QLabel("统计表格:"))
