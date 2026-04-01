@@ -2,7 +2,7 @@ import os
 import sys
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget,
-    QMenuBar, QMenu, QStatusBar, QFileDialog, QMessageBox
+    QMenuBar, QMenu, QStatusBar, QFileDialog, QMessageBox, QTableWidgetItem
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction
@@ -255,6 +255,22 @@ class MainWindow(QMainWindow):
             """)
             self.classify_btn.setEnabled(True)
             self.classify_output_file = output_file
+            
+            lithology_stats = stats.get('lithology_stats', {})
+            
+            self.process_table.setColumnCount(3)
+            self.process_table.setHorizontalHeaderLabels(["岩性名称", "图片数", "岩性描述"])
+            
+            sorted_lith = sorted(lithology_stats.items(), key=lambda x: -x[1]['count'])
+            self.process_table.setRowCount(len(sorted_lith))
+            
+            for i, (lith_name, info) in enumerate(sorted_lith):
+                self.process_table.setItem(i, 0, QTableWidgetItem(lith_name))
+                self.process_table.setItem(i, 1, QTableWidgetItem(str(info['count'])))
+                desc = info['description'][:50] + "..." if len(info['description']) > 50 else info['description']
+                self.process_table.setItem(i, 2, QTableWidgetItem(desc.replace('\n', ' ')))
+            
+            self.process_table.resizeColumnsToContents()
         else:
             self.process_status_label.setText("处理完成 - 未找到数据")
             self.process_status_label.setStyleSheet("""
@@ -304,7 +320,14 @@ class MainWindow(QMainWindow):
             if not json_file:
                 return
         
-        config_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', 'rock_types_flat.json')
+        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        project_root = os.path.dirname(app_dir)
+        config_file = os.path.join(project_root, 'config', 'rock_types_flat.json')
+        
+        if not os.path.exists(config_file):
+            QMessageBox.warning(self, "错误", f"找不到配置文件: {config_file}\n请检查config目录是否存在")
+            return
+        
         output_file = json_file.replace('.json', '_classified.json')
         
         self.process_status_label.setText("正在初始化...")
@@ -367,14 +390,37 @@ class MainWindow(QMainWindow):
         self.process_log.append(f"匹配种类: {stats['types']} 种")
         self.process_log.append(f"输出文件: {output_file}")
         
-        self.status_bar.showMessage("分类完成")
+        mapping = stats['mapping']
+        unmatched = stats.get('unmatched', {})
         
-        mapping_text = "\n".join([f"  {k}: {v}" for k, v in sorted(stats['mapping'].items(), key=lambda x: -x[1])])
-        QMessageBox.information(self, "分类完成", 
-            f"总记录数: {stats['total']}\n"
-            f"匹配成功: {stats['matched']} 条\n"
-            f"匹配种类: {stats['types']} 种\n\n"
-            f"分类统计:\n{mapping_text}")
+        total_rows = len(mapping)
+        if unmatched:
+            total_rows += 1
+        
+        self.process_table.setColumnCount(4)
+        self.process_table.setHorizontalHeaderLabels(["标准岩性", "对应原始岩性", "图片数", "分类数"])
+        self.process_table.setRowCount(total_rows)
+        
+        row = 0
+        for standard_rock, info in sorted(mapping.items(), key=lambda x: -x[1]['count']):
+            lithologies_str = ", ".join(sorted(info['lithologies']))
+            self.process_table.setItem(row, 0, QTableWidgetItem(standard_rock))
+            self.process_table.setItem(row, 1, QTableWidgetItem(lithologies_str))
+            self.process_table.setItem(row, 2, QTableWidgetItem(str(info['count'])))
+            self.process_table.setItem(row, 3, QTableWidgetItem(str(len(info['lithologies']))))
+            row += 1
+        
+        if unmatched:
+            unmatched_str = ", ".join(sorted(unmatched.keys()))
+            unmatched_count = sum(unmatched.values())
+            self.process_table.setItem(row, 0, QTableWidgetItem("未发现分类"))
+            self.process_table.setItem(row, 1, QTableWidgetItem(unmatched_str))
+            self.process_table.setItem(row, 2, QTableWidgetItem(str(unmatched_count)))
+            self.process_table.setItem(row, 3, QTableWidgetItem(str(len(unmatched))))
+        
+        self.process_table.resizeColumnsToContents()
+        
+        self.status_bar.showMessage("分类完成")
     
     def import_images(self):
         files, _ = QFileDialog.getOpenFileNames(

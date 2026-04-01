@@ -42,6 +42,7 @@ class DataProcessor(QObject):
             return ''
         
         mapping = {}
+        unmatched = {}
         for idx, item in enumerate(data):
             if idx % 100 == 0:
                 self.progress_updated.emit(int(idx / total * 100), f"正在分类... {idx}/{total}")
@@ -52,8 +53,13 @@ class DataProcessor(QObject):
             
             if keyword:
                 if keyword not in mapping:
-                    mapping[keyword] = 0
-                mapping[keyword] += 1
+                    mapping[keyword] = {'lithologies': set(), 'count': 0}
+                mapping[keyword]['lithologies'].add(lithology)
+                mapping[keyword]['count'] += 1
+            else:
+                if lithology not in unmatched:
+                    unmatched[lithology] = 0
+                unmatched[lithology] += 1
         
         self.progress_updated.emit(95, "正在保存文件...")
         
@@ -62,11 +68,14 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(100, "分类完成")
         
+        matched = sum(v['count'] for v in mapping.values())
+        
         stats = {
             'total': total,
-            'matched': sum(mapping.values()),
+            'matched': matched,
             'types': len(mapping),
-            'mapping': mapping
+            'mapping': mapping,
+            'unmatched': unmatched
         }
         
         self.processing_finished.emit(output_file, stats)
@@ -135,6 +144,14 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存数据文件...")
         
+        lithology_stats = {}
+        for item in all_data:
+            lith = item.get('lithology', '')
+            if lith:
+                if lith not in lithology_stats:
+                    lithology_stats[lith] = {'count': 0, 'description': item.get('lithology_description', '')}
+                lithology_stats[lith]['count'] += 1
+        
         output_file = os.path.join(output_dir, 'image_descriptions.json')
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(all_data, f, ensure_ascii=False, indent=2)
@@ -142,7 +159,8 @@ class DataProcessor(QObject):
         self.progress_updated.emit(100, "处理完成")
         self.processing_finished.emit(output_file, {
             'total_images': len(all_data),
-            'total_projects': total_projects
+            'total_projects': total_projects,
+            'lithology_stats': lithology_stats
         })
     
     def process_project(self, project_name, project_path, excel_path):

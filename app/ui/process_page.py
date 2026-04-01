@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
-    QGroupBox, QFrame, QProgressBar, QTextEdit
+    QGroupBox, QProgressBar, QTextEdit, QTableWidget
 )
+from PyQt6.QtWidgets import QHeaderView
 
 
 class ProcessPage:
@@ -11,13 +12,6 @@ class ProcessPage:
         layout = QVBoxLayout()
         
         main_content = QHBoxLayout()
-        
-        left_panel = QFrame()
-        left_panel.setFixedWidth(50)
-        left_layout = QVBoxLayout()
-        left_layout.addStretch()
-        left_panel.setLayout(left_layout)
-        main_content.addWidget(left_panel)
         
         right_panel = QWidget()
         right_layout = QVBoxLayout()
@@ -43,6 +37,30 @@ class ProcessPage:
         main_window.process_log.setReadOnly(True)
         right_layout.addWidget(QLabel("处理日志:"))
         right_layout.addWidget(main_window.process_log)
+        
+        main_window.process_table = QTableWidget()
+        main_window.process_table.setStyleSheet("""
+            QTableWidget {
+                border: 1px solid #E0E0E0;
+                background-color: white;
+            }
+            QTableWidget::item {
+                padding: 5px;
+                word-wrap: break-word;
+            }
+            QHeaderView::section {
+                background-color: #1E3A5F;
+                color: white;
+                padding: 5px;
+                font-weight: bold;
+            }
+        """)
+        main_window.process_table.setWordWrap(True)
+        main_window.process_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        main_window.process_table.resizeRowsToContents()
+        
+        right_layout.addWidget(QLabel("统计表格:"))
+        right_layout.addWidget(main_window.process_table, 1)
         
         right_panel.setLayout(right_layout)
         
