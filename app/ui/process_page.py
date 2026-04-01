@@ -48,7 +48,6 @@ class ProcessPage:
             }
             QTableWidget::item {
                 padding: 5px;
-                word-wrap: break-word;
                 color: #333333;
             }
             QHeaderView::section {
