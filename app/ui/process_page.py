@@ -35,6 +35,7 @@ class ProcessPage:
         
         main_window.process_log = QTextEdit()
         main_window.process_log.setReadOnly(True)
+        main_window.process_log.setStyleSheet("background-color: white; color: #333333; border: 1px solid #E0E0E0; border-radius: 4px;")
         right_layout.addWidget(QLabel("处理日志:"))
         right_layout.addWidget(main_window.process_log)
         
@@ -43,10 +44,12 @@ class ProcessPage:
             QTableWidget {
                 border: 1px solid #E0E0E0;
                 background-color: white;
+                color: #333333;
             }
             QTableWidget::item {
                 padding: 5px;
                 word-wrap: break-word;
+                color: #333333;
             }
             QHeaderView::section {
                 background-color: #1E3A5F;
@@ -115,8 +118,8 @@ class ProcessPage:
         
         button_layout.addStretch()
         
-        process_btn = QPushButton("开始处理")
-        process_btn.setStyleSheet("""
+        main_window.process_btn = QPushButton("开始处理")
+        main_window.process_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;
                 color: white;
@@ -127,9 +130,12 @@ class ProcessPage:
             QPushButton:hover {
                 background-color: #45a049;
             }
+            QPushButton:disabled {
+                background-color: #BDBDBD;
+            }
         """)
-        process_btn.clicked.connect(main_window.process_handler.start_data_processing)
-        button_layout.addWidget(process_btn)
+        main_window.process_btn.clicked.connect(main_window.process_handler.start_data_processing)
+        button_layout.addWidget(main_window.process_btn)
         
         main_window.classify_btn = QPushButton("岩性分类")
         main_window.classify_btn.setStyleSheet("""
@@ -148,7 +154,6 @@ class ProcessPage:
             }
         """)
         main_window.classify_btn.clicked.connect(main_window.process_handler.start_lithology_classify)
-        main_window.classify_btn.setEnabled(False)
         button_layout.addWidget(main_window.classify_btn)
         
         button_panel.setLayout(button_layout)

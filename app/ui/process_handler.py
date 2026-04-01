@@ -31,6 +31,8 @@ class ProcessHandler:
             QMessageBox.warning(self.main_window, "警告", "请先选择输出目录")
             return
         
+        self.main_window.process_btn.setEnabled(False)
+        self.main_window.classify_btn.setEnabled(False)
         self.main_window.process_status_label.setText("正在初始化...")
         self.main_window.process_status_label.setStyleSheet("""
             font-size: 14px;
@@ -117,6 +119,7 @@ class ProcessHandler:
                 border: 1px solid #4CAF50;
                 border-radius: 4px;
             """)
+            self.main_window.process_btn.setEnabled(True)
             self.main_window.classify_btn.setEnabled(True)
             self.main_window.classify_output_file = output_file
             
@@ -149,6 +152,8 @@ class ProcessHandler:
                 border: 1px solid #9E9E9E;
                 border-radius: 4px;
             """)
+            self.main_window.process_btn.setEnabled(True)
+            self.main_window.classify_btn.setEnabled(True)
         
         self.main_window.process_log.append(f"处理完成!")
         self.main_window.process_log.append(f"共处理图片: {stats.get('total_images', 0)} 张")
@@ -165,30 +170,16 @@ class ProcessHandler:
     
     def on_processing_error(self, error_msg):
         self.main_window.process_log.append(f"错误: {error_msg}")
+        self.main_window.process_btn.setEnabled(True)
+        self.main_window.classify_btn.setEnabled(True)
     
     def start_lithology_classify(self):
-        if hasattr(self.main_window, 'classify_output_file') and self.main_window.classify_output_file:
-            json_file = self.main_window.classify_output_file
-            from PyQt6.QtWidgets import QMessageBox
-            reply = QMessageBox.question(
-                self.main_window, "确认", 
-                f"使用之前生成的文件?\n{json_file}\n\n点击'是'使用该文件，点击'否'选择其他文件",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-            )
-            if reply == QMessageBox.StandardButton.No:
-                from PyQt6.QtWidgets import QFileDialog
-                json_file, _ = QFileDialog.getOpenFileName(
-                    self.main_window, "选择JSON文件", "", "JSON文件 (*.json)"
-                )
-                if not json_file:
-                    return
-        else:
-            from PyQt6.QtWidgets import QFileDialog
-            json_file, _ = QFileDialog.getOpenFileName(
-                self.main_window, "选择JSON文件", "", "JSON文件 (*.json)"
-            )
-            if not json_file:
-                return
+        from PyQt6.QtWidgets import QFileDialog
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
         
         app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         project_root = os.path.dirname(app_dir)
@@ -200,6 +191,8 @@ class ProcessHandler:
         
         output_file = json_file.replace('.json', '_classified.json')
         
+        self.main_window.process_btn.setEnabled(False)
+        self.main_window.classify_btn.setEnabled(False)
         self.main_window.process_status_label.setText("正在初始化...")
         self.main_window.process_status_label.setStyleSheet("""
             font-size: 14px;
@@ -268,10 +261,10 @@ class ProcessHandler:
             total_rows += 1
         
         self.main_window.process_table.setColumnCount(4)
-        self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "对应原始岩性", "图片数", "分类数"])
+        self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "对应原始岩性"])
         self.main_window.process_table.setColumnWidth(0, 100)
+        self.main_window.process_table.setColumnWidth(1, 80)
         self.main_window.process_table.setColumnWidth(2, 80)
-        self.main_window.process_table.setColumnWidth(3, 80)
         self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
         self.main_window.process_table.setRowCount(total_rows)
         
@@ -279,19 +272,21 @@ class ProcessHandler:
         for standard_rock, info in sorted(mapping.items(), key=lambda x: -x[1]['count']):
             lithologies_str = ", ".join(sorted(info['lithologies']))
             self.main_window.process_table.setItem(row, 0, QTableWidgetItem(standard_rock))
-            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(lithologies_str))
-            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(str(info['count'])))
-            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(str(len(info['lithologies']))))
+            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(str(info['count'])))
+            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(str(len(info['lithologies']))))
+            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(lithologies_str))
             row += 1
         
         if unmatched:
             unmatched_str = ", ".join(sorted(unmatched.keys()))
             unmatched_count = sum(unmatched.values())
             self.main_window.process_table.setItem(row, 0, QTableWidgetItem("未发现分类"))
-            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(unmatched_str))
-            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(str(unmatched_count)))
-            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(str(len(unmatched))))
+            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(str(unmatched_count)))
+            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(str(len(unmatched))))
+            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(unmatched_str))
         
         self.main_window.process_table.resizeRowsToContents()
         
+        self.main_window.process_btn.setEnabled(True)
+        self.main_window.classify_btn.setEnabled(True)
         self.main_window.status_bar.showMessage("分类完成")

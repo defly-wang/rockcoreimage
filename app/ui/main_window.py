@@ -446,6 +446,7 @@ class MainWindow(QMainWindow):
                 border: 1px solid #E0E0E0;
                 border-radius: 4px;
                 background-color: white;
+                color: #333333;
             }
             QComboBox {
                 border: 1px solid #E0E0E0;

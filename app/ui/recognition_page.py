@@ -139,6 +139,7 @@ class RecognitionPage:
         main_window.recognition_results = QTextEdit()
         main_window.recognition_results.setReadOnly(True)
         main_window.recognition_results.setMaximumHeight(150)
+        main_window.recognition_results.setStyleSheet("background-color: white; color: #333333; border: 1px solid #E0E0E0; border-radius: 4px;")
         right_layout.addWidget(QLabel("识别详情:"))
         right_layout.addWidget(main_window.recognition_results)
         

@@ -70,6 +70,7 @@ class TrainingPage:
         main_window.training_log = QTextEdit()
         main_window.training_log.setReadOnly(True)
         main_window.training_log.setMaximumHeight(150)
+        main_window.training_log.setStyleSheet("background-color: white; color: #333333; border: 1px solid #E0E0E0; border-radius: 4px;")
         right_layout.addWidget(QLabel("训练日志:"))
         right_layout.addWidget(main_window.training_log)
         
