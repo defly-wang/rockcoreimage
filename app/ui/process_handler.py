@@ -383,23 +383,24 @@ class ProcessHandler:
         with open(output_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', '')) for item in data]
+        records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
         records.sort(key=lambda x: (x[0], x[1]))
         
-        self.main_window.process_table.setColumnCount(5)
-        self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "原始岩性", "蚀变类型"])
+        self.main_window.process_table.setColumnCount(6)
+        self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "原始岩性", "蚀变类型", "岩性描述"])
         self.main_window.process_table.setColumnWidth(0, 100)
         self.main_window.process_table.setColumnWidth(1, 60)
         self.main_window.process_table.setColumnWidth(2, 60)
-        self.main_window.process_table.setColumnWidth(3, 250)
+        self.main_window.process_table.setColumnWidth(3, 200)
+        self.main_window.process_table.setColumnWidth(4, 120)
         self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
         
         rock_groups = {}
-        for rock_name, lithology, alteration in records:
+        for rock_name, lithology, alteration, description in records:
             if rock_name not in rock_groups:
                 rock_groups[rock_name] = {}
             if lithology not in rock_groups[rock_name]:
-                rock_groups[rock_name][lithology] = {'count': 0, 'alterations': set()}
+                rock_groups[rock_name][lithology] = {'count': 0, 'alterations': set(), 'description': description}
             rock_groups[rock_name][lithology]['count'] += 1
             if alteration:
                 rock_groups[rock_name][lithology]['alterations'].add(alteration)
@@ -408,15 +409,17 @@ class ProcessHandler:
         for rock_name in sorted(rock_groups.keys()):
             for lithology, info in rock_groups[rock_name].items():
                 alterations_str = ", ".join(sorted(info['alterations'])) if info['alterations'] else "-"
-                rows.append((rock_name, str(info['count']), "1", lithology, alterations_str))
+                desc = info['description'] or "-"
+                rows.append((rock_name, str(info['count']), "1", lithology, alterations_str, desc))
         
         self.main_window.process_table.setRowCount(len(rows))
-        for row, (rock_name, count, _, lithology, alteration) in enumerate(rows):
+        for row, (rock_name, count, _, lithology, alteration, description) in enumerate(rows):
             self.main_window.process_table.setItem(row, 0, QTableWidgetItem(rock_name))
             self.main_window.process_table.setItem(row, 1, QTableWidgetItem(count))
             self.main_window.process_table.setItem(row, 2, QTableWidgetItem("1"))
             self.main_window.process_table.setItem(row, 3, QTableWidgetItem(lithology))
             self.main_window.process_table.setItem(row, 4, QTableWidgetItem(alteration))
+            self.main_window.process_table.setItem(row, 5, QTableWidgetItem(description))
         
         self.main_window.process_table.resizeRowsToContents()
         
@@ -425,3 +428,200 @@ class ProcessHandler:
         if hasattr(self.main_window, 'alteration_btn'):
             self.main_window.alteration_btn.setEnabled(True)
         self.main_window.status_bar.showMessage("蚀变分析完成")
+    
+    def view_lithology_classification(self):
+        from PyQt6.QtWidgets import QFileDialog
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择岩性分类后的JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import json
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        self.main_window.process_log.clear()
+        self.main_window.process_log.append(f"已加载岩性分类结果: {json_file}")
+        self.main_window.process_log.append(f"总记录数: {len(data)}")
+        
+        rock_groups = {}
+        for item in data:
+            rock_name = item.get('岩性名称', '') or '未分类'
+            lithology = item.get('lithology', '')
+            if rock_name not in rock_groups:
+                rock_groups[rock_name] = {'lithologies': set(), 'count': 0}
+            rock_groups[rock_name]['lithologies'].add(lithology)
+            rock_groups[rock_name]['count'] += 1
+        
+        self.main_window.process_table.setColumnCount(4)
+        self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "对应原始岩性"])
+        self.main_window.process_table.setColumnWidth(0, 100)
+        self.main_window.process_table.setColumnWidth(1, 80)
+        self.main_window.process_table.setColumnWidth(2, 80)
+        self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+        
+        sorted_rocks = sorted(rock_groups.items(), key=lambda x: -x[1]['count'])
+        self.main_window.process_table.setRowCount(len(sorted_rocks))
+        
+        for row, (rock_name, info) in enumerate(sorted_rocks):
+            lithologies_str = ", ".join(sorted(info['lithologies']))
+            self.main_window.process_table.setItem(row, 0, QTableWidgetItem(rock_name))
+            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(str(info['count'])))
+            self.main_window.process_table.setItem(row, 2, QTableWidgetItem(str(len(info['lithologies']))))
+            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(lithologies_str))
+        
+        self.main_window.process_table.resizeRowsToContents()
+        
+        self.main_window.process_status_label.setText(f"显示岩性分类 - 共 {len(rock_groups)} 种岩性")
+        self.main_window.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #2196F3;
+            padding: 8px;
+            background-color: #E3F2FD;
+            border: 1px solid #2196F3;
+            border-radius: 4px;
+        """)
+        
+        self.main_window.current_json_file = json_file
+        self.main_window.status_bar.showMessage("已加载岩性分类结果")
+    
+    def view_alteration_analysis(self):
+        from PyQt6.QtWidgets import QFileDialog
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择蚀变分析后的JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import json
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        self.main_window.process_log.clear()
+        self.main_window.process_log.append(f"已加载蚀变分析结果: {json_file}")
+        self.main_window.process_log.append(f"总记录数: {len(data)}")
+        
+        records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
+        records.sort(key=lambda x: (x[0], x[1]))
+        
+        self.main_window.process_table.setColumnCount(6)
+        self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "原始岩性", "蚀变类型", "岩性描述"])
+        self.main_window.process_table.setColumnWidth(0, 100)
+        self.main_window.process_table.setColumnWidth(1, 60)
+        self.main_window.process_table.setColumnWidth(2, 60)
+        self.main_window.process_table.setColumnWidth(3, 200)
+        self.main_window.process_table.setColumnWidth(4, 120)
+        self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+        
+        rock_groups = {}
+        for rock_name, lithology, alteration, description in records:
+            if rock_name not in rock_groups:
+                rock_groups[rock_name] = {}
+            if lithology not in rock_groups[rock_name]:
+                rock_groups[rock_name][lithology] = {'count': 0, 'alterations': set(), 'description': description}
+            rock_groups[rock_name][lithology]['count'] += 1
+            if alteration:
+                rock_groups[rock_name][lithology]['alterations'].add(alteration)
+        
+        rows = []
+        for rock_name in sorted(rock_groups.keys()):
+            for lithology, info in rock_groups[rock_name].items():
+                alterations_str = ", ".join(sorted(info['alterations'])) if info['alterations'] else "-"
+                desc = info['description'] or "-"
+                rows.append((rock_name, str(info['count']), "1", lithology, alterations_str, desc))
+        
+        self.main_window.process_table.setRowCount(len(rows))
+        for row, (rock_name, count, _, lithology, alteration, description) in enumerate(rows):
+            self.main_window.process_table.setItem(row, 0, QTableWidgetItem(rock_name))
+            self.main_window.process_table.setItem(row, 1, QTableWidgetItem(count))
+            self.main_window.process_table.setItem(row, 2, QTableWidgetItem("1"))
+            self.main_window.process_table.setItem(row, 3, QTableWidgetItem(lithology))
+            self.main_window.process_table.setItem(row, 4, QTableWidgetItem(alteration))
+            self.main_window.process_table.setItem(row, 5, QTableWidgetItem(description))
+        
+        self.main_window.process_table.resizeRowsToContents()
+        
+        records_with_alt = sum(1 for item in data if item.get('蚀变类型'))
+        self.main_window.process_status_label.setText(f"显示蚀变分析 - {records_with_alt}/{len(data)} 条含蚀变")
+        self.main_window.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #9C27B0;
+            padding: 8px;
+            background-color: #F3E5F5;
+            border: 1px solid #9C27B0;
+            border-radius: 4px;
+        """)
+        
+        self.main_window.current_json_file = json_file
+        self.main_window.status_bar.showMessage("已加载蚀变分析结果")
+    
+    def export_to_excel(self):
+        from PyQt6.QtWidgets import QFileDialog
+        table = self.main_window.process_table
+        
+        if table.rowCount() == 0:
+            QMessageBox.warning(self.main_window, "警告", "表格中没有数据可导出")
+            return
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self.main_window, "导出Excel文件", "", "Excel文件 (*.xlsx)"
+        )
+        if not file_path:
+            return
+        
+        if not file_path.endswith('.xlsx'):
+            file_path += '.xlsx'
+        
+        try:
+            import openpyxl
+            from openpyxl.styles import Font, Alignment, PatternFill
+            
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "数据导出"
+            
+            header_fill = PatternFill(start_color="1E3A5F", end_color="1E3A5F", fill_type="solid")
+            header_font = Font(bold=True, color="FFFFFF")
+            
+            for col in range(table.columnCount()):
+                header_item = table.horizontalHeaderItem(col)
+                header_text = header_item.text() if header_item else ""
+                cell = ws.cell(row=1, column=col+1, value=header_text)
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+            
+            for row in range(table.rowCount()):
+                for col in range(table.columnCount()):
+                    item = table.item(row, col)
+                    cell_value = item.text() if item else ""
+                    ws.cell(row=row+2, column=col+1, value=cell_value)
+            
+            for col in range(table.columnCount()):
+                max_length = 0
+                col_letter = openpyxl.utils.get_column_letter(col+1)
+                column = ws.column_dimensions[col_letter]
+                for cell in ws[col_letter]:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                column.width = min(max_length + 2, 60)
+            
+            wb.save(file_path)
+            QMessageBox.information(self.main_window, "导出成功", f"数据已导出到:\n{file_path}")
+            self.main_window.process_log.append(f"已导出数据到: {file_path}")
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"导出失败: {str(e)}")

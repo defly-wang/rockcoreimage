@@ -591,21 +591,6 @@
       ]
     },
     {
-      "name": "次生石英岩化",
-      "name_en": " Quartzitization",
-      "category": "硅化蚀变",
-      "importance": true,
-      "minerals": [
-        "石英"
-      ],
-      "description": "强烈硅化作用形成的次生石英岩。是金矿、钨矿的重要找矿标志。",
-      "description_en": "Intense silicification forming secondary quartzite. Important indicator for gold and tungsten deposits.",
-      "aliases": [
-        "次生石英岩化作用",
-        "硅化"
-      ]
-    },
-    {
       "name": "蛋白石化",
       "name_en": "Opalization",
       "category": "硅化蚀变",
