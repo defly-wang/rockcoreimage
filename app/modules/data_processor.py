@@ -439,3 +439,297 @@ class DataProcessor(QObject):
         }
         
         self.processing_finished.emit(output_file, stats)
+    
+    def process_html_project(self, source_dir, output_dir):
+        self.source_dir = source_dir
+        self.output_dir = output_dir
+        
+        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(os.path.join(output_dir, 'images'), exist_ok=True)
+        
+        self.progress_updated.emit(0, "正在扫描项目目录...")
+        
+        project_dirs = [d for d in os.listdir(source_dir) 
+                      if os.path.isdir(os.path.join(source_dir, d)) and not d.startswith('.')]
+        
+        total_projects = len(project_dirs)
+        if total_projects == 0:
+            self.progress_updated.emit(100, "未找到项目")
+            self.processing_finished.emit("", {'total_images': 0, 'total_projects': 0})
+            return
+        
+        self.progress_updated.emit(5, f"共发现 {total_projects} 个项目")
+        
+        all_data = []
+        
+        for idx, project in enumerate(sorted(project_dirs)):
+            progress_base = int(10 + (idx / total_projects) * 80)
+            self.progress_updated.emit(
+                progress_base,
+                f"处理项目 [{idx+1}/{total_projects}]: {project}"
+            )
+            
+            project_path = os.path.join(source_dir, project)
+            
+            offline_dir = os.path.join(project_path, '离线成果展示')
+            borehole_dir = project_path
+            
+            found = False
+            for d in os.listdir(project_path):
+                d_path = os.path.join(project_path, d)
+                if os.path.isdir(d_path) and d.endswith('筒次'):
+                    borehole_dir = project_path
+                    found = True
+                    break
+                if os.path.isdir(d_path):
+                    for sub_d in os.listdir(d_path):
+                        if sub_d.endswith('筒次'):
+                            borehole_dir = d_path
+                            found = True
+                            break
+                if found:
+                    break
+            
+            if not os.path.exists(offline_dir):
+                self.progress_updated.emit(progress_base, f"项目 {project} 无离线成果展示目录，跳过")
+                continue
+            
+            white_light_html = os.path.join(offline_dir, '白光平扫相册.html')
+            histogram_html = os.path.join(offline_dir, '综合柱状图.html')
+            
+            if not os.path.exists(white_light_html) or not os.path.exists(histogram_html):
+                self.progress_updated.emit(progress_base, f"项目 {project} 缺少HTML文件，跳过")
+                continue
+            
+            try:
+                self.progress_updated.emit(progress_base + 2, f"正在解析 {project} 的HTML文件...")
+                project_data = self.process_html_files(project, borehole_dir, white_light_html, histogram_html)
+                all_data.extend(project_data)
+                self.progress_updated.emit(
+                    progress_base + 5,
+                    f"项目 {project} 处理完成，获取 {len(project_data)} 条记录"
+                )
+            except Exception as e:
+                self.error_occurred.emit(f"处理项目 {project} 时出错: {str(e)}")
+        
+        self.progress_updated.emit(95, "正在保存数据文件...")
+        
+        lithology_stats = {}
+        for item in all_data:
+            lith = item.get('lithology', '')
+            if lith:
+                if lith not in lithology_stats:
+                    lithology_stats[lith] = {'count': 0, 'description': item.get('lithology_description', '')}
+                lithology_stats[lith]['count'] += 1
+        
+        output_file = os.path.join(output_dir, 'image_descriptions.json')
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(all_data, f, ensure_ascii=False, indent=2)
+        
+        self.progress_updated.emit(100, "处理完成")
+        self.processing_finished.emit(output_file, {
+            'total_images': len(all_data),
+            'total_projects': total_projects,
+            'lithology_stats': lithology_stats
+        })
+    
+    def process_html_files(self, project_name, borehole_dir, white_light_html, histogram_html):
+        project_data = []
+        
+        image_info = self.parse_white_light_html(white_light_html)
+        
+        lithology_info = self.parse_histogram_html(histogram_html)
+        
+        lithology_map = {}
+        for lith in lithology_info:
+            key = (lith['start_depth'], lith['end_depth'])
+            lithology_map[key] = lith
+        
+        for img in image_info:
+            full_path = img['path']
+            full_path = full_path.replace('\\', '/')
+            if '//' in full_path:
+                full_path = full_path.split('//', 1)[1]
+            
+            filename = os.path.basename(full_path)
+            start_depth = img['start_depth']
+            end_depth = img['end_depth']
+            
+            matched_lith = None
+            for (s, e), lith in lithology_map.items():
+                if start_depth >= s and end_depth <= e:
+                    matched_lith = lith
+                    break
+                if start_depth < e and end_depth > s:
+                    matched_lith = lith
+                    break
+            
+            source_img_path = self.find_image_in_tongci(borehole_dir, filename)
+        
+        image_info = self.parse_white_light_html(white_light_html)
+        
+        lithology_info = self.parse_histogram_html(histogram_html)
+        
+        lithology_map = {}
+        for lith in lithology_info:
+            key = (lith['start_depth'], lith['end_depth'])
+            lithology_map[key] = lith
+        
+        for img in image_info:
+            full_path = img['path']
+            full_path = full_path.replace('\\', '/')
+            if '//' in full_path:
+                full_path = full_path.split('//', 1)[1]
+            
+            filename = os.path.basename(full_path)
+            start_depth = img['start_depth']
+            end_depth = img['end_depth']
+            
+            matched_lith = None
+            for (s, e), lith in lithology_map.items():
+                if start_depth >= s and end_depth <= e:
+                    matched_lith = lith
+                    break
+                if start_depth < e and end_depth > s:
+                    matched_lith = lith
+                    break
+            
+            source_img_path = self.find_image_in_tongci(borehole_dir, filename)
+            
+            if source_img_path:
+                new_filename = f"{project_name}_{os.path.basename(source_img_path)}"
+                dest_img_path = os.path.join(self.output_dir, 'images', new_filename)
+                os.makedirs(os.path.dirname(dest_img_path), exist_ok=True)
+                
+                try:
+                    shutil.copy2(source_img_path, dest_img_path)
+                    
+                    project_data.append({
+                        'project': project_name,
+                        'borehole': project_name,
+                        'image_file': os.path.basename(source_img_path),
+                        'new_filename': new_filename,
+                        'start_depth': start_depth,
+                        'end_depth': end_depth,
+                        'lithology': matched_lith['rock_name'] if matched_lith else '',
+                        'lithology_description': matched_lith['description'] if matched_lith else '',
+                        'source_path': source_img_path
+                    })
+                except Exception as e:
+                    self.error_occurred.emit(f"复制图片失败 {source_img_path}: {str(e)}")
+        
+        return project_data
+    
+    def parse_white_light_html(self, html_file):
+        import re
+        
+        info_js_path = os.path.join(os.path.dirname(html_file), '白光平扫相册_files', 'Info.js')
+        if not os.path.exists(info_js_path):
+            return []
+        
+        with open(info_js_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        match = re.search(r'var\s+imgjson\s*=\s*(\[\[.*?\]\]);', content, re.DOTALL)
+        if not match:
+            return []
+        
+        json_str = match.group(1)
+        
+        json_str = json_str.replace('\\', '\\\\')
+        
+        try:
+            data = json.loads(json_str)
+        except json.JSONDecodeError:
+            data = []
+        
+        result = []
+        for batch in data:
+            for item in batch:
+                yxbh = item.get('Yxbh', '')
+                qsjs = float(item.get('Qsjs', 0))
+                zzjs = float(item.get('Zzjs', 0))
+                txlj = item.get('Txlj', '')
+                
+                filename = os.path.basename(txlj)
+                
+                result.append({
+                    'filename': filename,
+                    'yxbh': yxbh,
+                    'start_depth': qsjs,
+                    'end_depth': zzjs,
+                    'path': txlj
+                })
+        
+        return result
+    
+    def parse_histogram_html(self, html_file):
+        sys_js_path = os.path.join(os.path.dirname(html_file), '综合柱状图_files', 'SysHistogramInfo.js')
+        if not os.path.exists(sys_js_path):
+            return []
+        
+        with open(sys_js_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        import re
+        match = re.search(r'var\s+json\s*=\s*(\[.*?\]);', content, re.DOTALL)
+        if not match:
+            return []
+        
+        json_str = match.group(1)
+        json_str = json_str.replace('\\', '\\\\')
+        
+        try:
+            data = json.loads(json_str)
+        except json.JSONDecodeError:
+            return []
+        
+        if len(data) < 2:
+            return []
+        
+        lithology_batch = data[1]
+        
+        result = []
+        for item in lithology_batch:
+            if item.get('Type') != '岩心描述':
+                continue
+                
+            qsjs = item.get('QSJD', 0)
+            zzjs = item.get('ZZJD', 0)
+            rock_name = item.get('YSMC', '')
+            description = item.get('MS', '')
+            
+            result.append({
+                'start_depth': float(qsjs) if qsjs else 0,
+                'end_depth': float(zzjs) if zzjs else 0,
+                'rock_name': rock_name,
+                'description': description
+            })
+        
+        return result
+    
+    def find_image_in_tongci(self, borehole_dir, filename):
+        if not borehole_dir or not os.path.exists(borehole_dir):
+            return None
+        
+        import re
+        def extract_number(d):
+            match = re.match(r'第(\d+)筒次', d)
+            return int(match.group(1)) if match else 0
+        
+        tongci_dirs = [d for d in os.listdir(borehole_dir) 
+                      if d.endswith('筒次') and os.path.isdir(os.path.join(borehole_dir, d))]
+        
+        for tongci in sorted(tongci_dirs, key=extract_number):
+            tongci_path = os.path.join(borehole_dir, tongci)
+            original_img_dir = os.path.join(tongci_path, '原始图像')
+            
+            if not os.path.exists(original_img_dir):
+                continue
+            
+            for root, dirs, files in os.walk(original_img_dir):
+                for f in files:
+                    if f.lower() == filename.lower():
+                        return os.path.join(root, f)
+        
+        return None

@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
-    QGroupBox, QProgressBar, QTextEdit, QTableWidget
+    QGroupBox, QProgressBar, QTextEdit, QTableWidget, QButtonGroup
 )
 from PyQt6.QtWidgets import QHeaderView
 
@@ -179,6 +179,46 @@ class ProcessPage:
         button_layout.addWidget(main_window.output_path_label)
         
         button_layout.addStretch()
+        
+        main_window.process_type_group = QButtonGroup()
+        main_window.excel_radio = QPushButton("Excel模式")
+        main_window.excel_radio.setCheckable(True)
+        main_window.excel_radio.setChecked(True)
+        main_window.excel_radio.setStyleSheet("""
+            QPushButton {
+                background-color: #1E3A5F;
+                color: white;
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            QPushButton:checked {
+                background-color: #4CAF50;
+            }
+        """)
+        main_window.excel_radio.clicked.connect(lambda: setattr(main_window, 'process_type', 'excel'))
+        button_layout.addWidget(main_window.excel_radio)
+        main_window.process_type_group.addButton(main_window.excel_radio)
+        
+        main_window.html_radio = QPushButton("HTML模式")
+        main_window.html_radio.setCheckable(True)
+        main_window.html_radio.setStyleSheet("""
+            QPushButton {
+                background-color: #1E3A5F;
+                color: white;
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            QPushButton:checked {
+                background-color: #4CAF50;
+            }
+        """)
+        main_window.html_radio.clicked.connect(lambda: setattr(main_window, 'process_type', 'html'))
+        button_layout.addWidget(main_window.html_radio)
+        main_window.process_type_group.addButton(main_window.html_radio)
+        
+        main_window.process_type = 'excel'
+        
+        button_layout.addSpacing(20)
         
         main_window.process_btn = QPushButton("开始处理")
         main_window.process_btn.setStyleSheet("""

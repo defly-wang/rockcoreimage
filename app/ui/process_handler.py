@@ -31,8 +31,12 @@ class ProcessHandler:
             QMessageBox.warning(self.main_window, "警告", "请先选择输出目录")
             return
         
+        process_type = getattr(self.main_window, 'process_type', 'excel')
+        
         self.main_window.process_btn.setEnabled(False)
         self.main_window.classify_btn.setEnabled(False)
+        if hasattr(self.main_window, 'alteration_btn'):
+            self.main_window.alteration_btn.setEnabled(False)
         self.main_window.process_status_label.setText("正在初始化...")
         self.main_window.process_status_label.setStyleSheet("""
             font-size: 14px;
@@ -45,7 +49,11 @@ class ProcessHandler:
         """)
         self.main_window.process_progress.setValue(0)
         self.main_window.process_log.clear()
-        self.main_window.process_log.append("开始处理数据...")
+        
+        if process_type == 'html':
+            self.main_window.process_log.append("开始处理HTML数据...")
+        else:
+            self.main_window.process_log.append("开始处理数据...")
         
         try:
             self.main_window.data_processor.progress_updated.disconnect()
@@ -59,11 +67,20 @@ class ProcessHandler:
         self.main_window.data_processor.error_occurred.connect(self.on_processing_error)
         
         from threading import Thread
-        self.main_window.process_thread = Thread(
-            target=self.main_window.data_processor.process,
-            args=(self.main_window.source_directory, self.main_window.output_directory),
-            daemon=True
-        )
+        process_type = getattr(self.main_window, 'process_type', 'excel')
+        
+        if process_type == 'html':
+            self.main_window.process_thread = Thread(
+                target=self.main_window.data_processor.process_html_project,
+                args=(self.main_window.source_directory, self.main_window.output_directory),
+                daemon=True
+            )
+        else:
+            self.main_window.process_thread = Thread(
+                target=self.main_window.data_processor.process,
+                args=(self.main_window.source_directory, self.main_window.output_directory),
+                daemon=True
+            )
         self.main_window.process_thread.start()
     
     def on_processing_progress(self, value, message):
@@ -121,6 +138,8 @@ class ProcessHandler:
             """)
             self.main_window.process_btn.setEnabled(True)
             self.main_window.classify_btn.setEnabled(True)
+            if hasattr(self.main_window, 'alteration_btn'):
+                self.main_window.alteration_btn.setEnabled(True)
             self.main_window.classify_output_file = output_file
             
             lithology_stats = stats.get('lithology_stats', {})
