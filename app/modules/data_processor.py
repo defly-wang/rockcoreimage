@@ -663,10 +663,70 @@ class DataProcessor(QObject):
         if not description:
             return current_lithology
         
-        refined_lithology = current_lithology
+        all_depth_ranges = []
         
-        depth_range = end_depth - start_depth
-        is_short_segment = depth_range < 2
+        combined_patterns = [
+            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?[,，]([\d.]+)[m米]?[-–—]([\d.]+)[m米]?[,，]([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+)',
+            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?[,，]([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+)',
+            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+)',
+        ]
+        
+        for pattern in combined_patterns:
+            matches = list(re.finditer(pattern, description))
+            for match in matches:
+                num_groups = len(match.groups())
+                potential_lithology = match.group(num_groups).strip()
+                
+                lithology_match = None
+                for rock in rocks:
+                    if rock == potential_lithology:
+                        lithology_match = rock
+                        break
+                    if len(rock) <= 4 and rock in potential_lithology:
+                        lithology_match = rock
+                        break
+                    if potential_lithology.endswith(rock):
+                        lithology_match = rock
+                        break
+                
+                if lithology_match:
+                    all_depth_ranges.append((lithology_match, match.group(1), match.group(2)))
+                    if num_groups >= 4:
+                        all_depth_ranges.append((lithology_match, match.group(3), match.group(4)))
+                    if num_groups >= 6:
+                        all_depth_ranges.append((lithology_match, match.group(5), match.group(6)))
+        
+        depth_range_before_wei = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?[,，](?=.*为([\u4e00-\u9fa5]+岩))'
+        for match in re.finditer(depth_range_before_wei, description):
+            depth_start = match.group(1)
+            depth_end = match.group(2)
+            
+            remaining = description[match.end():]
+            wei_match = re.search(r'为([\u4e00-\u9fa5]+岩)', remaining)
+            if wei_match:
+                lithology = wei_match.group(1)
+                lithology_match = None
+                for rock in rocks:
+                    if rock == lithology:
+                        lithology_match = rock
+                        break
+                    if len(rock) <= 4 and rock in lithology:
+                        lithology_match = rock
+                        break
+                    if lithology.endswith(rock):
+                        lithology_match = rock
+                        break
+                if lithology_match:
+                    all_depth_ranges.append((lithology_match, depth_start, depth_end))
+        
+        for rock, desc_start, desc_end_str in all_depth_ranges:
+            try:
+                desc_start = float(desc_start)
+                desc_end = float(desc_end_str)
+                if start_depth >= desc_start and end_depth <= desc_end:
+                    return rock
+            except (ValueError, IndexError):
+                pass
         
         depth_lith_patterns = [
             r'([\d.]+)[-–—]([\d.]+)[m米]?[左右]?[为到是]([\u4e00-\u9fa5]+岩?)',
@@ -689,20 +749,30 @@ class DataProcessor(QObject):
         ]
         
         for pattern in depth_lith_patterns:
-            match = re.search(pattern, description)
-            if match:
+            matches = list(re.finditer(pattern, description))
+            for match in matches:
                 try:
-                    potential_lithology = match.group(-1).strip()
+                    num_groups = len(match.groups())
+                    potential_lithology = match.group(num_groups).strip()
                     
+                    exact_match = None
                     for rock in rocks:
-                        if rock in potential_lithology or potential_lithology in rock:
-                            depth_match = re.search(r'([\d.]+)[-–—]', match.group(0))
-                            if depth_match:
-                                desc_depth = float(depth_match.group(1))
-                                if start_depth >= desc_depth - 0.5:
-                                    return rock
-                            else:
-                                return rock
+                        if rock == potential_lithology:
+                            exact_match = rock
+                            break
+                        if len(rock) <= 4 and rock in potential_lithology:
+                            exact_match = rock
+                            break
+                    
+                    if exact_match:
+                        depth_match = re.match(r'([\d.]+)[-–—]([\d.]+)', match.group(0))
+                        if depth_match:
+                            desc_start = float(depth_match.group(1))
+                            desc_end = float(depth_match.group(2))
+                            if start_depth >= desc_start and end_depth <= desc_end:
+                                return exact_match
+                        else:
+                            return exact_match
                 except (ValueError, IndexError):
                     pass
         
