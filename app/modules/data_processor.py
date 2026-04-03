@@ -673,17 +673,17 @@ class DataProcessor(QObject):
         ]
         
         color_grain_patterns = [
-            r'[\u4e00-\u9fa5]*色([\u4e00-\u9fa5]+岩)',
-            r'([\u4e00-\u9fa5]+)粒([\u4e00-\u9fa5]+岩)',
+            (r'[\u4e00-\u9fa5]*色([\u4e00-\u9fa5]+岩)', 1),
+            (r'([\u4e00-\u9fa5]+)粒([\u4e00-\u9fa5]+岩)', 2),
         ]
         
         rock_minerals = ['钾长石', '斜长石', '石英', '黑云母', '白云母', '绿泥石', '绢云母', '黄铁矿', '黄铜矿', '榍石', '钛铁矿', '石榴子石']
         
         exclude_terms = ['分界线', '接触带', '界面', '断层泥', '糜棱岩', '角砾']
 
-        for wei_pattern in wei_patterns:
-            for wei_match in re.finditer(wei_pattern, description):
-                lithology = wei_match.group(1).strip()
+        for pattern, lithology_group in color_grain_patterns:
+            for match in re.finditer(pattern, description):
+                lithology = match.group(lithology_group).strip()
                 
                 if lithology in rock_minerals:
                     continue
@@ -692,15 +692,10 @@ class DataProcessor(QObject):
                 if is_excluded:
                     continue
                 
-                lithology_match = None
-                
-                if lithology in rocks and '岩' in lithology:
-                    lithology_match = lithology
-                else:
-                    for rock in rocks:
-                        if lithology == rock and '岩' in rock:
-                            lithology_match = rock
-                            break
+                for rock in rocks:
+                    if lithology == rock:
+                        all_depth_ranges.append((rock, match.group(1), match.group(2)))
+                        break
                         if '岩' in lithology and lithology in rock:
                             lithology_match = rock
                             break
@@ -770,6 +765,8 @@ class DataProcessor(QObject):
                 if lithology == rock:
                     all_depth_ranges.append((rock, match.group(1), match.group(2)))
                     break
+            else:
+                all_depth_ranges.append((lithology, match.group(1), match.group(2)))
         
         for rock, desc_start, desc_end_str in all_depth_ranges:
             try:
