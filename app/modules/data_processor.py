@@ -670,11 +670,15 @@ class DataProcessor(QObject):
             r'为([\u4e00-\u9fa5]+)',
             r'是([\u4e00-\u9fa5]+岩)',
             r'是([\u4e00-\u9fa5]+)',
+            r'[\u4e00-\u9fa5]+性([\u4e00-\u9fa5]+岩)',
+            r'[\u4e00-\u9fa5]+性([\u4e00-\u9fa5]+)',
+            r'岩性([\u4e00-\u9fa5]+岩)',
+            r'岩性([\u4e00-\u9fa5]+)',
         ]
         
         for wei_pattern in wei_patterns:
             for wei_match in re.finditer(wei_pattern, description):
-                lithology = wei_match.group(1).strip()
+                lithology = wei_match.group(0).strip()
                 
                 lithology_match = None
                 
