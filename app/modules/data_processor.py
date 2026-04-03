@@ -663,6 +663,8 @@ class DataProcessor(QObject):
         if not description:
             return current_lithology
         
+        refined_lithology = current_lithology
+        
         all_depth_ranges = []
         
         combined_patterns = [
