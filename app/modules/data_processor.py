@@ -36,6 +36,7 @@ class DataProcessor(QObject):
         
         def extract_last_keyword(lithology):
             lithology = lithology.strip()
+            lithology = re.sub(r'[（(][^）)]*[）)]$', '', lithology).strip()
             for rock in rocks:
                 if lithology.endswith(rock):
                     return rock
