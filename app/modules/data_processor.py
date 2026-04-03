@@ -673,20 +673,21 @@ class DataProcessor(QObject):
             r'([\d.]+)[-–—]([\d.]+)m?[为到是]([\u4e00-\u9fa5]+岩?)',
             r'深度[为到是]?([\d.]+)[-–—]([\d.]+)[为到是]([\u4e00-\u9fa5]+岩?)',
             r'([\d.]+)[-–—]([\d.]+)[^\d]*?([\u4e00-\u9fa5]+岩)',
+            r'[\d.]+[-–—][\d.]+m?,?\s*[\d.]+[-–—][\d.]+m?,?\s*[\d.]+[-–—][\d.]+m?是([\u4e00-\u9fa5]+岩)',
+            r'[\d.]+[-–—][\d.]+m?,?\s*[\d.]+[-–—][\d.]+m?是([\u4e00-\u9fa5]+岩)',
+            r'([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?是([\u4e00-\u9fa5]+岩)',
+            r'([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?是([\u4e00-\u9fa5]+岩)',
         ]
         
         for pattern in depth_lith_patterns:
             match = re.search(pattern, description)
             if match:
                 try:
-                    desc_start = float(match.group(1))
-                    desc_end = float(match.group(2))
-                    potential_lithology = match.group(3).strip()
+                    potential_lithology = match.group(-1).strip()
                     
-                    if start_depth >= desc_start and end_depth <= desc_end:
-                        for rock in rocks:
-                            if rock in potential_lithology or potential_lithology in rock:
-                                return rock
+                    for rock in rocks:
+                        if rock in potential_lithology or potential_lithology in rock:
+                            return rock
                 except (ValueError, IndexError):
                     pass
         
