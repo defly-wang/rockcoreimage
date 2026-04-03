@@ -665,37 +665,50 @@ class DataProcessor(QObject):
         
         all_depth_ranges = []
         
-        wei_pattern = r'为([\u4e00-\u9fa5]+岩)'
-        for wei_match in re.finditer(wei_pattern, description):
-            lithology = wei_match.group(1)
-            
-            lithology_match = None
-            for rock in rocks:
-                if rock == lithology:
-                    lithology_match = rock
-                    break
-                if len(rock) <= 4 and rock in lithology:
-                    lithology_match = rock
-                    break
-                if lithology.endswith(rock):
-                    lithology_match = rock
-                    break
+        wei_patterns = [
+            r'为([\u4e00-\u9fa5]+岩)',
+            r'为([\u4e00-\u9fa5]+)',
+            r'是([\u4e00-\u9fa5]+岩)',
+            r'是([\u4e00-\u9fa5]+)',
+        ]
+        
+        for wei_pattern in wei_patterns:
+            for wei_match in re.finditer(wei_pattern, description):
+                lithology = wei_match.group(1)
+                
+                lithology_match = None
+                for rock in rocks:
+                    if rock == lithology:
+                        lithology_match = rock
+                        break
+                    if len(rock) <= 4 and rock in lithology:
+                        lithology_match = rock
+                        break
+                    if lithology.endswith(rock):
+                        lithology_match = rock
+                        break
             
             if lithology_match:
                 text_before = description[:wei_match.start()]
                 
-                last_sentence = text_before
-                for sep in ['。', '；', '||']:
-                    if sep in last_sentence:
-                        last_sentence = last_sentence.split(sep)[-1]
+                sentences = re.split(r'[。；]', text_before)
                 
-                depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
-                for dm in re.finditer(depth_pattern, last_sentence):
-                    all_depth_ranges.append((
-                        lithology_match,
-                        dm.group(1),
-                        dm.group(2)
-                    ))
+                for sentence in reversed(sentences):
+                    if not sentence.strip():
+                        continue
+                    
+                    depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
+                    all_depths = list(re.finditer(depth_pattern, sentence))
+                    
+                    for dm in all_depths:
+                        all_depth_ranges.append((
+                            lithology_match,
+                            dm.group(1),
+                            dm.group(2)
+                        ))
+                    
+                    if all_depths:
+                        break
         
         for rock, desc_start, desc_end_str in all_depth_ranges:
             try:
