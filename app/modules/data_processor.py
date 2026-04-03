@@ -682,15 +682,24 @@ class DataProcessor(QObject):
                 
                 lithology_match = None
                 
-                if lithology in rocks:
+                if lithology in rocks and '岩' in lithology:
                     lithology_match = lithology
                 else:
                     for rock in rocks:
-                        if rock == lithology:
+                        if lithology == rock and '岩' in rock:
                             lithology_match = rock
                             break
-                        if lithology in rock:
-                            lithology_match = lithology
+                        if '岩' in lithology and lithology in rock:
+                            lithology_match = rock
+                            break
+                
+                if lithology_match is None:
+                    for rock in rocks:
+                        if lithology == rock:
+                            lithology_match = rock
+                            break
+                        if lithology in rock and '岩' in rock:
+                            lithology_match = rock
                             break
                 
                 if lithology_match is None:
