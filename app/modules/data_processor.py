@@ -755,6 +755,22 @@ class DataProcessor(QObject):
                         all_depth_ranges.append((rock, match.group(2), match.group(3)))
                         break
         
+        depth_lith_direct = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?([\u4e00-\u9fa5]{1,5}岩)'
+        for match in re.finditer(depth_lith_direct, description):
+            lithology = match.group(3).strip()
+            
+            if lithology in rock_minerals:
+                continue
+            
+            is_excluded = any(term in lithology for term in exclude_terms)
+            if is_excluded:
+                continue
+            
+            for rock in rocks:
+                if lithology == rock:
+                    all_depth_ranges.append((rock, match.group(1), match.group(2)))
+                    break
+        
         for rock, desc_start, desc_end_str in all_depth_ranges:
             try:
                 desc_start = float(desc_start)
