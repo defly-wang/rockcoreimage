@@ -663,39 +663,36 @@ class DataProcessor(QObject):
         if not description:
             return current_lithology
         
-        refined_lithology = current_lithology
-        
         all_depth_ranges = []
         
-        wei_pattern = r'为([\u4e00-\u9fa5]+岩)'
-        for wei_match in re.finditer(wei_pattern, description):
-            lithology = wei_match.group(1)
-            
+        parts = re.split(r'(?=为[\u4e00-\u9fa5]+岩)', description)
+        
+        for i in range(1, len(parts)):
+            section = parts[i]
             lithology_match = None
-            for rock in rocks:
-                if rock == lithology:
-                    lithology_match = rock
-                    break
-                if len(rock) <= 4 and rock in lithology:
-                    lithology_match = rock
-                    break
-                if lithology.endswith(rock):
-                    lithology_match = rock
-                    break
+            
+            wei_match = re.match(r'为([\u4e00-\u9fa5]+岩)', section)
+            if wei_match:
+                lithology = wei_match.group(1)
+                for rock in rocks:
+                    if rock == lithology:
+                        lithology_match = rock
+                        break
+                    if len(rock) <= 4 and rock in lithology:
+                        lithology_match = rock
+                        break
+                    if lithology.endswith(rock):
+                        lithology_match = rock
+                        break
             
             if lithology_match:
-                text_before = description[:wei_match.start()]
+                prev_section = parts[i-1]
                 depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
-                
-                last_depths = []
-                for dm in re.finditer(depth_pattern, text_before):
-                    last_depths = [dm.group(1), dm.group(2)]
-                
-                if last_depths:
+                for dm in re.finditer(depth_pattern, prev_section):
                     all_depth_ranges.append((
                         lithology_match,
-                        last_depths[0],
-                        last_depths[1]
+                        dm.group(1),
+                        dm.group(2)
                     ))
         
         for rock, desc_start, desc_end_str in all_depth_ranges:
@@ -704,97 +701,10 @@ class DataProcessor(QObject):
                 desc_end = float(desc_end_str)
                 if start_depth >= desc_start and end_depth <= desc_end:
                     return rock
-            except (ValueError, IndexError):
+            except:
                 pass
         
-        depth_lith_patterns = [
-            r'([\d.]+)[-–—]([\d.]+)[m米]?[左右]?[为到是]([\u4e00-\u9fa5]+岩?)',
-            r'([\d.]+)[-–—]([\d.]+)m?[为到是]([\u4e00-\u9fa5]+岩?)',
-            r'深度[为到是]?([\d.]+)[-–—]([\d.]+)[为到是]([\u4e00-\u9fa5]+岩?)',
-            r'([\d.]+)[-–—]([\d.]+)[^\d]*?([\u4e00-\u9fa5]+岩)',
-            r'[\d.]+[-–—][\d.]+m?,?\s*[\d.]+[-–—][\d.]+m?,?\s*[\d.]+[-–—][\d.]+m?是([\u4e00-\u9fa5]+岩)',
-            r'[\d.]+[-–—][\d.]+m?,?\s*[\d.]+[-–—][\d.]+m?是([\u4e00-\u9fa5]+岩)',
-            r'([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?是([\u4e00-\u9fa5]+岩)',
-            r'([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?是([\u4e00-\u9fa5]+岩)',
-            r'([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+岩)',
-            r'([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+)',
-            r'([\d.]+)[-–—]([\d.]+)m,([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+岩)',
-            r'([\d.]+)[-–—]([\d.]+)m,([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+)',
-            r'([\d.]+)[-–—]([\d.]+)m，([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+岩)',
-            r'([\d.]+)[-–—]([\d.]+)m，([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+)',
-            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?[,，]([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+岩)',
-            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+岩)',
-            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+)',
-        ]
-        
-        for pattern in depth_lith_patterns:
-            matches = list(re.finditer(pattern, description))
-            for match in matches:
-                try:
-                    num_groups = len(match.groups())
-                    potential_lithology = match.group(num_groups).strip()
-                    
-                    exact_match = None
-                    for rock in rocks:
-                        if rock == potential_lithology:
-                            exact_match = rock
-                            break
-                        if len(rock) <= 4 and rock in potential_lithology:
-                            exact_match = rock
-                            break
-                    
-                    if exact_match:
-                        depth_match = re.match(r'([\d.]+)[-–—]([\d.]+)', match.group(0))
-                        if depth_match:
-                            desc_start = float(depth_match.group(1))
-                            desc_end = float(depth_match.group(2))
-                            if start_depth >= desc_start and end_depth <= desc_end:
-                                return exact_match
-                        else:
-                            return exact_match
-                except (ValueError, IndexError):
-                    pass
-        
-        patterns = [
-            (r'下部[为到是]([\u4e00-\u9fa5]+)', 'lower'),
-            (r'上部[为到是]([\u4e00-\u9fa5]+)', 'upper'),
-            (r'底部[为到是]([\u4e00-\u9fa5]+)', 'bottom'),
-            (r'顶部[为到是]([\u4e00-\u9fa5]+)', 'top'),
-            (r'夹([\u4e00-\u9fa5]+)', 'interlayer'),
-            (r'夹层[为到是]?([\u4e00-\u9fa5]+)', 'interlayer'),
-            (r'含([\u4e00-\u9fa5]+)', 'contains'),
-            (r'局部[为到是]([\u4e00-\u9fa5]+)', 'partial'),
-            (r'局部夹([\u4e00-\u9fa5]+)', 'partial'),
-            (r'上层[为到是]([\u4e00-\u9fa5]+)', 'upper'),
-            (r'下层[为到是]([\u4e00-\u9fa5]+)', 'lower'),
-            (r'中下部[为到是]([\u4e00-\u9fa5]+)', 'lower'),
-            (r'中上部[为到是]([\u4e00-\u9fa5]+)', 'upper'),
-        ]
-        
-        new_lithology = None
-        pattern_position = None
-        
-        for pattern, position in patterns:
-            match = re.search(pattern, description)
-            if match:
-                potential_lithology = match.group(1)
-                
-                for rock in rocks:
-                    if rock in potential_lithology or potential_lithology in rock:
-                        if new_lithology is None:
-                            new_lithology = rock
-                            pattern_position = position
-                        elif position in ['lower', 'bottom'] and pattern_position in ['upper', 'top']:
-                            new_lithology = rock
-                            pattern_position = position
-                        elif position == 'interlayer' and is_short_segment:
-                            new_lithology = rock
-                            pattern_position = position
-        
-        if new_lithology and new_lithology != current_lithology:
-            refined_lithology = new_lithology
-        
-        return refined_lithology
+        return current_lithology
     
     def parse_white_light_html(self, html_file):
         import re
