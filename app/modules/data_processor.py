@@ -571,6 +571,8 @@ class DataProcessor(QObject):
         
         lithology_info = self.parse_histogram_html(histogram_html)
         
+        rocks = self.load_rock_types()
+        
         lithology_map = {}
         for lith in lithology_info:
             key = (lith['start_depth'], lith['end_depth'])
@@ -595,6 +597,16 @@ class DataProcessor(QObject):
                     matched_lith = lith
                     break
             
+            lithology = matched_lith['rock_name'] if matched_lith else ''
+            lithology_description = matched_lith['description'] if matched_lith else ''
+            
+            if lithology_description:
+                refined_lithology = self.analyze_lithology_from_description(
+                    lithology, lithology_description, start_depth, end_depth, rocks
+                )
+                if refined_lithology:
+                    lithology = refined_lithology
+            
             source_img_path = self.find_image_in_tongci(borehole_dir, filename)
             
             if source_img_path:
@@ -612,14 +624,112 @@ class DataProcessor(QObject):
                         'new_filename': new_filename,
                         'start_depth': start_depth,
                         'end_depth': end_depth,
-                        'lithology': matched_lith['rock_name'] if matched_lith else '',
-                        'lithology_description': matched_lith['description'] if matched_lith else '',
+                        'lithology': lithology,
+                        'lithology_description': lithology_description,
                         'source_path': source_img_path
                     })
                 except Exception as e:
                     self.error_occurred.emit(f"复制图片失败 {source_img_path}: {str(e)}")
         
         return project_data
+    
+    def load_rock_types(self):
+        config_files = [
+            'config/rock_types.json',
+            'config/rock_types_comprehensive.json',
+            'config/rock_types_flat.json'
+        ]
+        
+        rocks = set()
+        for config_file in config_files:
+            try:
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                
+                if 'rocks' in config:
+                    for rock in config['rocks']:
+                        rocks.add(rock['name'])
+                        rocks.update(rock.get('aliases', []))
+                elif 'categories' in config:
+                    for category, cat_info in config['categories'].items():
+                        for rock_list in [cat_info.get('important', []), cat_info.get('general', [])]:
+                            rocks.update(rock_list)
+            except:
+                pass
+        
+        return sorted(rocks, key=lambda x: -len(x))
+    
+    def analyze_lithology_from_description(self, current_lithology, description, start_depth, end_depth, rocks):
+        if not description:
+            return current_lithology
+        
+        refined_lithology = current_lithology
+        
+        depth_range = end_depth - start_depth
+        is_short_segment = depth_range < 2
+        
+        depth_lith_patterns = [
+            r'([\d.]+)[-–—]([\d.]+)[m米]?[左右]?[为到是]([\u4e00-\u9fa5]+岩?)',
+            r'([\d.]+)[-–—]([\d.]+)m?[为到是]([\u4e00-\u9fa5]+岩?)',
+            r'深度[为到是]?([\d.]+)[-–—]([\d.]+)[为到是]([\u4e00-\u9fa5]+岩?)',
+            r'([\d.]+)[-–—]([\d.]+)[^\d]*?([\u4e00-\u9fa5]+岩)',
+        ]
+        
+        for pattern in depth_lith_patterns:
+            match = re.search(pattern, description)
+            if match:
+                try:
+                    desc_start = float(match.group(1))
+                    desc_end = float(match.group(2))
+                    potential_lithology = match.group(3).strip()
+                    
+                    if start_depth >= desc_start and end_depth <= desc_end:
+                        for rock in rocks:
+                            if rock in potential_lithology or potential_lithology in rock:
+                                return rock
+                except (ValueError, IndexError):
+                    pass
+        
+        patterns = [
+            (r'下部[为到是]([\u4e00-\u9fa5]+)', 'lower'),
+            (r'上部[为到是]([\u4e00-\u9fa5]+)', 'upper'),
+            (r'底部[为到是]([\u4e00-\u9fa5]+)', 'bottom'),
+            (r'顶部[为到是]([\u4e00-\u9fa5]+)', 'top'),
+            (r'夹([\u4e00-\u9fa5]+)', 'interlayer'),
+            (r'夹层[为到是]?([\u4e00-\u9fa5]+)', 'interlayer'),
+            (r'含([\u4e00-\u9fa5]+)', 'contains'),
+            (r'局部[为到是]([\u4e00-\u9fa5]+)', 'partial'),
+            (r'局部夹([\u4e00-\u9fa5]+)', 'partial'),
+            (r'上层[为到是]([\u4e00-\u9fa5]+)', 'upper'),
+            (r'下层[为到是]([\u4e00-\u9fa5]+)', 'lower'),
+            (r'中下部[为到是]([\u4e00-\u9fa5]+)', 'lower'),
+            (r'中上部[为到是]([\u4e00-\u9fa5]+)', 'upper'),
+        ]
+        
+        new_lithology = None
+        pattern_position = None
+        
+        for pattern, position in patterns:
+            match = re.search(pattern, description)
+            if match:
+                potential_lithology = match.group(1)
+                
+                for rock in rocks:
+                    if rock in potential_lithology or potential_lithology in rock:
+                        if new_lithology is None:
+                            new_lithology = rock
+                            pattern_position = position
+                        elif position in ['lower', 'bottom'] and pattern_position in ['upper', 'top']:
+                            new_lithology = rock
+                            pattern_position = position
+                        elif position == 'interlayer' and is_short_segment:
+                            new_lithology = rock
+                            pattern_position = position
+        
+        if new_lithology and new_lithology != current_lithology:
+            refined_lithology = new_lithology
+        
+        return refined_lithology
     
     def parse_white_light_html(self, html_file):
         import re
