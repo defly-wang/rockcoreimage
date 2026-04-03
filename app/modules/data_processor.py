@@ -696,59 +696,9 @@ class DataProcessor(QObject):
                     if lithology == rock:
                         all_depth_ranges.append((rock, match.group(1), match.group(2)))
                         break
-                        if '岩' in lithology and lithology in rock:
-                            lithology_match = rock
-                            break
-                
-                if lithology_match is None:
-                    for rock in rocks:
-                        if lithology == rock:
-                            lithology_match = rock
-                            break
-                        if lithology in rock and '岩' in rock:
-                            lithology_match = rock
-                            break
-                
-                if lithology_match is None:
-                    lithology_match = lithology
-                
-                if lithology_match:
-                    text_before = description[:wei_match.start()]
-                    
-                    sentences = re.split(r'[。；]', text_before)
-                    
-                    for sentence in reversed(sentences):
-                        if not sentence.strip():
-                            continue
-                        
-                        depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
-                        all_depths = list(re.finditer(depth_pattern, sentence))
-                        
-                        for dm in all_depths:
-                            all_depth_ranges.append((
-                                lithology_match,
-                                dm.group(1),
-                                dm.group(2)
-                            ))
-                        
-                        if all_depths:
-                            break
-        
-        for pattern, lithology_group in color_grain_patterns:
-            for match in re.finditer(pattern, description):
-                lithology = match.group(lithology_group).strip()
-                
-                if lithology in rock_minerals:
-                    continue
-                
-                is_excluded = any(term in lithology for term in exclude_terms)
-                if is_excluded:
-                    continue
-                
-                for rock in rocks:
-                    if lithology == rock:
-                        all_depth_ranges.append((rock, match.group(1), match.group(2)))
-                        break
+                else:
+                    if '岩' in lithology:
+                        all_depth_ranges.append((lithology, match.group(1), match.group(2)))
         
         depth_lith_direct = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?([\u4e00-\u9fa5]{1,5}岩)'
         for match in re.finditer(depth_lith_direct, description):
