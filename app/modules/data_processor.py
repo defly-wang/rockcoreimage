@@ -674,25 +674,23 @@ class DataProcessor(QObject):
         
         for wei_pattern in wei_patterns:
             for wei_match in re.finditer(wei_pattern, description):
-                lithology = wei_match.group(1)
+                lithology = wei_match.group(1).strip()
                 
                 lithology_match = None
-                for rock in rocks:
-                    if rock == lithology:
-                        lithology_match = rock
-                        break
-                    if rock in lithology or lithology in rock:
-                        lithology_match = rock
-                        break
+                
+                if lithology in rocks:
+                    lithology_match = lithology
+                else:
+                    for rock in rocks:
+                        if rock == lithology:
+                            lithology_match = rock
+                            break
+                        if lithology in rock:
+                            lithology_match = lithology
+                            break
                 
                 if lithology_match is None:
-                    if any(rock in lithology or lithology in rock for rock in rocks):
-                        for rock in rocks:
-                            if rock in lithology or lithology in rock:
-                                lithology_match = rock
-                                break
-                    else:
-                        lithology_match = lithology
+                    lithology_match = lithology
                 
                 if lithology_match:
                     text_before = description[:wei_match.start()]
