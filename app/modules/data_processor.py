@@ -707,61 +707,6 @@ class DataProcessor(QObject):
                 pass
         
         return current_lithology
-        
-        all_depth_ranges = []
-        
-        parts = re.split(r'(?=为[\u4e00-\u9fa5]+岩)', description)
-        
-        for i in range(1, len(parts)):
-            section = parts[i]
-            lithology_match = None
-            
-            wei_match = re.match(r'为([\u4e00-\u9fa5]+岩)', section)
-            if wei_match:
-                lithology = wei_match.group(1)
-                for rock in rocks:
-                    if rock == lithology:
-                        lithology_match = rock
-                        break
-                    if len(rock) <= 4 and rock in lithology:
-                        lithology_match = rock
-                        break
-                    if lithology.endswith(rock):
-                        lithology_match = rock
-                        break
-            
-            if lithology_match:
-                prev_section = parts[i-1]
-                
-                last_sentence = prev_section
-                for sep in ['。', '；', '?\n', '||']:
-                    if sep in last_sentence:
-                        last_sentence = last_sentence.split(sep)[-1]
-                
-                depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
-                for dm in re.finditer(depth_pattern, last_sentence):
-                    all_depth_ranges.append((
-                        lithology_match,
-                        dm.group(1),
-                        dm.group(2)
-                    ))
-        
-        for rock, desc_start, desc_end_str in all_depth_ranges:
-            try:
-                desc_start = float(desc_start)
-                desc_end = float(desc_end_str)
-                
-                overlap_start = max(start_depth, desc_start)
-                overlap_end = min(end_depth, desc_end)
-                overlap = max(0, overlap_end - overlap_start)
-                img_range = end_depth - start_depth
-                
-                if img_range > 0 and overlap / img_range >= 0.6:
-                    return rock
-            except:
-                pass
-        
-        return current_lithology
     
     def parse_white_light_html(self, html_file):
         import re
