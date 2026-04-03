@@ -681,12 +681,18 @@ class DataProcessor(QObject):
                     if rock == lithology:
                         lithology_match = rock
                         break
-                    if len(rock) <= 4 and rock in lithology:
+                    if rock in lithology or lithology in rock:
                         lithology_match = rock
                         break
-                    if lithology.endswith(rock):
-                        lithology_match = rock
-                        break
+                
+                if lithology_match is None:
+                    if any(rock in lithology or lithology in rock for rock in rocks):
+                        for rock in rocks:
+                            if rock in lithology or lithology in rock:
+                                lithology_match = rock
+                                break
+                    else:
+                        lithology_match = lithology
                 
                 if lithology_match:
                     text_before = description[:wei_match.start()]
