@@ -687,28 +687,28 @@ class DataProcessor(QObject):
                     if lithology.endswith(rock):
                         lithology_match = rock
                         break
-            
-            if lithology_match:
-                text_before = description[:wei_match.start()]
                 
-                sentences = re.split(r'[。；]', text_before)
-                
-                for sentence in reversed(sentences):
-                    if not sentence.strip():
-                        continue
+                if lithology_match:
+                    text_before = description[:wei_match.start()]
                     
-                    depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
-                    all_depths = list(re.finditer(depth_pattern, sentence))
+                    sentences = re.split(r'[。；]', text_before)
                     
-                    for dm in all_depths:
-                        all_depth_ranges.append((
-                            lithology_match,
-                            dm.group(1),
-                            dm.group(2)
-                        ))
-                    
-                    if all_depths:
-                        break
+                    for sentence in reversed(sentences):
+                        if not sentence.strip():
+                            continue
+                        
+                        depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
+                        all_depths = list(re.finditer(depth_pattern, sentence))
+                        
+                        for dm in all_depths:
+                            all_depth_ranges.append((
+                                lithology_match,
+                                dm.group(1),
+                                dm.group(2)
+                            ))
+                        
+                        if all_depths:
+                            break
         
         for rock, desc_start, desc_end_str in all_depth_ranges:
             try:
