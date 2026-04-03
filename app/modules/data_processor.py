@@ -684,14 +684,11 @@ class DataProcessor(QObject):
             if lithology_match:
                 text_before = description[:wei_match.start()]
                 depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
-                all_depths = list(re.finditer(depth_pattern, text_before))
-                
-                if all_depths:
-                    last_depth = all_depths[-1]
+                for dm in re.finditer(depth_pattern, text_before):
                     all_depth_ranges.append((
                         lithology_match,
-                        last_depth.group(1),
-                        last_depth.group(2)
+                        dm.group(1),
+                        dm.group(2)
                     ))
         
         for rock, desc_start, desc_end_str in all_depth_ranges:
