@@ -677,12 +677,18 @@ class DataProcessor(QObject):
         ]
         
         rock_minerals = ['钾长石', '斜长石', '石英', '黑云母', '白云母', '绿泥石', '绢云母', '黄铁矿', '黄铜矿', '榍石', '钛铁矿', '石榴子石']
+        
+        exclude_terms = ['分界线', '接触带', '界面', '断层泥', '糜棱岩', '角砾']
 
         for wei_pattern in wei_patterns:
             for wei_match in re.finditer(wei_pattern, description):
                 lithology = wei_match.group(1).strip()
                 
                 if lithology in rock_minerals:
+                    continue
+                
+                is_excluded = any(term in lithology for term in exclude_terms)
+                if is_excluded:
                     continue
                 
                 lithology_match = None
