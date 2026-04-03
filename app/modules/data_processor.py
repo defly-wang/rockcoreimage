@@ -663,75 +663,73 @@ class DataProcessor(QObject):
         if not description:
             return current_lithology
         
-        all_depth_ranges = []
-        
-        wei_patterns = [
-            r'为([\u4e00-\u9fa5]+岩)',
-            r'是([\u4e00-\u9fa5]+岩)',
-            r'[\u4e00-\u9fa5]+性([\u4e00-\u9fa5]+岩)',
-            r'岩性([\u4e00-\u9fa5]+岩)',
-        ]
-        
-        color_grain_patterns = [
-            (r'[\u4e00-\u9fa5]*色([\u4e00-\u9fa5]+岩)', 1),
-            (r'([\u4e00-\u9fa5]+)粒([\u4e00-\u9fa5]+岩)', 2),
-        ]
-        
         rock_minerals = ['钾长石', '斜长石', '石英', '黑云母', '白云母', '绿泥石', '绢云母', '黄铁矿', '黄铜矿', '榍石', '钛铁矿', '石榴子石']
         
         exclude_terms = ['分界线', '接触带', '界面', '断层泥', '糜棱岩', '角砾']
 
-        for pattern, lithology_group in color_grain_patterns:
-            for match in re.finditer(pattern, description):
-                lithology = match.group(lithology_group).strip()
-                
-                if lithology in rock_minerals:
-                    continue
-                
-                is_excluded = any(term in lithology for term in exclude_terms)
-                if is_excluded:
-                    continue
-                
-                for rock in rocks:
-                    if lithology == rock:
-                        all_depth_ranges.append((rock, match.group(1), match.group(2)))
-                        break
-                else:
-                    if '岩' in lithology:
-                        all_depth_ranges.append((lithology, match.group(1), match.group(2)))
-        
-        depth_lith_direct = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?([\u4e00-\u9fa5]{1,5}岩)'
-        for match in re.finditer(depth_lith_direct, description):
-            lithology = match.group(3).strip()
-            
+        def check_lithology(lithology):
             if lithology in rock_minerals:
-                continue
-            
-            is_excluded = any(term in lithology for term in exclude_terms)
-            if is_excluded:
-                continue
-            
+                return None
+            if any(term in lithology for term in exclude_terms):
+                return None
             for rock in rocks:
                 if lithology == rock:
-                    all_depth_ranges.append((rock, match.group(1), match.group(2)))
-                    break
-            else:
-                all_depth_ranges.append((lithology, match.group(1), match.group(2)))
-        
-        for rock, desc_start, desc_end_str in all_depth_ranges:
-            try:
-                desc_start = float(desc_start)
-                desc_end = float(desc_end_str)
-                
-                overlap_start = max(start_depth, desc_start)
-                overlap_end = min(end_depth, desc_end)
-                overlap = max(0, overlap_end - overlap_start)
-                img_range = end_depth - start_depth
-                
-                if img_range > 0 and overlap / img_range >= 0.6:
                     return rock
-            except:
-                pass
+            if '岩' in lithology:
+                return lithology
+            return None
+
+        depth_pattern = r'(\d+\.?\d*)[m米]?[-–—](\d+\.?\d*)[m米]?[\u4e00-\u9fa5]*([\u4e00-\u9fa5]{1,5}岩)'
+        match = re.search(depth_pattern, description)
+        if match:
+            lithology = match.group(3).strip()
+            result = check_lithology(lithology)
+            if result:
+                try:
+                    desc_start = float(match.group(1))
+                    desc_end = float(match.group(2))
+                    overlap_start = max(start_depth, desc_start)
+                    overlap_end = min(end_depth, desc_end)
+                    overlap = max(0, overlap_end - overlap_start)
+                    img_range = end_depth - start_depth
+                    if img_range > 0 and overlap / img_range >= 0.6:
+                        return result
+                except:
+                    pass
+        
+        for pattern in [
+            r'(\d+\.?\d*)[m米]?[-–—](\d+\.?\d*)[m米]?[\u4e00-\u9fa5]*([\u4e00-\u9fa5]+)粒([\u4e00-\u9fa5]+岩)',
+            r'(\d+\.?\d*)[m米]?[-–—](\d+\.?\d*)[m米]?[\u4e00-\u9fa5]*色([\u4e00-\u9fa5]+岩)',
+        ]:
+            match = re.search(pattern, description)
+            if match:
+                lithology = match.groups()[-1].strip()
+                result = check_lithology(lithology)
+                if result:
+                    try:
+                        desc_start = float(match.group(1))
+                        desc_end = float(match.group(2))
+                        overlap_start = max(start_depth, desc_start)
+                        overlap_end = min(end_depth, desc_end)
+                        overlap = max(0, overlap_end - overlap_start)
+                        img_range = end_depth - start_depth
+                        if img_range > 0 and overlap / img_range >= 0.6:
+                            return result
+                    except:
+                        pass
+        
+        for pattern in [
+            r'[\u4e00-\u9fa5]+性([\u4e00-\u9fa5]+岩)',
+            r'岩性([\u4e00-\u9fa5]+岩)',
+            r'为([\u4e00-\u9fa5]+岩)',
+            r'是([\u4e00-\u9fa5]+岩)',
+        ]:
+            match = re.search(pattern, description)
+            if match:
+                lithology = match.group(1).strip()
+                result = check_lithology(lithology)
+                if result:
+                    return result
         
         return current_lithology
     
