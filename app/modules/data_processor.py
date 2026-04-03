@@ -811,6 +811,13 @@ class DataProcessor(QObject):
             rock_name = item.get('YSMC', '')
             description = item.get('MS', '')
             
+            if description:
+                description = description.replace('||', '')
+                description = description.replace('\\n', '\n')
+                description = description.replace('\\r', '\r')
+                description = description.replace('\\t', '\t')
+                description = description.strip()
+            
             result.append({
                 'start_depth': float(qsjs) if qsjs else 0,
                 'end_depth': float(zzjs) if zzjs else 0,
