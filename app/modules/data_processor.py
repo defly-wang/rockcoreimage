@@ -676,9 +676,14 @@ class DataProcessor(QObject):
             r'岩性([\u4e00-\u9fa5]+)',
         ]
         
+        rock_minerals = ['钾长石', '斜长石', '石英', '黑云母', '白云母', '绿泥石', '绢云母', '黄铁矿', '黄铜矿', '榍石', '钛铁矿', '石榴子石']
+
         for wei_pattern in wei_patterns:
             for wei_match in re.finditer(wei_pattern, description):
                 lithology = wei_match.group(1).strip()
+                
+                if lithology in rock_minerals:
+                    continue
                 
                 lithology_match = None
                 
