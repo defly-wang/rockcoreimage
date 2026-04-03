@@ -734,9 +734,9 @@ class DataProcessor(QObject):
                         if all_depths:
                             break
         
-        for pattern in color_grain_patterns:
+        for pattern, lithology_group in color_grain_patterns:
             for match in re.finditer(pattern, description):
-                lithology = match.group(1).strip()
+                lithology = match.group(lithology_group).strip()
                 
                 if lithology in rock_minerals:
                     continue
@@ -747,7 +747,7 @@ class DataProcessor(QObject):
                 
                 for rock in rocks:
                     if lithology == rock:
-                        all_depth_ranges.append((rock, match.group(2), match.group(3)))
+                        all_depth_ranges.append((rock, match.group(1), match.group(2)))
                         break
         
         depth_lith_direct = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?([\u4e00-\u9fa5]{1,5}岩)'
