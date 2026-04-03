@@ -678,7 +678,7 @@ class DataProcessor(QObject):
         
         for wei_pattern in wei_patterns:
             for wei_match in re.finditer(wei_pattern, description):
-                lithology = wei_match.group(0).strip()
+                lithology = wei_match.group(1).strip()
                 
                 lithology_match = None
                 
