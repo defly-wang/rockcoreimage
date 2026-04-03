@@ -667,13 +667,14 @@ class DataProcessor(QObject):
         
         wei_patterns = [
             r'为([\u4e00-\u9fa5]+岩)',
-            r'为([\u4e00-\u9fa5]+)',
             r'是([\u4e00-\u9fa5]+岩)',
-            r'是([\u4e00-\u9fa5]+)',
             r'[\u4e00-\u9fa5]+性([\u4e00-\u9fa5]+岩)',
-            r'[\u4e00-\u9fa5]+性([\u4e00-\u9fa5]+)',
             r'岩性([\u4e00-\u9fa5]+岩)',
-            r'岩性([\u4e00-\u9fa5]+)',
+        ]
+        
+        color_grain_patterns = [
+            r'[\u4e00-\u9fa5]*色([\u4e00-\u9fa5]+岩)',
+            r'([\u4e00-\u9fa5]+)粒([\u4e00-\u9fa5]+岩)',
         ]
         
         rock_minerals = ['钾长石', '斜长石', '石英', '黑云母', '白云母', '绿泥石', '绢云母', '黄铁矿', '黄铜矿', '榍石', '钛铁矿', '石榴子石']
@@ -737,6 +738,22 @@ class DataProcessor(QObject):
                         
                         if all_depths:
                             break
+        
+        for pattern in color_grain_patterns:
+            for match in re.finditer(pattern, description):
+                lithology = match.group(1).strip()
+                
+                if lithology in rock_minerals:
+                    continue
+                
+                is_excluded = any(term in lithology for term in exclude_terms)
+                if is_excluded:
+                    continue
+                
+                for rock in rocks:
+                    if lithology == rock:
+                        all_depth_ranges.append((rock, match.group(2), match.group(3)))
+                        break
         
         for rock, desc_start, desc_end_str in all_depth_ranges:
             try:
