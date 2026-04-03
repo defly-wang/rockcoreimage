@@ -248,6 +248,14 @@
       ]
     },
     {
+      "name": "二长花岗岩",
+      "category": "岩浆岩",
+      "importance": false,
+      "description_en": "",
+      "description": "",
+      "aliases": []
+    },
+    {
       "name": "珍珠岩",
       "category": "岩浆岩",
       "importance": false,
