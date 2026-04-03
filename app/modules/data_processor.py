@@ -683,8 +683,14 @@ class DataProcessor(QObject):
             
             if lithology_match:
                 text_before = description[:wei_match.start()]
+                
+                last_sentence = text_before
+                for sep in ['。', '；', '||']:
+                    if sep in last_sentence:
+                        last_sentence = last_sentence.split(sep)[-1]
+                
                 depth_pattern = r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?'
-                for dm in re.finditer(depth_pattern, text_before):
+                for dm in re.finditer(depth_pattern, last_sentence):
                     all_depth_ranges.append((
                         lithology_match,
                         dm.group(1),
