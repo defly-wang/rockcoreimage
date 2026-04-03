@@ -677,6 +677,15 @@ class DataProcessor(QObject):
             r'[\d.]+[-–—][\d.]+m?,?\s*[\d.]+[-–—][\d.]+m?是([\u4e00-\u9fa5]+岩)',
             r'([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?是([\u4e00-\u9fa5]+岩)',
             r'([\d.]+)[-–—]([\d.]+)m?[,，]([\d.]+)[-–—]([\d.]+)m?是([\u4e00-\u9fa5]+岩)',
+            r'([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+岩)',
+            r'([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+)',
+            r'([\d.]+)[-–—]([\d.]+)m,([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+岩)',
+            r'([\d.]+)[-–—]([\d.]+)m,([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+)',
+            r'([\d.]+)[-–—]([\d.]+)m，([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+岩)',
+            r'([\d.]+)[-–—]([\d.]+)m，([\d.]+)[-–—]([\d.]+)m为([\u4e00-\u9fa5]+)',
+            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?[,，]([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+岩)',
+            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+岩)',
+            r'([\d.]+)[m米]?[-–—]([\d.]+)[m米]?为([\u4e00-\u9fa5]+)',
         ]
         
         for pattern in depth_lith_patterns:
@@ -687,7 +696,13 @@ class DataProcessor(QObject):
                     
                     for rock in rocks:
                         if rock in potential_lithology or potential_lithology in rock:
-                            return rock
+                            depth_match = re.search(r'([\d.]+)[-–—]', match.group(0))
+                            if depth_match:
+                                desc_depth = float(depth_match.group(1))
+                                if start_depth >= desc_depth - 0.5:
+                                    return rock
+                            else:
+                                return rock
                 except (ValueError, IndexError):
                     pass
         
