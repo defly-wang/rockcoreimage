@@ -144,20 +144,22 @@ class ProcessHandler:
             
             lithology_stats = stats.get('lithology_stats', {})
             
-            self.main_window.process_table.setColumnCount(3)
-            self.main_window.process_table.setHorizontalHeaderLabels(["岩性名称", "图片数", "岩性描述"])
+            self.main_window.process_table.setColumnCount(4)
+            self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "图片数", "岩性描述"])
             self.main_window.process_table.setColumnWidth(0, 120)
-            self.main_window.process_table.setColumnWidth(1, 80)
+            self.main_window.process_table.setColumnWidth(1, 120)
+            self.main_window.process_table.setColumnWidth(2, 80)
             self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
             
-            sorted_lith = sorted(lithology_stats.items(), key=lambda x: -x[1]['count'])
+            sorted_lith = sorted(lithology_stats.values(), key=lambda x: (x.get('proj_order', 0), x.get('order', 0)))
             self.main_window.process_table.setRowCount(len(sorted_lith))
             
-            for i, (lith_name, info) in enumerate(sorted_lith):
-                self.main_window.process_table.setItem(i, 0, QTableWidgetItem(lith_name))
-                self.main_window.process_table.setItem(i, 1, QTableWidgetItem(str(info['count'])))
+            for i, info in enumerate(sorted_lith):
+                self.main_window.process_table.setItem(i, 0, QTableWidgetItem(info['project']))
+                self.main_window.process_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
+                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
                 desc = info['description']
-                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(desc.replace('\n', ' ')))
+                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(desc.replace('\n', ' ')))
             
             self.main_window.process_table.resizeRowsToContents()
         else:

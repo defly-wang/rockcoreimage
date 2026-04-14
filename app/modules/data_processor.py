@@ -148,10 +148,12 @@ class DataProcessor(QObject):
         lithology_stats = {}
         for item in all_data:
             lith = item.get('lithology', '')
+            proj = item.get('project', '')
             if lith:
-                if lith not in lithology_stats:
-                    lithology_stats[lith] = {'count': 0, 'description': item.get('lithology_description', '')}
-                lithology_stats[lith]['count'] += 1
+                key = (lith, proj)
+                if key not in lithology_stats:
+                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
+                lithology_stats[key]['count'] += 1
         
         output_file = os.path.join(output_dir, 'image_descriptions.json')
         with open(output_file, 'w', encoding='utf-8') as f:
@@ -516,12 +518,23 @@ class DataProcessor(QObject):
         self.progress_updated.emit(95, "正在保存数据文件...")
         
         lithology_stats = {}
-        for item in all_data:
+        lith_order = {}
+        proj_order = {}
+        for idx, item in enumerate(all_data):
             lith = item.get('lithology', '')
+            proj = item.get('project', '')
             if lith:
-                if lith not in lithology_stats:
-                    lithology_stats[lith] = {'count': 0, 'description': item.get('lithology_description', '')}
-                lithology_stats[lith]['count'] += 1
+                if proj not in proj_order:
+                    proj_order[proj] = len(proj_order)
+                key = (lith, proj)
+                if key not in lithology_stats:
+                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
+                    lith_order[key] = len(lith_order)
+                lithology_stats[key]['count'] += 1
+        
+        for key in lithology_stats:
+            lithology_stats[key]['order'] = lith_order[key]
+            lithology_stats[key]['proj_order'] = proj_order[key[1]]
         
         output_file = os.path.join(output_dir, 'image_descriptions.json')
         with open(output_file, 'w', encoding='utf-8') as f:
@@ -565,47 +578,8 @@ class DataProcessor(QObject):
                     matched_lith = lith
                     break
             
-            source_img_path = self.find_image_in_tongci(borehole_dir, filename)
-        
-        image_info = self.parse_white_light_html(white_light_html)
-        
-        lithology_info = self.parse_histogram_html(histogram_html)
-        
-        rocks = self.load_rock_types()
-        
-        lithology_map = {}
-        for lith in lithology_info:
-            key = (lith['start_depth'], lith['end_depth'])
-            lithology_map[key] = lith
-        
-        for img in image_info:
-            full_path = img['path']
-            full_path = full_path.replace('\\', '/')
-            if '//' in full_path:
-                full_path = full_path.split('//', 1)[1]
-            
-            filename = os.path.basename(full_path)
-            start_depth = img['start_depth']
-            end_depth = img['end_depth']
-            
-            matched_lith = None
-            for (s, e), lith in lithology_map.items():
-                if start_depth >= s and end_depth <= e:
-                    matched_lith = lith
-                    break
-                if start_depth < e and end_depth > s:
-                    matched_lith = lith
-                    break
-            
             lithology = matched_lith['rock_name'] if matched_lith else ''
             lithology_description = matched_lith['description'] if matched_lith else ''
-            
-            if lithology_description:
-                refined_lithology = self.analyze_lithology_from_description(
-                    lithology, lithology_description, start_depth, end_depth, rocks
-                )
-                if refined_lithology:
-                    lithology = refined_lithology
             
             source_img_path = self.find_image_in_tongci(borehole_dir, filename)
             
@@ -679,7 +653,7 @@ class DataProcessor(QObject):
                 return lithology
             return None
 
-        depth_pattern = r'(\d+\.?\d*)[m米]?[-–—](\d+\.?\d*)[m米]?[\u4e00-\u9fa5]*([\u4e00-\u9fa5]{1,5}岩)'
+        depth_pattern = r'(\d+\.?\d*)[m米]?[-–—](\d+\.?\d*)[m米]?\s*([\u4e00-\u9fa5]+岩)'
         match = re.search(depth_pattern, description)
         if match:
             lithology = match.group(3).strip()
@@ -719,14 +693,14 @@ class DataProcessor(QObject):
                         pass
         
         for pattern in [
-            r'[\u4e00-\u9fa5]+性([\u4e00-\u9fa5]+岩)',
-            r'岩性([\u4e00-\u9fa5]+岩)',
-            r'为([\u4e00-\u9fa5]+岩)',
-            r'是([\u4e00-\u9fa5]+岩)',
+            r'岩性.*?([\u4e00-\u9fa5]{1,4}岩)',
+            r'(?:为|是)\s*([\u4e00-\u9fa5]{1,4}岩)',
         ]:
             match = re.search(pattern, description)
             if match:
                 lithology = match.group(1).strip()
+                if lithology.startswith(('为', '是')):
+                    continue
                 result = check_lithology(lithology)
                 if result:
                     return result
