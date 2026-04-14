@@ -22,6 +22,64 @@ class ProcessHandler:
             self.main_window.output_path_label.setText(os.path.basename(folder))
             self.main_window.process_log.append(f"已选择输出目录: {folder}")
     
+    def show_process_stats(self):
+        from PyQt6.QtWidgets import QFileDialog
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择处理结果文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import json
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        self.main_window.process_log.clear()
+        self.main_window.process_log.append(f"正在加载: {json_file}")
+        
+        lithology_stats = {}
+        lith_order = {}
+        proj_order = {}
+        for idx, item in enumerate(data):
+            lith = item.get('lithology', '')
+            proj = item.get('project', '')
+            if lith:
+                if proj not in proj_order:
+                    proj_order[proj] = len(proj_order)
+                key = (lith, proj)
+                if key not in lithology_stats:
+                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
+                    lith_order[key] = len(lith_order)
+                lithology_stats[key]['count'] += 1
+        
+        for key in lithology_stats:
+            lithology_stats[key]['order'] = lith_order[key]
+            lithology_stats[key]['proj_order'] = proj_order[key[1]]
+        
+        self.main_window.process_table.setColumnCount(4)
+        self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "图片数", "岩性描述"])
+        self.main_window.process_table.setColumnWidth(0, 120)
+        self.main_window.process_table.setColumnWidth(1, 120)
+        self.main_window.process_table.setColumnWidth(2, 80)
+        self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+        
+        sorted_lith = sorted(lithology_stats.values(), key=lambda x: (x.get('proj_order', 0), x.get('order', 0)))
+        self.main_window.process_table.setRowCount(len(sorted_lith))
+        
+        for i, info in enumerate(sorted_lith):
+            self.main_window.process_table.setItem(i, 0, QTableWidgetItem(info['project']))
+            self.main_window.process_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
+            self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
+            desc = info['description']
+            self.main_window.process_table.setItem(i, 3, QTableWidgetItem(desc.replace('\n', ' ') if desc else ''))
+        
+        self.main_window.process_table.resizeRowsToContents()
+        self.main_window.process_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
+    
     def start_data_processing(self):
         if not hasattr(self.main_window, 'source_directory') or not self.main_window.source_directory:
             QMessageBox.warning(self.main_window, "警告", "请先选择数据源目录")
@@ -37,6 +95,8 @@ class ProcessHandler:
         self.main_window.classify_btn.setEnabled(False)
         if hasattr(self.main_window, 'alteration_btn'):
             self.main_window.alteration_btn.setEnabled(False)
+        if hasattr(self.main_window, 'stats_btn'):
+            self.main_window.stats_btn.setEnabled(False)
         self.main_window.process_status_label.setText("正在初始化...")
         self.main_window.process_status_label.setStyleSheet("""
             font-size: 14px;
@@ -140,6 +200,8 @@ class ProcessHandler:
             self.main_window.classify_btn.setEnabled(True)
             if hasattr(self.main_window, 'alteration_btn'):
                 self.main_window.alteration_btn.setEnabled(True)
+            if hasattr(self.main_window, 'stats_btn'):
+                self.main_window.stats_btn.setEnabled(True)
             self.main_window.classify_output_file = output_file
             
             lithology_stats = stats.get('lithology_stats', {})

@@ -239,6 +239,25 @@ class ProcessPage:
         main_window.process_btn.clicked.connect(main_window.process_handler.start_data_processing)
         button_layout.addWidget(main_window.process_btn)
         
+        main_window.stats_btn = QPushButton("岩性统计")
+        main_window.stats_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 12px 20px;
+            }
+            QPushButton:hover {
+                background-color: #F57C00;
+            }
+            QPushButton:disabled {
+                background-color: #BDBDBD;
+            }
+        """)
+        main_window.stats_btn.clicked.connect(main_window.process_handler.show_process_stats)
+        button_layout.addWidget(main_window.stats_btn)
+        
         main_window.classify_btn = QPushButton("岩性分类")
         main_window.classify_btn.setStyleSheet("""
             QPushButton {
