@@ -155,6 +155,7 @@ class DataProcessor(QObject):
         self.progress_updated.emit(5, f"共发现 {total_projects} 个项目")
         
         all_data = []
+        html_lithology_data = []
         
         for idx, project in enumerate(sorted(project_dirs)):
             progress_base = int(10 + (idx / total_projects) * 80)
@@ -577,6 +578,7 @@ class DataProcessor(QObject):
         self.progress_updated.emit(5, f"共发现 {total_projects} 个项目")
         
         all_data = []
+        html_lithology_data = []
         
         for idx, project in enumerate(sorted(project_dirs)):
             progress_base = int(10 + (idx / total_projects) * 80)
@@ -619,8 +621,12 @@ class DataProcessor(QObject):
             
             try:
                 self.progress_updated.emit(progress_base + 2, f"正在解析 {project} 的HTML文件...")
-                project_data = self.process_html_files(project, borehole_dir, white_light_html, histogram_html)
+                project_data, lithology_info = self.process_html_files(project, borehole_dir, white_light_html, histogram_html)
                 all_data.extend(project_data)
+                for lith in lithology_info:
+                    lith['project'] = project
+                    lith['borehole'] = project
+                    html_lithology_data.append(lith)
                 self.progress_updated.emit(
                     progress_base + 5,
                     f"项目 {project} 处理完成，获取 {len(project_data)} 条记录"
@@ -630,60 +636,21 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存数据文件...")
         
-        desc_key_map = {}
-        desc_records = {}
-        
         for item in all_data:
-            project = item.get('project', '')
-            borehole = item.get('borehole', '')
-            lithology = item.get('lithology', '')
-            start_depth = item.get('start_depth', 0)
-            end_depth = item.get('end_depth', 0)
-            description = item.get('lithology_description', '')
-            
-            key = (project, borehole, lithology)
-            
-            if key not in desc_key_map:
-                desc_id = len(desc_key_map)
-                desc_key_map[key] = desc_id
-                desc_records[desc_id] = {
-                    'id': desc_id,
-                    'project': project,
-                    'borehole': borehole,
-                    'lithology': lithology,
-                    'segments': []
-                }
-            
-            existing = desc_records[desc_key_map[key]]
-            if not any(s['start'] == start_depth and s['end'] == end_depth for s in existing['segments']):
-                existing['segments'].append({
-                    'start': start_depth,
-                    'end': end_depth,
-                    'description': description
-                })
-            
-            item['description_id'] = desc_key_map[key]
             item.pop('lithology_description', None)
         
         descriptions = []
-        for desc_id in sorted(desc_records.keys()):
-            rec = desc_records[desc_id]
-            rec['segments'].sort(key=lambda x: x['start'])
-            
-            min_start = min(s['start'] for s in rec['segments'])
-            max_end = max(s['end'] for s in rec['segments'])
-            
-            merged_desc = '；'.join([s['description'] for s in rec['segments'] if s['description']])
-            
-            descriptions.append({
-                'id': rec['id'],
-                'project': rec['project'],
-                'borehole': rec['borehole'],
-                'lithology': rec['lithology'],
-                'start_depth': min_start,
-                'end_depth': max_end,
-                'description': merged_desc
-            })
+        if html_lithology_data:
+            for idx, lith in enumerate(html_lithology_data):
+                descriptions.append({
+                    'id': idx,
+                    'project': lith.get('project', ''),
+                    'borehole': lith.get('borehole', ''),
+                    'lithology': lith.get('rock_name', ''),
+                    'start_depth': lith.get('start_depth', 0),
+                    'end_depth': lith.get('end_depth', 0),
+                    'description': lith.get('description', '')
+                })
         
         lithology_stats = {}
         lith_order = {}
@@ -778,7 +745,7 @@ class DataProcessor(QObject):
                 except Exception as e:
                     self.error_occurred.emit(f"复制图片失败 {source_img_path}: {str(e)}")
         
-        return project_data
+        return project_data, lithology_info
     
     def load_rock_types(self):
         config_files = [
