@@ -144,47 +144,8 @@ class AnalysisPage:
 class AnalysisHandler:
     def __init__(self, main_window):
         self.main_window = main_window
-        
-        lithology_stats = {}
-        lith_order = {}
-        proj_order = {}
-        for idx, item in enumerate(data):
-            lith = item.get('lithology', '')
-            proj = item.get('project', '')
-            if lith:
-                if proj not in proj_order:
-                    proj_order[proj] = len(proj_order)
-                key = (lith, proj)
-                if key not in lithology_stats:
-                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
-                    lith_order[key] = len(lith_order)
-                lithology_stats[key]['count'] += 1
-        
-        for key in lithology_stats:
-            lithology_stats[key]['order'] = lith_order[key]
-            lithology_stats[key]['proj_order'] = proj_order[key[1]]
-        
-        self.main_window.analysis_table.setColumnCount(4)
-        self.main_window.analysis_table.setHorizontalHeaderLabels(["项目", "岩性名称", "图片数", "岩性描述"])
-        self.main_window.analysis_table.setColumnWidth(0, 120)
-        self.main_window.analysis_table.setColumnWidth(1, 120)
-        self.main_window.analysis_table.setColumnWidth(2, 80)
-        self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
-        
-        sorted_lith = sorted(lithology_stats.values(), key=lambda x: (x.get('proj_order', 0), x.get('order', 0)))
-        self.main_window.analysis_table.setRowCount(len(sorted_lith))
-        
-        for i, info in enumerate(sorted_lith):
-            self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(info['project']))
-            self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
-            self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
-            desc = info['description']
-            self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(desc.replace('\n', ' ') if desc else ''))
-        
-        self.main_window.analysis_table.resizeRowsToContents()
-        self.main_window.analysis_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
     
-    def view_alteration_analysis(self):
+    def show_process_stats(self):
         json_file, _ = QFileDialog.getOpenFileName(
             self.main_window, "选择岩性分类后的JSON文件", "", "JSON文件 (*.json)"
         )
