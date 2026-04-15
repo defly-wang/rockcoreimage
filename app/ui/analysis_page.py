@@ -132,6 +132,27 @@ class AnalysisPage:
         right_layout.addWidget(QLabel("统计表格:"))
         right_layout.addWidget(main_window.analysis_table, 1)
         
+        stats_button_panel = QHBoxLayout()
+        stats_button_panel.addStretch()
+        
+        stats_btn = QPushButton("岩性统计")
+        stats_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #F57C00;
+            }
+        """)
+        stats_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
+        stats_button_panel.addWidget(stats_btn)
+        
+        right_layout.addLayout(stats_button_panel)
+        
         right_panel.setLayout(right_layout)
         
         main_content.addWidget(right_panel, 1)
@@ -145,6 +166,63 @@ class AnalysisPage:
 class AnalysisHandler:
     def __init__(self, main_window):
         self.main_window = main_window
+    
+    def show_process_stats(self):
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择处理结果文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import json
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append(f"正在加载: {json_file}")
+        
+        lithology_stats = {}
+        lith_order = {}
+        proj_order = {}
+        for idx, item in enumerate(data):
+            lith = item.get('lithology', '')
+            proj = item.get('project', '')
+            if lith:
+                if proj not in proj_order:
+                    proj_order[proj] = len(proj_order)
+                key = (lith, proj)
+                if key not in lithology_stats:
+                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
+                    lith_order[key] = len(lith_order)
+                lithology_stats[key]['count'] += 1
+        
+        for key in lithology_stats:
+            lithology_stats[key]['order'] = lith_order[key]
+            lithology_stats[key]['proj_order'] = proj_order[key[1]]
+        
+        self.main_window.analysis_table.setColumnCount(4)
+        self.main_window.analysis_table.setHorizontalHeaderLabels(["项目", "岩性名称", "图片数", "岩性描述"])
+        self.main_window.analysis_table.setColumnWidth(0, 120)
+        self.main_window.analysis_table.setColumnWidth(1, 120)
+        self.main_window.analysis_table.setColumnWidth(2, 80)
+        self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+        
+        sorted_lith = sorted(lithology_stats.values(), key=lambda x: (x.get('proj_order', 0), x.get('order', 0)))
+        self.main_window.analysis_table.setRowCount(len(sorted_lith))
+        
+        for i, info in enumerate(sorted_lith):
+            self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(info['project']))
+            self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
+            self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
+            desc = info['description']
+            self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(desc.replace('\n', ' ') if desc else ''))
+        
+        self.main_window.analysis_table.resizeRowsToContents()
+        self.main_window.analysis_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
     
     def view_lithology_classification(self):
         json_file, _ = QFileDialog.getOpenFileName(
