@@ -198,7 +198,8 @@ class ProcessHandler:
                 border-radius: 4px;
             """)
             self.main_window.process_btn.setEnabled(True)
-            self.main_window.classify_btn.setEnabled(True)
+            if hasattr(self.main_window, 'classify_btn'):
+                self.main_window.classify_btn.setEnabled(True)
             if hasattr(self.main_window, 'alteration_btn'):
                 self.main_window.alteration_btn.setEnabled(True)
             if hasattr(self.main_window, 'stats_btn'):
@@ -237,7 +238,8 @@ class ProcessHandler:
                 border-radius: 4px;
             """)
             self.main_window.process_btn.setEnabled(True)
-            self.main_window.classify_btn.setEnabled(True)
+            if hasattr(self.main_window, 'classify_btn'):
+                self.main_window.classify_btn.setEnabled(True)
         
         self.main_window.process_log.append(f"处理完成!")
         self.main_window.process_log.append(f"共处理图片: {stats.get('total_images', 0)} 张")
@@ -255,7 +257,8 @@ class ProcessHandler:
     def on_processing_error(self, error_msg):
         self.main_window.process_log.append(f"错误: {error_msg}")
         self.main_window.process_btn.setEnabled(True)
-        self.main_window.classify_btn.setEnabled(True)
+        if hasattr(self.main_window, 'classify_btn'):
+            self.main_window.classify_btn.setEnabled(True)
     
     def start_lithology_classify(self):
         from PyQt6.QtWidgets import QFileDialog
@@ -276,7 +279,8 @@ class ProcessHandler:
         output_file = json_file.replace('.json', '_classified.json')
         
         self.main_window.process_btn.setEnabled(False)
-        self.main_window.classify_btn.setEnabled(False)
+        if hasattr(self.main_window, 'classify_btn'):
+            self.main_window.classify_btn.setEnabled(False)
         self.main_window.process_status_label.setText("正在初始化...")
         self.main_window.process_status_label.setStyleSheet("""
             font-size: 14px;
@@ -372,7 +376,8 @@ class ProcessHandler:
         self.main_window.process_table.resizeRowsToContents()
         
         self.main_window.process_btn.setEnabled(True)
-        self.main_window.classify_btn.setEnabled(True)
+        if hasattr(self.main_window, 'classify_btn'):
+            self.main_window.classify_btn.setEnabled(True)
         self.main_window.status_bar.showMessage("分类完成")
     
     def start_alteration_analysis(self):
@@ -394,7 +399,8 @@ class ProcessHandler:
         output_file = json_file.replace('.json', '_alteration.json')
         
         self.main_window.process_btn.setEnabled(False)
-        self.main_window.classify_btn.setEnabled(False)
+        if hasattr(self.main_window, 'classify_btn'):
+            self.main_window.classify_btn.setEnabled(False)
         if hasattr(self.main_window, 'alteration_btn'):
             self.main_window.alteration_btn.setEnabled(False)
         self.main_window.process_status_label.setText("正在初始化...")
@@ -508,7 +514,8 @@ class ProcessHandler:
         self.main_window.process_table.resizeRowsToContents()
         
         self.main_window.process_btn.setEnabled(True)
-        self.main_window.classify_btn.setEnabled(True)
+        if hasattr(self.main_window, 'classify_btn'):
+            self.main_window.classify_btn.setEnabled(True)
         if hasattr(self.main_window, 'alteration_btn'):
             self.main_window.alteration_btn.setEnabled(True)
         self.main_window.status_bar.showMessage("蚀变分析完成")
