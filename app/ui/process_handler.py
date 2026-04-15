@@ -202,6 +202,9 @@ class ProcessHandler:
             """)
     
     def on_processing_finished(self, output_file, stats):
+        import json
+        import os
+        
         self.main_window.process_progress.setValue(100)
         
         if stats.get('total_images', 0) > 0:
@@ -226,6 +229,17 @@ class ProcessHandler:
             
             lithology_stats = stats.get('lithology_stats', {})
             
+            desc_file = os.path.join(os.path.dirname(output_file), 'lithology_descriptions.json')
+            descriptions = {}
+            if os.path.exists(desc_file):
+                with open(desc_file, 'r', encoding='utf-8') as f:
+                    desc_data = json.load(f)
+                    for d in desc_data:
+                        key = (d.get('project', ''), d.get('borehole', ''), d.get('lithology', ''))
+                        if key not in descriptions:
+                            descriptions[key] = []
+                        descriptions[key].append(d)
+            
             self.main_window.process_table.setColumnCount(6)
             self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "起始深度(m)", "结束深度(m)", "图片数", "岩性描述"])
             self.main_window.process_table.setColumnWidth(0, 100)
@@ -241,11 +255,24 @@ class ProcessHandler:
             for i, info in enumerate(sorted_lith):
                 self.main_window.process_table.setItem(i, 0, QTableWidgetItem(info['project']))
                 self.main_window.process_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
-                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info.get('start_depth', 0))))
-                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(str(info.get('end_depth', 0))))
+                
+                key = (info['project'], info['lithology'])
+                desc_list = descriptions.get(key, [])
+                
+                if desc_list:
+                    first_desc = desc_list[0]
+                    start_depth = first_desc.get('start_depth', 0)
+                    end_depth = first_desc.get('end_depth', 0)
+                    desc_text = first_desc.get('description', '')
+                else:
+                    start_depth = 0
+                    end_depth = 0
+                    desc_text = ''
+                
+                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(start_depth)))
+                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(str(end_depth)))
                 self.main_window.process_table.setItem(i, 4, QTableWidgetItem(str(info['count'])))
-                desc = info.get('description', '')
-                self.main_window.process_table.setItem(i, 5, QTableWidgetItem(desc.replace('\n', ' ') if desc else ''))
+                self.main_window.process_table.setItem(i, 5, QTableWidgetItem(desc_text.replace('\n', ' ') if desc_text else ''))
             
             self.main_window.process_table.resizeRowsToContents()
         else:
