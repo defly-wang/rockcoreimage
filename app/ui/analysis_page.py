@@ -132,11 +132,27 @@ class AnalysisPage:
         right_layout.addWidget(QLabel("统计表格:"))
         right_layout.addWidget(main_window.analysis_table, 1)
         
-        stats_button_panel = QHBoxLayout()
-        stats_button_panel.addStretch()
+        action_button_panel = QHBoxLayout()
+        action_button_panel.addStretch()
+        
+        classify_btn = QPushButton("岩性分类")
+        classify_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+        """)
+        classify_btn.clicked.connect(main_window.analysis_handler.start_lithology_classify)
+        action_button_panel.addWidget(classify_btn)
         
         stats_btn = QPushButton("岩性统计")
-        stats_btn.setStyleSheet("""
+        stats_btn.setStyleSheet(""""
             QPushButton {
                 background-color: #FF9800;
                 color: white;
@@ -149,9 +165,9 @@ class AnalysisPage:
             }
         """)
         stats_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
-        stats_button_panel.addWidget(stats_btn)
+        action_button_panel.addWidget(stats_btn)
         
-        right_layout.addLayout(stats_button_panel)
+        right_layout.addLayout(action_button_panel)
         
         right_panel.setLayout(right_layout)
         
@@ -166,6 +182,61 @@ class AnalysisPage:
 class AnalysisHandler:
     def __init__(self, main_window):
         self.main_window = main_window
+    
+    def start_lithology_classify(self):
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import os
+        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        project_root = os.path.dirname(app_dir)
+        config_file = os.path.join(project_root, 'config', 'rock_types_flat.json')
+        
+        if not os.path.exists(config_file):
+            QMessageBox.warning(self.main_window, "错误", f"找不到配置文件: {config_file}")
+            return
+        
+        output_file = json_file.replace('.json', '_classified.json')
+        
+        self.main_window.analysis_status_label.setText("正在初始化...")
+        self.main_window.analysis_progress.setValue(0)
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append("开始岩性分类...")
+        
+        from app.modules.data_processor import DataProcessor
+        data_processor = DataProcessor()
+        
+        data_processor.progress_updated.connect(self.on_classify_progress)
+        data_processor.processing_finished.connect(self.on_classify_finished)
+        data_processor.error_occurred.connect(self.on_processing_error)
+        
+        from threading import Thread
+        classify_thread = Thread(
+            target=data_processor.classify_lithology,
+            args=(json_file, config_file, output_file),
+            daemon=True
+        )
+        classify_thread.start()
+    
+    def on_classify_progress(self, value, message):
+        self.main_window.analysis_progress.setValue(value)
+        self.main_window.analysis_log.append(message)
+        self.main_window.status_bar.showMessage(message)
+        self.main_window.analysis_status_label.setText(message)
+    
+    def on_classify_finished(self, output_file, stats):
+        self.main_window.analysis_progress.setValue(100)
+        self.main_window.analysis_status_label.setText(f"分类完成 - 匹配 {stats.get('matched', 0)}/{stats.get('total', 0)} 条")
+        self.main_window.analysis_log.append(f"分类完成!")
+        self.main_window.analysis_log.append(f"输出文件: {output_file}")
+        self.main_window.status_bar.showMessage("分类完成")
+    
+    def on_processing_error(self, error_message):
+        QMessageBox.critical(self.main_window, "错误", error_message)
+        self.main_window.analysis_status_label.setText(f"错误: {error_message}")
     
     def show_process_stats(self):
         json_file, _ = QFileDialog.getOpenFileName(

@@ -239,24 +239,6 @@ class ProcessPage:
         main_window.process_btn.clicked.connect(main_window.process_handler.start_data_processing)
         button_layout.addWidget(main_window.process_btn)
         
-        main_window.classify_btn = QPushButton("岩性分类")
-        main_window.classify_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2196F3;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 12px 20px;
-            }
-            QPushButton:hover {
-                background-color: #1976D2;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
-            }
-        """)
-        main_window.classify_btn.clicked.connect(main_window.process_handler.start_lithology_classify)
-        button_layout.addWidget(main_window.classify_btn)
         
         main_window.alteration_btn = QPushButton("蚀变分析")
         main_window.alteration_btn.setStyleSheet("""
