@@ -1224,6 +1224,18 @@
       ]
     },
     {
+      "name": "第四系",
+      "category": "沉积岩",
+      "importance": true,
+      "name_en": "Quaternary Deposits",
+      "description_en": "Unconsolidated Quaternary sediment deposits including alluvial, lacustrine, eolian, and glacial deposits. The youngest geological stratigraphic unit.",
+      "description": "未固结的第四纪沉积物，包括冲积、湖积、风积和冰川沉积。最年轻的地层层位。",
+      "aliases": [
+        "第四纪沉积",
+        "第四系沉积"
+      ]
+    },
+    {
       "name": "超糜棱岩",
       "category": "变质岩",
       "importance": false,
@@ -1233,10 +1245,21 @@
       "aliases": [
         "超糜棱石"
       ]
+    },
+    {
+      "name": "变粒岩",
+      "category": "变质岩",
+      "importance": true,
+      "name_en": "Leptynite",
+      "description_en": "Medium-grade metamorphic rock composed of quartz and alkali feldspar with minor mica. Fine to medium-grained gneissic texture, lighter-colored than typical gneiss.",
+      "description": "中级变质岩，主要由石英和碱性长石组成，含少量云母。细至中粒片麻状构造，浅色。",
+      "aliases": [
+        "浅色片麻岩"
+      ]
     }
   ],
   "metadata": {
-    "total": 111,
+    "total": 113,
     "source": "Based on 常见岩性列表.xlsx",
     "version": "1.0"
   }
