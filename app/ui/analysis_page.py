@@ -137,33 +137,6 @@ class AnalysisPage:
         
         layout.addLayout(main_content)
         
-        
-        button_layout.addSpacing(20)
-        
-        button_layout.addStretch()
-        
-        main_window.stats_btn = QPushButton("岩性统计")
-        main_window.stats_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #FF9800;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                padding: 12px 30px;
-            }
-            QPushButton:hover {
-                background-color: #F57C00;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
-            }
-        """)
-        main_window.stats_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
-        button_layout.addWidget(main_window.stats_btn)
-        
-        button_panel.setLayout(button_layout)
-        layout.addWidget(button_panel)
-        
         page.setLayout(layout)
         return page
 
@@ -171,23 +144,6 @@ class AnalysisPage:
 class AnalysisHandler:
     def __init__(self, main_window):
         self.main_window = main_window
-    
-        json_file, _ = QFileDialog.getOpenFileName(
-            self.main_window, "选择处理结果文件", "", "JSON文件 (*.json)"
-        )
-        if not json_file:
-            return
-        
-        import json
-        try:
-            with open(json_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except Exception as e:
-            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
-            return
-        
-        self.main_window.analysis_log.clear()
-        self.main_window.analysis_log.append(f"正在加载: {json_file}")
         
         lithology_stats = {}
         lith_order = {}
