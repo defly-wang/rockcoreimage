@@ -636,9 +636,6 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存数据文件...")
         
-        for item in all_data:
-            item.pop('lithology_description', None)
-        
         descriptions = []
         if html_lithology_data:
             for idx, lith in enumerate(html_lithology_data):
@@ -651,6 +648,27 @@ class DataProcessor(QObject):
                     'end_depth': lith.get('end_depth', 0),
                     'description': lith.get('description', '')
                 })
+        
+        desc_lookup = {(d['project'], d['borehole'], d['start_depth'], d['end_depth']): d['id'] for d in descriptions}
+        
+        for item in all_data:
+            project = item.get('project', '')
+            borehole = item.get('borehole', '')
+            start_depth = item.get('start_depth', 0)
+            end_depth = item.get('end_depth', 0)
+            
+            desc_id = None
+            for (proj, bore, ds, de), lid in desc_lookup.items():
+                if proj == project and bore == borehole:
+                    if start_depth >= ds and end_depth <= de:
+                        desc_id = lid
+                        break
+                    if start_depth < de and end_depth > ds:
+                        desc_id = lid
+                        break
+            
+            item['lithology_description_id'] = desc_id
+            item.pop('lithology_description', None)
         
         lithology_stats = {}
         lith_order = {}
