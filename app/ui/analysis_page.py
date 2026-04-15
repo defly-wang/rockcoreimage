@@ -135,6 +135,38 @@ class AnalysisPage:
         action_button_panel = QHBoxLayout()
         action_button_panel.addStretch()
         
+        stats_btn = QPushButton("岩性统计")
+        stats_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #F57C00;
+            }
+        """)
+        stats_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
+        action_button_panel.addWidget(stats_btn)
+        
+        alteration_btn = QPushButton("蚀变分析")
+        alteration_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #7B1FA2;
+            }
+        """)
+        alteration_btn.clicked.connect(main_window.analysis_handler.start_alteration_analysis)
+        action_button_panel.addWidget(alteration_btn)
+        
         classify_btn = QPushButton("岩性分类")
         classify_btn.setStyleSheet("""
             QPushButton {
@@ -150,22 +182,6 @@ class AnalysisPage:
         """)
         classify_btn.clicked.connect(main_window.analysis_handler.start_lithology_classify)
         action_button_panel.addWidget(classify_btn)
-        
-        stats_btn = QPushButton("岩性统计")
-        stats_btn.setStyleSheet(""""
-            QPushButton {
-                background-color: #FF9800;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
-            }
-            QPushButton:hover {
-                background-color: #F57C00;
-            }
-        """)
-        stats_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
-        action_button_panel.addWidget(stats_btn)
         
         right_layout.addLayout(action_button_panel)
         
@@ -276,6 +292,113 @@ class AnalysisHandler:
     def on_processing_error(self, error_message):
         QMessageBox.critical(self.main_window, "错误", error_message)
         self.main_window.analysis_status_label.setText(f"错误: {error_message}")
+    
+    def start_alteration_analysis(self):
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择岩性分类后的JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import os
+        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        project_root = os.path.dirname(app_dir)
+        alteration_config_file = os.path.join(project_root, 'config', 'alteration_types.json')
+        
+        if not os.path.exists(alteration_config_file):
+            QMessageBox.warning(self.main_window, "错误", f"找不到蚀变配置文件: {alteration_config_file}")
+            return
+        
+        output_file = json_file.replace('.json', '_alteration.json')
+        
+        self.main_window.analysis_status_label.setText("正在蚀变分析...")
+        self.main_window.analysis_progress.setValue(0)
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append("开始蚀变分析...")
+        
+        from app.modules.data_processor import DataProcessor
+        data_processor = DataProcessor()
+        
+        data_processor.progress_updated.connect(self.on_alteration_progress)
+        data_processor.processing_finished.connect(self.on_alteration_finished)
+        data_processor.error_occurred.connect(self.on_processing_error)
+        
+        from threading import Thread
+        alteration_thread = Thread(
+            target=data_processor.analyze_alteration,
+            args=(json_file, alteration_config_file, output_file),
+            daemon=True
+        )
+        alteration_thread.start()
+    
+    def on_alteration_progress(self, value, message):
+        self.main_window.analysis_progress.setValue(value)
+        self.main_window.analysis_log.append(message)
+        self.main_window.status_bar.showMessage(message)
+        self.main_window.analysis_status_label.setText(message)
+    
+    def on_alteration_finished(self, output_file, stats):
+        import json
+        
+        self.main_window.analysis_progress.setValue(100)
+        
+        records_with_alt = stats.get('records_with_alteration', 0)
+        total_records = stats.get('total_records', 0)
+        
+        self.main_window.analysis_status_label.setText(f"蚀变分析完成 - {records_with_alt}/{total_records} 条含蚀变")
+        self.main_window.analysis_log.append(f"蚀变分析完成!")
+        self.main_window.analysis_log.append(f"总记录数: {total_records}")
+        self.main_window.analysis_log.append(f"含蚀变记录: {records_with_alt} 条")
+        
+        try:
+            with open(output_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
+            records.sort(key=lambda x: (x[0], x[1]))
+            
+            self.main_window.analysis_table.setColumnCount(6)
+            self.main_window.analysis_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "原始岩性", "蚀变类型", "岩性描述"])
+            self.main_window.analysis_table.setColumnWidth(0, 100)
+            self.main_window.analysis_table.setColumnWidth(1, 60)
+            self.main_window.analysis_table.setColumnWidth(2, 60)
+            self.main_window.analysis_table.setColumnWidth(3, 200)
+            self.main_window.analysis_table.setColumnWidth(4, 120)
+            self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+            
+            rock_groups = {}
+            for rock_name, lithology, alteration, description in records:
+                if rock_name not in rock_groups:
+                    rock_groups[rock_name] = {}
+                if lithology not in rock_groups[rock_name]:
+                    rock_groups[rock_name][lithology] = {'count': 0, 'alterations': set(), 'description': description}
+                rock_groups[rock_name][lithology]['count'] += 1
+                if alteration:
+                    rock_groups[rock_name][lithology]['alterations'].add(alteration)
+            
+            rows = []
+            for rock_name in sorted(rock_groups.keys()):
+                for lithology, info in rock_groups[rock_name].items():
+                    alterations_str = ", ".join(sorted(info['alterations'])) if info['alterations'] else "-"
+                    desc = info['description'] or "-"
+                    rows.append((rock_name, str(info['count']), "1", lithology, alterations_str, desc))
+            
+            self.main_window.analysis_table.setRowCount(len(rows))
+            for row, (rock_name, count, _, lithology, alteration, description) in enumerate(rows):
+                self.main_window.analysis_table.setItem(row, 0, QTableWidgetItem(rock_name))
+                self.main_window.analysis_table.setItem(row, 1, QTableWidgetItem(count))
+                self.main_window.analysis_table.setItem(row, 2, QTableWidgetItem("1"))
+                self.main_window.analysis_table.setItem(row, 3, QTableWidgetItem(lithology))
+                self.main_window.analysis_table.setItem(row, 4, QTableWidgetItem(alteration))
+                self.main_window.analysis_table.setItem(row, 5, QTableWidgetItem(description))
+            
+            self.main_window.analysis_table.resizeRowsToContents()
+            self.main_window.analysis_log.append(f"显示蚀变分析结果")
+            
+        except Exception as e:
+            self.main_window.analysis_log.append(f"加载结果失败: {str(e)}")
+        
+        self.main_window.status_bar.showMessage("蚀变分析完成")
     
     def show_process_stats(self):
         json_file, _ = QFileDialog.getOpenFileName(
