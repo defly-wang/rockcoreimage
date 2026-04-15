@@ -228,10 +228,49 @@ class AnalysisHandler:
         self.main_window.analysis_status_label.setText(message)
     
     def on_classify_finished(self, output_file, stats):
+        import json
+        
         self.main_window.analysis_progress.setValue(100)
         self.main_window.analysis_status_label.setText(f"分类完成 - 匹配 {stats.get('matched', 0)}/{stats.get('total', 0)} 条")
         self.main_window.analysis_log.append(f"分类完成!")
         self.main_window.analysis_log.append(f"输出文件: {output_file}")
+        
+        try:
+            with open(output_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            rock_groups = {}
+            for item in data:
+                rock_name = item.get('岩性名称', '') or '未分类'
+                lithology = item.get('lithology', '')
+                if rock_name not in rock_groups:
+                    rock_groups[rock_name] = {'lithologies': set(), 'count': 0}
+                rock_groups[rock_name]['lithologies'].add(lithology)
+                rock_groups[rock_name]['count'] += 1
+            
+            self.main_window.analysis_table.setColumnCount(4)
+            self.main_window.analysis_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "对应原始岩性"])
+            self.main_window.analysis_table.setColumnWidth(0, 100)
+            self.main_window.analysis_table.setColumnWidth(1, 80)
+            self.main_window.analysis_table.setColumnWidth(2, 80)
+            self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+            
+            sorted_rocks = sorted(rock_groups.items(), key=lambda x: x[1]['count'], reverse=True)
+            self.main_window.analysis_table.setRowCount(len(sorted_rocks))
+            
+            for i, (rock_name, info) in enumerate(sorted_rocks):
+                self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(rock_name))
+                self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(str(info['count'])))
+                self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(str(len(info['lithologies']))))
+                lithologies_str = ", ".join(sorted(info['lithologies']))
+                self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(lithologies_str))
+            
+            self.main_window.analysis_table.resizeRowsToContents()
+            self.main_window.analysis_log.append(f"显示分类结果 - 共 {len(rock_groups)} 种岩性")
+            
+        except Exception as e:
+            self.main_window.analysis_log.append(f"加载结果失败: {str(e)}")
+        
         self.main_window.status_bar.showMessage("分类完成")
     
     def on_processing_error(self, error_message):
