@@ -44,6 +44,10 @@ class DataProcessor(QObject):
         
         mapping = {}
         unmatched = {}
+        
+        descriptions_file = output_file.replace('.json', '_descriptions.json')
+        descriptions_data = []
+        
         for idx, item in enumerate(data):
             if idx % 100 == 0:
                 self.progress_updated.emit(int(idx / total * 100), f"正在分类... {idx}/{total}")
@@ -51,6 +55,19 @@ class DataProcessor(QObject):
             lithology = item.get('lithology', '')
             keyword = extract_last_keyword(lithology)
             item['岩性名称'] = keyword
+            
+            item['description_id'] = len(descriptions_data)
+            
+            descriptions_data.append({
+                'id': len(descriptions_data),
+                'project': item.get('project', ''),
+                'borehole': item.get('borehole', ''),
+                'lithology': lithology,
+                'lithology_name': keyword,
+                'start_depth': item.get('start_depth', 0),
+                'end_depth': item.get('end_depth', 0),
+                'description': item.get('lithology_description', '')
+            })
             
             if keyword:
                 if keyword not in mapping:
@@ -64,8 +81,13 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存文件...")
         
+        item['description_id'] = len(descriptions_data)
+        
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        with open(descriptions_file, 'w', encoding='utf-8') as f:
+            json.dump(descriptions_data, f, ensure_ascii=False, indent=2)
         
         self.progress_updated.emit(100, "分类完成")
         
@@ -76,7 +98,8 @@ class DataProcessor(QObject):
             'matched': matched,
             'types': len(mapping),
             'mapping': mapping,
-            'unmatched': unmatched
+            'unmatched': unmatched,
+            'descriptions_file': descriptions_file
         }
         
         self.processing_finished.emit(output_file, stats)
