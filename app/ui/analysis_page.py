@@ -132,7 +132,7 @@ class AnalysisPage:
         right_layout.addWidget(QLabel("统计表格:"))
         right_layout.addWidget(main_window.analysis_table, 1)
         
-action_button_panel = QHBoxLayout()
+        action_button_panel = QHBoxLayout()
         action_button_panel.addStretch()
         
         stats_btn = QPushButton("岩性统计")
