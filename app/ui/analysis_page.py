@@ -145,22 +145,6 @@ class AnalysisPage:
 class AnalysisHandler:
     def __init__(self, main_window):
         self.main_window = main_window
-        
-        self.main_window.analysis_table.setRowCount(len(rows))
-        for row, (rock_name, count, _, lithology, alteration, description) in enumerate(rows):
-            self.main_window.analysis_table.setItem(row, 0, QTableWidgetItem(rock_name))
-            self.main_window.analysis_table.setItem(row, 1, QTableWidgetItem(count))
-            self.main_window.analysis_table.setItem(row, 2, QTableWidgetItem("1"))
-            self.main_window.analysis_table.setItem(row, 3, QTableWidgetItem(lithology))
-            self.main_window.analysis_table.setItem(row, 4, QTableWidgetItem(alteration))
-            self.main_window.analysis_table.setItem(row, 5, QTableWidgetItem(description))
-        
-        self.main_window.analysis_table.resizeRowsToContents()
-        
-        self.main_window.classify_btn.setEnabled(True)
-        self.main_window.alteration_btn.setEnabled(True)
-        self.main_window.stats_btn.setEnabled(True)
-        self.main_window.status_bar.showMessage("蚀变分析完成")
     
     def view_lithology_classification(self):
         json_file, _ = QFileDialog.getOpenFileName(
