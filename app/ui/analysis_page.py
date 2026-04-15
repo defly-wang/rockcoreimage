@@ -519,29 +519,48 @@ class AnalysisHandler:
         self.main_window.analysis_log.append(f"总记录数: {len(data)}")
         self.main_window.analysis_log.append(f"含蚀变记录: {records_with_alt} 条")
         
-        alteration_groups = {}
-        for item in data:
-            rock_name = item.get('岩性名称', '') or '未分类'
-            alteration = item.get('蚀变类型', '')
-            if alteration:
-                if rock_name not in alteration_groups:
-                    alteration_groups[rock_name] = {'alterations': set(), 'count': 0}
-                alteration_groups[rock_name]['alterations'].add(alteration)
-                alteration_groups[rock_name]['count'] += 1
+        records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
+        records.sort(key=lambda x: (x[0], x[1]))
         
-        self.main_window.analysis_table.setColumnCount(3)
-        self.main_window.analysis_table.setHorizontalHeaderLabels(["岩性", "蚀变类型数", "含蚀变条数"])
-        self.main_window.analysis_table.setColumnWidth(0, 150)
-        self.main_window.analysis_table.setColumnWidth(1, 100)
+        self.main_window.analysis_table.setColumnCount(6)
+        self.main_window.analysis_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "原始岩性", "蚀变类型", "岩性描述"])
+        self.main_window.analysis_table.setColumnWidth(0, 100)
+        self.main_window.analysis_table.setColumnWidth(1, 60)
+        self.main_window.analysis_table.setColumnWidth(2, 60)
+        self.main_window.analysis_table.setColumnWidth(3, 200)
+        self.main_window.analysis_table.setColumnWidth(4, 120)
         self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
         
-        sorted_alterations = sorted(alteration_groups.items(), key=lambda x: x[1]['count'], reverse=True)
-        self.main_window.analysis_table.setRowCount(len(sorted_alterations))
+        rock_groups = {}
+        for rock_name, lithology, alteration, description in records:
+            if rock_name not in rock_groups:
+                rock_groups[rock_name] = {}
+            if lithology not in rock_groups[rock_name]:
+                rock_groups[rock_name][lithology] = {'count': 0, 'alterations': set(), 'description': description}
+            rock_groups[rock_name][lithology]['count'] += 1
+            if alteration:
+                rock_groups[rock_name][lithology]['alterations'].add(alteration)
         
-        for i, (rock_name, info) in enumerate(sorted_alterations):
-            self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(rock_name))
-            self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(str(len(info['alterations']))))
-            self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
+        rows = []
+        for rock_name in sorted(rock_groups.keys()):
+            for lithology, info in rock_groups[rock_name].items():
+                alterations_str = ", ".join(sorted(info['alterations'])) if info['alterations'] else "-"
+                desc = info['description'] or "-"
+                rows.append((rock_name, str(info['count']), "1", lithology, alterations_str, desc))
+        
+        self.main_window.analysis_table.setRowCount(len(rows))
+        for row, (rock_name, count, _, lithology, alteration, description) in enumerate(rows):
+            self.main_window.analysis_table.setItem(row, 0, QTableWidgetItem(rock_name))
+            self.main_window.analysis_table.setItem(row, 1, QTableWidgetItem(count))
+            self.main_window.analysis_table.setItem(row, 2, QTableWidgetItem("1"))
+            self.main_window.analysis_table.setItem(row, 3, QTableWidgetItem(lithology))
+            self.main_window.analysis_table.setItem(row, 4, QTableWidgetItem(alteration))
+            self.main_window.analysis_table.setItem(row, 5, QTableWidgetItem(description))
+        
+        self.main_window.analysis_table.resizeRowsToContents()
+        self.main_window.analysis_log.append(f"显示蚀变分析结果")
+        self.main_window.analysis_status_label.setText(f"显示蚀变分析 - {records_with_alt}/{len(data)} 条含蚀变")
+        self.main_window.status_bar.showMessage("已加载蚀变分析结果")
         
         self.main_window.analysis_table.resizeRowsToContents()
         self.main_window.analysis_status_label.setText(f"显示蚀变分析 - {records_with_alt}/{len(data)} 条含蚀变")
