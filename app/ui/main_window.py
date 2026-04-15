@@ -18,6 +18,7 @@ from app.ui.sidebar import Sidebar
 from app.ui.home_page import HomePage
 from app.ui.data_page import DataPage
 from app.ui.process_page import ProcessPage
+from app.ui.analysis_page import AnalysisPage, AnalysisHandler
 from app.ui.preprocess_page import PreprocessPage
 from app.ui.training_page import TrainingPage
 from app.ui.recognition_page import RecognitionPage
@@ -50,6 +51,7 @@ class MainWindow(QMainWindow):
         self.data_processor = DataProcessor()
         
         self.process_handler = ProcessHandler(self)
+        self.analysis_handler = AnalysisHandler(self)
         
         self.setup_ui()
         self.apply_stylesheet()
@@ -73,6 +75,7 @@ class MainWindow(QMainWindow):
         self.content_widget.addWidget(HomePage.create(self))
         self.content_widget.addWidget(DataPage.create(self))
         self.content_widget.addWidget(ProcessPage.create(self))
+        self.content_widget.addWidget(AnalysisPage.create(self))
         self.content_widget.addWidget(PreprocessPage.create(self))
         self.content_widget.addWidget(TrainingPage.create(self))
         self.content_widget.addWidget(RecognitionPage.create(self))
