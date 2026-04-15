@@ -199,9 +199,7 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存数据文件...")
         
-        desc_key_map = {}
-        desc_records = {}
-        
+        lithology_map = {}
         for item in all_data:
             project = item.get('project', '')
             borehole = item.get('borehole', '')
@@ -211,48 +209,40 @@ class DataProcessor(QObject):
             description = item.get('lithology_description', '')
             
             key = (project, borehole, lithology)
-            
-            if key not in desc_key_map:
-                desc_id = len(desc_key_map)
-                desc_key_map[key] = desc_id
-                desc_records[desc_id] = {
-                    'id': desc_id,
+            if key not in lithology_map:
+                lithology_map[key] = {
+                    'id': len(lithology_map),
                     'project': project,
                     'borehole': borehole,
                     'lithology': lithology,
-                    'segments': []
-                }
-            
-            existing = desc_records[desc_key_map[key]]
-            if not any(s['start'] == start_depth and s['end'] == end_depth for s in existing['segments']):
-                existing['segments'].append({
-                    'start': start_depth,
-                    'end': end_depth,
+                    'start_depth': start_depth,
+                    'end_depth': end_depth,
                     'description': description
-                })
+                }
+        
+        desc_lookup = {(d['project'], d['borehole'], d['start_depth'], d['end_depth']): d['id'] 
+                      for d in lithology_map.values()}
+        
+        for item in all_data:
+            project = item.get('project', '')
+            borehole = item.get('borehole', '')
+            start_depth = item.get('start_depth', 0)
+            end_depth = item.get('end_depth', 0)
             
-            item['description_id'] = desc_key_map[key]
+            desc_id = None
+            for (proj, bore, ds, de), lid in desc_lookup.items():
+                if proj == project and bore == borehole:
+                    if start_depth >= ds and end_depth <= de:
+                        desc_id = lid
+                        break
+                    if start_depth < de and end_depth > ds:
+                        desc_id = lid
+                        break
+            
+            item['lithology_description_id'] = desc_id
             item.pop('lithology_description', None)
         
-        descriptions = []
-        for desc_id in sorted(desc_records.keys()):
-            rec = desc_records[desc_id]
-            rec['segments'].sort(key=lambda x: x['start'])
-            
-            min_start = min(s['start'] for s in rec['segments'])
-            max_end = max(s['end'] for s in rec['segments'])
-            
-            merged_desc = '；'.join([s['description'] for s in rec['segments'] if s['description']])
-            
-            descriptions.append({
-                'id': rec['id'],
-                'project': rec['project'],
-                'borehole': rec['borehole'],
-                'lithology': rec['lithology'],
-                'start_depth': min_start,
-                'end_depth': max_end,
-                'description': merged_desc
-            })
+        descriptions = list(lithology_map.values())
         
         lithology_stats = {}
         for item in all_data:
