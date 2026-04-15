@@ -92,7 +92,8 @@ class ProcessHandler:
         process_type = getattr(self.main_window, 'process_type', 'excel')
         
         self.main_window.process_btn.setEnabled(False)
-        self.main_window.classify_btn.setEnabled(False)
+        if hasattr(self.main_window, 'classify_btn'):
+            self.main_window.classify_btn.setEnabled(False)
         if hasattr(self.main_window, 'alteration_btn'):
             self.main_window.alteration_btn.setEnabled(False)
         if hasattr(self.main_window, 'stats_btn'):
