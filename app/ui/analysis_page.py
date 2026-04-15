@@ -137,88 +137,6 @@ class AnalysisPage:
         
         layout.addLayout(main_content)
         
-        button_panel = QGroupBox("操作")
-        button_layout = QHBoxLayout()
-        
-        select_source_btn = QPushButton("选择数据目录")
-        select_source_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #1E3A5F;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 12px 20px;
-            }
-            QPushButton:hover {
-                background-color: #2D5A87;
-            }
-        """)
-        select_source_btn.clicked.connect(main_window.analysis_handler.select_source_directory)
-        button_layout.addWidget(select_source_btn)
-        
-        main_window.analysis_source_path_label = QLabel("未选择")
-        main_window.analysis_source_path_label.setStyleSheet("color: #666; font-size: 12px; min-width: 200px;")
-        button_layout.addWidget(main_window.analysis_source_path_label)
-        
-        select_output_btn = QPushButton("选择输出目录")
-        select_output_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #1E3A5F;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 12px 20px;
-            }
-            QPushButton:hover {
-                background-color: #2D5A87;
-            }
-        """)
-        select_output_btn.clicked.connect(main_window.analysis_handler.select_output_directory)
-        button_layout.addWidget(select_output_btn)
-        
-        main_window.analysis_output_path_label = QLabel("未选择")
-        main_window.analysis_output_path_label.setStyleSheet("color: #666; font-size: 12px; min-width: 200px;")
-        button_layout.addWidget(main_window.analysis_output_path_label)
-        
-        button_layout.addStretch()
-        
-        main_window.analysis_type_group = QButtonGroup()
-        main_window.excel_radio = QPushButton("Excel模式")
-        main_window.excel_radio.setCheckable(True)
-        main_window.excel_radio.setChecked(True)
-        main_window.excel_radio.setStyleSheet("""
-            QPushButton {
-                background-color: #1E3A5F;
-                color: white;
-                font-size: 12px;
-                padding: 8px 16px;
-            }
-            QPushButton:checked {
-                background-color: #4CAF50;
-            }
-        """)
-        main_window.excel_radio.clicked.connect(lambda: setattr(main_window, 'analysis_type', 'excel'))
-        button_layout.addWidget(main_window.excel_radio)
-        main_window.analysis_type_group.addButton(main_window.excel_radio)
-        
-        main_window.html_radio = QPushButton("HTML模式")
-        main_window.html_radio.setCheckable(True)
-        main_window.html_radio.setStyleSheet("""
-            QPushButton {
-                background-color: #1E3A5F;
-                color: white;
-                font-size: 12px;
-                padding: 8px 16px;
-            }
-            QPushButton:checked {
-                background-color: #4CAF50;
-            }
-        """)
-        main_window.html_radio.clicked.connect(lambda: setattr(main_window, 'analysis_type', 'html'))
-        button_layout.addWidget(main_window.html_radio)
-        main_window.analysis_type_group.addButton(main_window.html_radio)
-        
-        main_window.analysis_type = 'excel'
         
         button_layout.addSpacing(20)
         
@@ -290,21 +208,6 @@ class AnalysisHandler:
     def __init__(self, main_window):
         self.main_window = main_window
     
-    def select_source_directory(self):
-        folder = QFileDialog.getExistingDirectory(self.main_window, "选择数据目录")
-        if folder:
-            self.main_window.analysis_source_directory = folder
-            self.main_window.analysis_source_path_label.setText(os.path.basename(folder))
-            self.main_window.analysis_log.append(f"已选择数据源: {folder}")
-    
-    def select_output_directory(self):
-        folder = QFileDialog.getExistingDirectory(self.main_window, "选择输出目录")
-        if folder:
-            self.main_window.analysis_output_directory = folder
-            self.main_window.analysis_output_path_label.setText(os.path.basename(folder))
-            self.main_window.analysis_log.append(f"已选择输出目录: {folder}")
-    
-    def show_process_stats(self):
         json_file, _ = QFileDialog.getOpenFileName(
             self.main_window, "选择处理结果文件", "", "JSON文件 (*.json)"
         )
