@@ -143,6 +143,7 @@ class AnalysisPage:
                 font-weight: bold;
             }
         """)
+        main_window.analysis_table.setColumnCount(4)
         main_window.analysis_table.setWordWrap(True)
         main_window.analysis_table.setColumnWidth(0, 120)
         main_window.analysis_table.setColumnWidth(1, 80)
