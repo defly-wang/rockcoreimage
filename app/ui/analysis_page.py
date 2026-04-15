@@ -145,33 +145,6 @@ class AnalysisPage:
 class AnalysisHandler:
     def __init__(self, main_window):
         self.main_window = main_window
-        records.sort(key=lambda x: (x[0], x[1]))
-        
-        self.main_window.analysis_table.setColumnCount(6)
-        self.main_window.analysis_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "原始岩性", "蚀变类型", "岩性描述"])
-        self.main_window.analysis_table.setColumnWidth(0, 100)
-        self.main_window.analysis_table.setColumnWidth(1, 60)
-        self.main_window.analysis_table.setColumnWidth(2, 60)
-        self.main_window.analysis_table.setColumnWidth(3, 200)
-        self.main_window.analysis_table.setColumnWidth(4, 120)
-        self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
-        
-        rock_groups = {}
-        for rock_name, lithology, alteration, description in records:
-            if rock_name not in rock_groups:
-                rock_groups[rock_name] = {}
-            if lithology not in rock_groups[rock_name]:
-                rock_groups[rock_name][lithology] = {'count': 0, 'alterations': set(), 'description': description}
-            rock_groups[rock_name][lithology]['count'] += 1
-            if alteration:
-                rock_groups[rock_name][lithology]['alterations'].add(alteration)
-        
-        rows = []
-        for rock_name in sorted(rock_groups.keys()):
-            for lithology, info in rock_groups[rock_name].items():
-                alterations_str = ", ".join(sorted(info['alterations'])) if info['alterations'] else "-"
-                desc = info['description'] or "-"
-                rows.append((rock_name, str(info['count']), "1", lithology, alterations_str, desc))
         
         self.main_window.analysis_table.setRowCount(len(rows))
         for row, (rock_name, count, _, lithology, alteration, description) in enumerate(rows):
