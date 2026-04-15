@@ -140,43 +140,7 @@ class AnalysisPage:
         
         button_layout.addSpacing(20)
         
-        main_window.classify_btn = QPushButton("岩性分类")
-        main_window.classify_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2196F3;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                padding: 12px 30px;
-            }
-            QPushButton:hover {
-                background-color: #1976D2;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
-            }
-        """)
-        main_window.classify_btn.clicked.connect(main_window.analysis_handler.start_lithology_classify)
-        button_layout.addWidget(main_window.classify_btn)
-        
-        main_window.alteration_btn = QPushButton("蚀变分析")
-        main_window.alteration_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #9C27B0;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                padding: 12px 30px;
-            }
-            QPushButton:hover {
-                background-color: #7B1FA2;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
-            }
-        """)
-        main_window.alteration_btn.clicked.connect(main_window.analysis_handler.start_alteration_analysis)
-        button_layout.addWidget(main_window.alteration_btn)
+        button_layout.addStretch()
         
         main_window.stats_btn = QPushButton("岩性统计")
         main_window.stats_btn.setStyleSheet("""
@@ -264,62 +228,7 @@ class AnalysisHandler:
         self.main_window.analysis_table.resizeRowsToContents()
         self.main_window.analysis_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
     
-    def start_lithology_classify(self):
-        if not hasattr(self.main_window, 'analysis_source_directory') or not self.main_window.analysis_source_directory:
-            QMessageBox.warning(self.main_window, "警告", "请先选择数据源目录")
-            return
-        
-        if not hasattr(self.main_window, 'analysis_output_directory') or not self.main_window.analysis_output_directory:
-            QMessageBox.warning(self.main_window, "警告", "请先选择输出目录")
-            return
-        
-        process_type = getattr(self.main_window, 'analysis_type', 'excel')
-        
-        self.main_window.classify_btn.setEnabled(False)
-        self.main_window.alteration_btn.setEnabled(False)
-        self.main_window.stats_btn.setEnabled(False)
-        self.main_window.analysis_status_label.setText("正在分类...")
-        
-        from app.modules.data_processor import DataProcessor
-        self.data_processor = DataProcessor()
-        
-        self.data_processor.progress_updated.connect(self.on_classify_progress)
-        self.data_processor.processing_finished.connect(self.on_classify_finished)
-        self.data_processor.error_occurred.connect(self.on_processing_error)
-        
-        from threading import Thread
-        self.classify_thread = Thread(
-            target=self.data_processor.classify_lithology,
-            args=(self.main_window.analysis_source_directory, self.main_window.analysis_output_directory, process_type),
-            daemon=True
-        )
-        self.classify_thread.start()
-    
-    def on_classify_progress(self, value, message):
-        self.main_window.analysis_progress.setValue(value)
-        self.main_window.analysis_log.append(message)
-        self.main_window.status_bar.showMessage(message)
-        self.main_window.analysis_status_label.setText(message)
-    
-    def on_classify_finished(self, output_file, stats):
-        self.main_window.analysis_progress.setValue(100)
-        self.main_window.analysis_status_label.setText(f"分类完成 - 共 {stats.get('total', 0)} 条")
-        self.main_window.analysis_log.append(f"分类完成!")
-        self.main_window.analysis_log.append(f"输出文件: {output_file}")
-        
-        self.main_window.classify_btn.setEnabled(True)
-        self.main_window.alteration_btn.setEnabled(True)
-        self.main_window.stats_btn.setEnabled(True)
-        self.main_window.status_bar.showMessage("分类完成")
-    
-    def on_processing_error(self, error_message):
-        QMessageBox.critical(self.main_window, "错误", error_message)
-        self.main_window.analysis_status_label.setText(f"错误: {error_message}")
-        self.main_window.classify_btn.setEnabled(True)
-        self.main_window.alteration_btn.setEnabled(True)
-        self.main_window.stats_btn.setEnabled(True)
-    
-    def start_alteration_analysis(self):
+    def view_alteration_analysis(self):
         json_file, _ = QFileDialog.getOpenFileName(
             self.main_window, "选择岩性分类后的JSON文件", "", "JSON文件 (*.json)"
         )
@@ -476,7 +385,7 @@ class AnalysisHandler:
         self.main_window.analysis_status_label.setText(f"显示岩性分类 - 共 {len(rock_groups)} 种岩性")
         self.main_window.status_bar.showMessage(f"已加载岩性分类结果")
     
-    def view_alteration_analysis(self):
+    def load_alteration_results(self):
         json_file, _ = QFileDialog.getOpenFileName(
             self.main_window, "选择蚀变分析后的JSON文件", "", "JSON文件 (*.json)"
         )
