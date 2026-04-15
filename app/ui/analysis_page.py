@@ -524,7 +524,7 @@ class AnalysisHandler:
         new_data = []
         total = len(data)
         
-        depth_pattern = re.compile(r'(\d+\.?\d*)[-–—](\d+\.?\d*)\s*m')
+        depth_pattern = re.compile(r'(\d+\.?\d*)\s*[-–—]\s*(\d+\.?\d*)\s*m')
         
         for idx, item in enumerate(data):
             if idx % 500 == 0:
@@ -544,20 +544,11 @@ class AnalysisHandler:
                 new_data.append(item)
                 continue
             
-            if len(lines) == 1:
-                new_data.append(item)
-                continue
-            
-            has_depth_markers = False
+            depth_segments = []
             for line in lines:
-                if depth_pattern.search(line):
-                    has_depth_markers = True
-                    break
-            
-            if has_depth_markers:
-                for line in lines:
-                    match = depth_pattern.search(line)
-                    if match:
+                match = depth_pattern.search(line)
+                if match:
+                    try:
                         seg_start = float(match.group(1))
                         seg_end = float(match.group(2))
                         lith_part = line[match.end():].strip()
@@ -568,35 +559,49 @@ class AnalysisHandler:
                                 detected_lith = rock_name
                                 break
                         
+                        depth_segments.append({
+                            'start': seg_start,
+                            'end': seg_end,
+                            'desc': lith_part if lith_part else line,
+                            'lithology': detected_lith
+                        })
+                    except:
+                        pass
+            
+            if depth_segments:
+                depth_segments.sort(key=lambda x: x['start'])
+                
+                for seg in depth_segments:
+                    new_item = dict(item)
+                    new_item['lithology_description'] = seg['desc']
+                    new_item['start_depth'] = seg['start']
+                    new_item['end_depth'] = seg['end']
+                    new_item['lithology'] = seg['lithology'] if seg['lithology'] else item.get('lithology', '')
+                    new_data.append(new_item)
+            else:
+                if len(lines) > 1:
+                    depth_range = record_end - record_start
+                    seg_count = len(lines)
+                    avg_depth = depth_range / seg_count if seg_count > 0 else 0
+                    
+                    for seg_idx, seg_desc in enumerate(lines):
+                        seg_start = record_start + seg_idx * avg_depth
+                        seg_end = min(seg_start + avg_depth, record_end)
+                        
+                        detected_lith = None
+                        for rock_name in rock_names:
+                            if rock_name in seg_desc:
+                                detected_lith = rock_name
+                                break
+                        
                         new_item = dict(item)
-                        new_item['lithology_description'] = lith_part if lith_part else line
+                        new_item['lithology_description'] = seg_desc
                         new_item['start_depth'] = seg_start
                         new_item['end_depth'] = seg_end
                         new_item['lithology'] = detected_lith if detected_lith else item.get('lithology', '')
                         new_data.append(new_item)
-                    else:
-                        continue
-            else:
-                depth_range = record_end - record_start
-                seg_count = len(lines)
-                avg_depth = depth_range / seg_count if seg_count > 0 else 0
-                
-                for seg_idx, seg_desc in enumerate(lines):
-                    seg_start = record_start + seg_idx * avg_depth
-                    seg_end = min(seg_start + avg_depth, record_end)
-                    
-                    detected_lith = None
-                    for rock_name in rock_names:
-                        if rock_name in seg_desc:
-                            detected_lith = rock_name
-                            break
-                    
-                    new_item = dict(item)
-                    new_item['lithology_description'] = seg_desc
-                    new_item['start_depth'] = seg_start
-                    new_item['end_depth'] = seg_end
-                    new_item['lithology'] = detected_lith if detected_lith else item.get('lithology', '')
-                    new_data.append(new_item)
+                else:
+                    new_data.append(item)
         
         output_file = json_file.replace('.json', '_detail.json')
         
