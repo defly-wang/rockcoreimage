@@ -104,6 +104,27 @@ class AnalysisPage:
         
         right_layout.addLayout(view_button_panel)
         
+        stats_button_panel = QHBoxLayout()
+        stats_button_panel.addStretch()
+        
+        stats_btn = QPushButton("岩性统计")
+        stats_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #F57C00;
+            }
+        """)
+        stats_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
+        stats_button_panel.addWidget(stats_btn)
+        
+        right_layout.addLayout(stats_button_panel)
+        
         main_window.analysis_table = QTableWidget()
         main_window.analysis_table.setStyleSheet("""
             QTableWidget {
