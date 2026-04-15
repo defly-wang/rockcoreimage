@@ -155,6 +155,7 @@ class DataProcessor(QObject):
         self.progress_updated.emit(5, f"共发现 {total_projects} 个项目")
         
         all_data = []
+        excel_lithology_data = []
         html_lithology_data = []
         
         for idx, project in enumerate(sorted(project_dirs)):
@@ -188,8 +189,13 @@ class DataProcessor(QObject):
                     progress_base + 2,
                     f"正在解析 {excel_files[0]}..."
                 )
-                project_data = self.process_project(project, project_path, excel_path)
+                project_data, lithology_data = self.process_project(project, project_path, excel_path)
                 all_data.extend(project_data)
+                
+                for lith in lithology_data:
+                    lith['project'] = project
+                    excel_lithology_data.append(lith)
+                
                 self.progress_updated.emit(
                     progress_base + 5,
                     f"项目 {project} 处理完成，获取 {len(project_data)} 条记录"
@@ -199,29 +205,8 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存数据文件...")
         
-        lithology_map = {}
-        for item in all_data:
-            project = item.get('project', '')
-            borehole = item.get('borehole', '')
-            lithology = item.get('lithology', '')
-            start_depth = item.get('start_depth', 0)
-            end_depth = item.get('end_depth', 0)
-            description = item.get('lithology_description', '')
-            
-            key = (project, borehole, lithology)
-            if key not in lithology_map:
-                lithology_map[key] = {
-                    'id': len(lithology_map),
-                    'project': project,
-                    'borehole': borehole,
-                    'lithology': lithology,
-                    'start_depth': start_depth,
-                    'end_depth': end_depth,
-                    'description': description
-                }
-        
-        desc_lookup = {(d['project'], d['borehole'], d['start_depth'], d['end_depth']): d['id'] 
-                      for d in lithology_map.values()}
+        desc_lookup = {(d.get('project', ''), d.get('borehole', ''), d.get('start_depth', 0), d.get('end_depth', 0)): idx 
+                      for idx, d in enumerate(excel_lithology_data)}
         
         for item in all_data:
             project = item.get('project', '')
@@ -242,7 +227,17 @@ class DataProcessor(QObject):
             item['lithology_description_id'] = desc_id
             item.pop('lithology_description', None)
         
-        descriptions = list(lithology_map.values())
+        descriptions = []
+        for idx, lith in enumerate(excel_lithology_data):
+            descriptions.append({
+                'id': idx,
+                'project': lith.get('project', ''),
+                'borehole': lith.get('borehole', ''),
+                'lithology': lith.get('rock_name', ''),
+                'start_depth': lith.get('start_depth', 0),
+                'end_depth': lith.get('end_depth', 0),
+                'description': lith.get('description', '')
+            })
         
         lithology_stats = {}
         for item in all_data:
@@ -315,7 +310,7 @@ class DataProcessor(QObject):
                 except Exception as e:
                     self.error_occurred.emit(f"复制图片失败 {source_img_path}: {str(e)}")
         
-        return project_data
+        return project_data, lithology_data
     
     def read_lithology_sheet(self, wb):
         data = []
