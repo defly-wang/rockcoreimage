@@ -147,64 +147,60 @@ class AnalysisHandler:
     
     def show_process_stats(self):
         json_file, _ = QFileDialog.getOpenFileName(
-            self.main_window, "选择岩性分类后的JSON文件", "", "JSON文件 (*.json)"
+            self.main_window, "选择处理结果文件", "", "JSON文件 (*.json)"
         )
         if not json_file:
             return
         
-        config_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config')
-        alteration_config_file = os.path.join(config_dir, 'alteration_types.json')
-        if not os.path.exists(alteration_config_file):
-            alteration_config_file = os.path.join(config_dir, 'alteration_examples.json')
-        
-        output_file = json_file.replace('.json', '_alteration.json')
-        
-        self.main_window.classify_btn.setEnabled(False)
-        self.main_window.alteration_btn.setEnabled(False)
-        self.main_window.stats_btn.setEnabled(False)
-        
-        self.main_window.analysis_status_label.setText("正在蚀变分析...")
-        self.main_window.analysis_progress.setValue(0)
-        self.main_window.analysis_log.clear()
-        self.main_window.analysis_log.append("开始蚀变分析...")
-        
-        from app.modules.data_processor import DataProcessor
-        self.data_processor = DataProcessor()
-        
-        self.data_processor.progress_updated.connect(self.on_alteration_progress)
-        self.data_processor.processing_finished.connect(self.on_alteration_finished)
-        self.data_processor.error_occurred.connect(self.on_processing_error)
-        
-        from threading import Thread
-        self.alteration_thread = Thread(
-            target=self.data_processor.analyze_alteration,
-            args=(json_file, alteration_config_file, output_file),
-            daemon=True
-        )
-        self.alteration_thread.start()
-    
-    def on_alteration_progress(self, value, message):
-        self.main_window.analysis_progress.setValue(value)
-        self.main_window.analysis_log.append(message)
-        self.main_window.status_bar.showMessage(message)
-        self.main_window.analysis_status_label.setText(message)
-    
-    def on_alteration_finished(self, output_file, stats):
         import json
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
         
-        self.main_window.analysis_progress.setValue(100)
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append(f"正在加载: {json_file}")
         
-        records_with_alt = stats.get('records_with_alteration', 0)
-        total_records = stats.get('total_records', 0)
+        lithology_stats = {}
+        lith_order = {}
+        proj_order = {}
+        for idx, item in enumerate(data):
+            lith = item.get('lithology', '')
+            proj = item.get('project', '')
+            if lith:
+                if proj not in proj_order:
+                    proj_order[proj] = len(proj_order)
+                key = (lith, proj)
+                if key not in lithology_stats:
+                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
+                    lith_order[key] = len(lith_order)
+                lithology_stats[key]['count'] += 1
         
-        self.main_window.analysis_status_label.setText(f"蚀变分析完成 - {records_with_alt}/{total_records} 条含蚀变")
+        for key in lithology_stats:
+            lithology_stats[key]['order'] = lith_order[key]
+            lithology_stats[key]['proj_order'] = proj_order[key[1]]
         
-        self.main_window.analysis_log.append(f"蚀变分析完成!")
-        self.main_window.analysis_log.append(f"总记录数: {total_records}")
-        self.main_window.analysis_log.append(f"含蚀变记录: {records_with_alt} 条")
+        self.main_window.analysis_table.setColumnCount(4)
+        self.main_window.analysis_table.setHorizontalHeaderLabels(["项目", "岩性名称", "图片数", "岩性描述"])
+        self.main_window.analysis_table.setColumnWidth(0, 120)
+        self.main_window.analysis_table.setColumnWidth(1, 120)
+        self.main_window.analysis_table.setColumnWidth(2, 80)
+        self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
         
-        with open(output_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        sorted_lith = sorted(lithology_stats.values(), key=lambda x: (x.get('proj_order', 0), x.get('order', 0)))
+        self.main_window.analysis_table.setRowCount(len(sorted_lith))
+        
+        for i, info in enumerate(sorted_lith):
+            self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(info['project']))
+            self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
+            self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
+            desc = info['description']
+            self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(desc.replace('\n', ' ') if desc else ''))
+        
+        self.main_window.analysis_table.resizeRowsToContents()
+        self.main_window.analysis_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
         
         records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
         records.sort(key=lambda x: (x[0], x[1]))
