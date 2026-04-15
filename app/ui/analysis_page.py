@@ -508,60 +508,95 @@ class AnalysisHandler:
         config_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config')
         rock_types_file = os.path.join(config_dir, 'rock_types_flat.json')
         
-        rock_types = []
+        rock_names = {}
         if os.path.exists(rock_types_file):
             try:
                 with open(rock_types_file, 'r', encoding='utf-8') as f:
                     rock_types = json.load(f)
+                    for rock in rock_types:
+                        name = rock.get('name', '')
+                        rock_names[name] = True
+                        for alias in rock.get('aliases', []):
+                            rock_names[alias] = True
             except:
                 pass
         
         new_data = []
         total = len(data)
         
+        depth_pattern = re.compile(r'(\d+\.?\d*)[-–—](\d+\.?\d*)\s*m')
+        
         for idx, item in enumerate(data):
-            if idx % 100 == 0:
+            if idx % 500 == 0:
                 self.main_window.analysis_progress.setValue(int(idx * 100 / total))
             
             description = item.get('lithology_description', '')
-            start_depth = item.get('start_depth', 0)
-            end_depth = item.get('end_depth', 0)
+            record_start = item.get('start_depth', 0)
+            record_end = item.get('end_depth', 0)
             
-            if description and ('。' in description or '\n' in description or '，' in description):
-                segments = re.split(r'[。\n]+', description)
-                segments = [s.strip() for s in segments if s.strip()]
-                
-                if len(segments) > 1:
-                    depth_range = end_depth - start_depth
-                    seg_count = len(segments)
-                    avg_depth = depth_range / seg_count if seg_count > 0 else 0
-                    
-                    for seg_idx, seg_desc in enumerate(segments):
-                        seg_start = start_depth + seg_idx * avg_depth
-                        seg_end = min(seg_start + avg_depth, end_depth)
+            if not description:
+                new_data.append(item)
+                continue
+            
+            lines = [l.strip() for l in description.split('\n') if l.strip() and l.strip() != '。']
+            
+            if not lines:
+                new_data.append(item)
+                continue
+            
+            if len(lines) == 1:
+                new_data.append(item)
+                continue
+            
+            has_depth_markers = False
+            for line in lines:
+                if depth_pattern.search(line):
+                    has_depth_markers = True
+                    break
+            
+            if has_depth_markers:
+                for line in lines:
+                    match = depth_pattern.search(line)
+                    if match:
+                        seg_start = float(match.group(1))
+                        seg_end = float(match.group(2))
+                        lith_part = line[match.end():].strip()
                         
                         detected_lith = None
-                        for rock in rock_types:
-                            rock_name = rock.get('name', '')
-                            aliases = rock.get('aliases', [])
-                            all_names = [rock_name] + aliases
-                            for name in all_names:
-                                if name and name in seg_desc:
-                                    detected_lith = rock_name
-                                    break
-                            if detected_lith:
+                        for rock_name in rock_names:
+                            if rock_name in lith_part:
+                                detected_lith = rock_name
                                 break
                         
                         new_item = dict(item)
-                        new_item['lithology_description'] = seg_desc
+                        new_item['lithology_description'] = lith_part if lith_part else line
                         new_item['start_depth'] = seg_start
                         new_item['end_depth'] = seg_end
                         new_item['lithology'] = detected_lith if detected_lith else item.get('lithology', '')
                         new_data.append(new_item)
-                else:
-                    new_data.append(item)
+                    else:
+                        continue
             else:
-                new_data.append(item)
+                depth_range = record_end - record_start
+                seg_count = len(lines)
+                avg_depth = depth_range / seg_count if seg_count > 0 else 0
+                
+                for seg_idx, seg_desc in enumerate(lines):
+                    seg_start = record_start + seg_idx * avg_depth
+                    seg_end = min(seg_start + avg_depth, record_end)
+                    
+                    detected_lith = None
+                    for rock_name in rock_names:
+                        if rock_name in seg_desc:
+                            detected_lith = rock_name
+                            break
+                    
+                    new_item = dict(item)
+                    new_item['lithology_description'] = seg_desc
+                    new_item['start_depth'] = seg_start
+                    new_item['end_depth'] = seg_end
+                    new_item['lithology'] = detected_lith if detected_lith else item.get('lithology', '')
+                    new_data.append(new_item)
         
         output_file = json_file.replace('.json', '_detail.json')
         
