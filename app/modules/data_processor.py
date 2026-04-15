@@ -46,7 +46,9 @@ class DataProcessor(QObject):
         unmatched = {}
         
         descriptions_file = output_file.replace('.json', '_descriptions.json')
-        descriptions_data = []
+        
+        desc_key_map = {}
+        desc_records = {}
         
         for idx, item in enumerate(data):
             if idx % 100 == 0:
@@ -56,18 +58,33 @@ class DataProcessor(QObject):
             keyword = extract_last_keyword(lithology)
             item['岩性名称'] = keyword
             
-            item['description_id'] = len(descriptions_data)
+            project = item.get('project', '')
+            borehole = item.get('borehole', '')
+            start_depth = item.get('start_depth', 0)
+            end_depth = item.get('end_depth', 0)
+            description = item.get('lithology_description', '')
             
-            descriptions_data.append({
-                'id': len(descriptions_data),
-                'project': item.get('project', ''),
-                'borehole': item.get('borehole', ''),
-                'lithology': lithology,
-                'lithology_name': keyword,
-                'start_depth': item.get('start_depth', 0),
-                'end_depth': item.get('end_depth', 0),
-                'description': item.get('lithology_description', '')
-            })
+            key = (project, borehole, lithology, start_depth, end_depth)
+            
+            if key not in desc_key_map:
+                desc_id = len(desc_key_map)
+                desc_key_map[key] = desc_id
+                desc_records[desc_id] = {
+                    'id': desc_id,
+                    'project': project,
+                    'borehole': borehole,
+                    'lithology': lithology,
+                    'lithology_name': keyword,
+                    'start_depth': start_depth,
+                    'end_depth': end_depth,
+                    'descriptions': []
+                }
+            
+            if description and description not in desc_records[desc_key_map[key]]['descriptions']:
+                desc_records[desc_key_map[key]]['descriptions'].append(description)
+            
+            item['description_id'] = desc_key_map[key]
+            item.pop('lithology_description', None)
             
             if keyword:
                 if keyword not in mapping:
@@ -81,7 +98,20 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存文件...")
         
-        item['description_id'] = len(descriptions_data)
+        descriptions_data = []
+        for desc_id in sorted(desc_records.keys()):
+            rec = desc_records[desc_id]
+            merged_desc = '；'.join(rec['descriptions'])
+            descriptions_data.append({
+                'id': rec['id'],
+                'project': rec['project'],
+                'borehole': rec['borehole'],
+                'lithology': rec['lithology'],
+                'lithology_name': rec['lithology_name'],
+                'start_depth': rec['start_depth'],
+                'end_depth': rec['end_depth'],
+                'description': merged_desc
+            })
         
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -168,6 +198,61 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存数据文件...")
         
+        desc_key_map = {}
+        desc_records = {}
+        
+        for item in all_data:
+            project = item.get('project', '')
+            borehole = item.get('borehole', '')
+            lithology = item.get('lithology', '')
+            start_depth = item.get('start_depth', 0)
+            end_depth = item.get('end_depth', 0)
+            description = item.get('lithology_description', '')
+            
+            key = (project, borehole, lithology)
+            
+            if key not in desc_key_map:
+                desc_id = len(desc_key_map)
+                desc_key_map[key] = desc_id
+                desc_records[desc_id] = {
+                    'id': desc_id,
+                    'project': project,
+                    'borehole': borehole,
+                    'lithology': lithology,
+                    'segments': []
+                }
+            
+            existing = desc_records[desc_key_map[key]]
+            if not any(s['start'] == start_depth and s['end'] == end_depth for s in existing['segments']):
+                existing['segments'].append({
+                    'start': start_depth,
+                    'end': end_depth,
+                    'description': description
+                })
+            
+            item['description_id'] = desc_key_map[key]
+            item.pop('lithology_description', None)
+        
+        descriptions = []
+        for desc_id in sorted(desc_records.keys()):
+            rec = desc_records[desc_id]
+            rec['segments'].sort(key=lambda x: x['start'])
+            
+            min_start = min(s['start'] for s in rec['segments'])
+            max_end = max(s['end'] for s in rec['segments'])
+            
+            merged_desc = '；'.join([s['description'] for s in rec['segments'] if s['description']])
+            
+            descriptions.append({
+                'id': rec['id'],
+                'project': rec['project'],
+                'borehole': rec['borehole'],
+                'lithology': rec['lithology'],
+                'start_depth': min_start,
+                'end_depth': max_end,
+                'description': merged_desc
+            })
+        
         lithology_stats = {}
         for item in all_data:
             lith = item.get('lithology', '')
@@ -175,18 +260,23 @@ class DataProcessor(QObject):
             if lith:
                 key = (lith, proj)
                 if key not in lithology_stats:
-                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
+                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0}
                 lithology_stats[key]['count'] += 1
         
         output_file = os.path.join(output_dir, 'image_descriptions.json')
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(all_data, f, ensure_ascii=False, indent=2)
         
+        descriptions_file = os.path.join(output_dir, 'lithology_descriptions.json')
+        with open(descriptions_file, 'w', encoding='utf-8') as f:
+            json.dump(descriptions, f, ensure_ascii=False, indent=2)
+        
         self.progress_updated.emit(100, "处理完成")
         self.processing_finished.emit(output_file, {
             'total_images': len(all_data),
             'total_projects': total_projects,
-            'lithology_stats': lithology_stats
+            'lithology_stats': lithology_stats,
+            'descriptions_file': descriptions_file
         })
     
     def process_project(self, project_name, project_path, excel_path):
@@ -540,6 +630,61 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(95, "正在保存数据文件...")
         
+        desc_key_map = {}
+        desc_records = {}
+        
+        for item in all_data:
+            project = item.get('project', '')
+            borehole = item.get('borehole', '')
+            lithology = item.get('lithology', '')
+            start_depth = item.get('start_depth', 0)
+            end_depth = item.get('end_depth', 0)
+            description = item.get('lithology_description', '')
+            
+            key = (project, borehole, lithology)
+            
+            if key not in desc_key_map:
+                desc_id = len(desc_key_map)
+                desc_key_map[key] = desc_id
+                desc_records[desc_id] = {
+                    'id': desc_id,
+                    'project': project,
+                    'borehole': borehole,
+                    'lithology': lithology,
+                    'segments': []
+                }
+            
+            existing = desc_records[desc_key_map[key]]
+            if not any(s['start'] == start_depth and s['end'] == end_depth for s in existing['segments']):
+                existing['segments'].append({
+                    'start': start_depth,
+                    'end': end_depth,
+                    'description': description
+                })
+            
+            item['description_id'] = desc_key_map[key]
+            item.pop('lithology_description', None)
+        
+        descriptions = []
+        for desc_id in sorted(desc_records.keys()):
+            rec = desc_records[desc_id]
+            rec['segments'].sort(key=lambda x: x['start'])
+            
+            min_start = min(s['start'] for s in rec['segments'])
+            max_end = max(s['end'] for s in rec['segments'])
+            
+            merged_desc = '；'.join([s['description'] for s in rec['segments'] if s['description']])
+            
+            descriptions.append({
+                'id': rec['id'],
+                'project': rec['project'],
+                'borehole': rec['borehole'],
+                'lithology': rec['lithology'],
+                'start_depth': min_start,
+                'end_depth': max_end,
+                'description': merged_desc
+            })
+        
         lithology_stats = {}
         lith_order = {}
         proj_order = {}
@@ -551,7 +696,7 @@ class DataProcessor(QObject):
                     proj_order[proj] = len(proj_order)
                 key = (lith, proj)
                 if key not in lithology_stats:
-                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
+                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0}
                     lith_order[key] = len(lith_order)
                 lithology_stats[key]['count'] += 1
         
@@ -563,11 +708,16 @@ class DataProcessor(QObject):
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(all_data, f, ensure_ascii=False, indent=2)
         
+        descriptions_file = os.path.join(output_dir, 'lithology_descriptions.json')
+        with open(descriptions_file, 'w', encoding='utf-8') as f:
+            json.dump(descriptions, f, ensure_ascii=False, indent=2)
+        
         self.progress_updated.emit(100, "处理完成")
         self.processing_finished.emit(output_file, {
             'total_images': len(all_data),
             'total_projects': total_projects,
-            'lithology_stats': lithology_stats
+            'lithology_stats': lithology_stats,
+            'descriptions_file': descriptions_file
         })
     
     def process_html_files(self, project_name, borehole_dir, white_light_html, histogram_html):
