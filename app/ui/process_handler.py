@@ -47,24 +47,40 @@ class ProcessHandler:
         for idx, item in enumerate(data):
             lith = item.get('lithology', '')
             proj = item.get('project', '')
+            start_depth = item.get('start_depth', 0)
+            end_depth = item.get('end_depth', 0)
             if lith:
                 if proj not in proj_order:
                     proj_order[proj] = len(proj_order)
                 key = (lith, proj)
                 if key not in lithology_stats:
-                    lithology_stats[key] = {'lithology': lith, 'project': proj, 'count': 0, 'description': item.get('lithology_description', '')}
+                    lithology_stats[key] = {
+                        'lithology': lith, 
+                        'project': proj, 
+                        'count': 0, 
+                        'description': item.get('lithology_description', ''),
+                        'start_depth': start_depth,
+                        'end_depth': end_depth
+                    }
                     lith_order[key] = len(lith_order)
+                else:
+                    if start_depth < lithology_stats[key]['start_depth']:
+                        lithology_stats[key]['start_depth'] = start_depth
+                    if end_depth > lithology_stats[key]['end_depth']:
+                        lithology_stats[key]['end_depth'] = end_depth
                 lithology_stats[key]['count'] += 1
         
         for key in lithology_stats:
             lithology_stats[key]['order'] = lith_order[key]
             lithology_stats[key]['proj_order'] = proj_order[key[1]]
         
-        self.main_window.process_table.setColumnCount(4)
-        self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "图片数", "岩性描述"])
-        self.main_window.process_table.setColumnWidth(0, 120)
-        self.main_window.process_table.setColumnWidth(1, 120)
+        self.main_window.process_table.setColumnCount(6)
+        self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "起始深度(m)", "结束深度(m)", "图片数", "岩性描述"])
+        self.main_window.process_table.setColumnWidth(0, 100)
+        self.main_window.process_table.setColumnWidth(1, 100)
         self.main_window.process_table.setColumnWidth(2, 80)
+        self.main_window.process_table.setColumnWidth(3, 80)
+        self.main_window.process_table.setColumnWidth(4, 60)
         self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
         
         sorted_lith = sorted(lithology_stats.values(), key=lambda x: (x.get('proj_order', 0), x.get('order', 0)))
@@ -73,9 +89,11 @@ class ProcessHandler:
         for i, info in enumerate(sorted_lith):
             self.main_window.process_table.setItem(i, 0, QTableWidgetItem(info['project']))
             self.main_window.process_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
-            self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
+            self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info.get('start_depth', 0))))
+            self.main_window.process_table.setItem(i, 3, QTableWidgetItem(str(info.get('end_depth', 0))))
+            self.main_window.process_table.setItem(i, 4, QTableWidgetItem(str(info['count'])))
             desc = info['description']
-            self.main_window.process_table.setItem(i, 3, QTableWidgetItem(desc.replace('\n', ' ') if desc else ''))
+            self.main_window.process_table.setItem(i, 5, QTableWidgetItem(desc.replace('\n', ' ') if desc else ''))
         
         self.main_window.process_table.resizeRowsToContents()
         self.main_window.process_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
@@ -208,11 +226,13 @@ class ProcessHandler:
             
             lithology_stats = stats.get('lithology_stats', {})
             
-            self.main_window.process_table.setColumnCount(4)
-            self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "图片数", "岩性描述"])
-            self.main_window.process_table.setColumnWidth(0, 120)
-            self.main_window.process_table.setColumnWidth(1, 120)
+            self.main_window.process_table.setColumnCount(6)
+            self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "起始深度(m)", "结束深度(m)", "图片数", "岩性描述"])
+            self.main_window.process_table.setColumnWidth(0, 100)
+            self.main_window.process_table.setColumnWidth(1, 100)
             self.main_window.process_table.setColumnWidth(2, 80)
+            self.main_window.process_table.setColumnWidth(3, 80)
+            self.main_window.process_table.setColumnWidth(4, 60)
             self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
             
             sorted_lith = sorted(lithology_stats.values(), key=lambda x: (x.get('proj_order', 0), x.get('order', 0)))
@@ -221,9 +241,11 @@ class ProcessHandler:
             for i, info in enumerate(sorted_lith):
                 self.main_window.process_table.setItem(i, 0, QTableWidgetItem(info['project']))
                 self.main_window.process_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
-                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
-                desc = info['description']
-                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(desc.replace('\n', ' ')))
+                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info.get('start_depth', 0))))
+                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(str(info.get('end_depth', 0))))
+                self.main_window.process_table.setItem(i, 4, QTableWidgetItem(str(info['count'])))
+                desc = info.get('description', '')
+                self.main_window.process_table.setItem(i, 5, QTableWidgetItem(desc.replace('\n', ' ') if desc else ''))
             
             self.main_window.process_table.resizeRowsToContents()
         else:
