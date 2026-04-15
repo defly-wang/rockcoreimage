@@ -227,18 +227,43 @@ class ProcessHandler:
                 self.main_window.stats_btn.setEnabled(True)
             self.main_window.classify_output_file = output_file
             
-            lithology_stats = stats.get('lithology_stats', {})
+            with open(output_file, 'r', encoding='utf-8') as f:
+                image_data = json.load(f)
             
             desc_file = os.path.join(os.path.dirname(output_file), 'lithology_descriptions.json')
-            descriptions = {}
+            desc_by_id = {}
             if os.path.exists(desc_file):
                 with open(desc_file, 'r', encoding='utf-8') as f:
-                    desc_data = json.load(f)
-                    for d in desc_data:
-                        key = (d.get('project', ''), d.get('borehole', ''), d.get('lithology', ''))
-                        if key not in descriptions:
-                            descriptions[key] = []
-                        descriptions[key].append(d)
+                    desc_list = json.load(f)
+                    for d in desc_list:
+                        desc_by_id[d['id']] = d
+            
+            lithology_groups = {}
+            for item in image_data:
+                proj = item.get('project', '')
+                lith = item.get('lithology', '')
+                key = (proj, lith)
+                
+                if key not in lithology_groups:
+                    lithology_groups[key] = {
+                        'project': proj,
+                        'lithology': lith,
+                        'count': 0,
+                        'desc_id': None,
+                        'start_depth': None,
+                        'end_depth': None,
+                        'description': ''
+                    }
+                
+                lithology_groups[key]['count'] += 1
+                
+                if lithology_groups[key]['desc_id'] is None:
+                    desc_id = item.get('lithology_description_id')
+                    if desc_id is not None and desc_id in desc_by_id:
+                        lithology_groups[key]['desc_id'] = desc_id
+                        lithology_groups[key]['start_depth'] = desc_by_id[desc_id].get('start_depth', 0)
+                        lithology_groups[key]['end_depth'] = desc_by_id[desc_id].get('end_depth', 0)
+                        lithology_groups[key]['description'] = desc_by_id[desc_id].get('description', '')
             
             self.main_window.process_table.setColumnCount(6)
             self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "起始深度(m)", "结束深度(m)", "图片数", "岩性描述"])
@@ -249,30 +274,16 @@ class ProcessHandler:
             self.main_window.process_table.setColumnWidth(4, 60)
             self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
             
-            sorted_lith = sorted(lithology_stats.values(), key=lambda x: (x.get('proj_order', 0), x.get('order', 0)))
+            sorted_lith = sorted(lithology_groups.values(), key=lambda x: (x['project'], x['lithology']))
             self.main_window.process_table.setRowCount(len(sorted_lith))
             
             for i, info in enumerate(sorted_lith):
                 self.main_window.process_table.setItem(i, 0, QTableWidgetItem(info['project']))
                 self.main_window.process_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
-                
-                key = (info['project'], info['lithology'])
-                desc_list = descriptions.get(key, [])
-                
-                if desc_list:
-                    first_desc = desc_list[0]
-                    start_depth = first_desc.get('start_depth', 0)
-                    end_depth = first_desc.get('end_depth', 0)
-                    desc_text = first_desc.get('description', '')
-                else:
-                    start_depth = 0
-                    end_depth = 0
-                    desc_text = ''
-                
-                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(start_depth)))
-                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(str(end_depth)))
+                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info['start_depth']) if info['start_depth'] is not None else ''))
+                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(str(info['end_depth']) if info['end_depth'] is not None else ''))
                 self.main_window.process_table.setItem(i, 4, QTableWidgetItem(str(info['count'])))
-                self.main_window.process_table.setItem(i, 5, QTableWidgetItem(desc_text.replace('\n', ' ') if desc_text else ''))
+                self.main_window.process_table.setItem(i, 5, QTableWidgetItem(info['description'].replace('\n', ' ') if info['description'] else ''))
             
             self.main_window.process_table.resizeRowsToContents()
         else:
