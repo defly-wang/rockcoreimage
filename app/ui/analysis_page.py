@@ -80,7 +80,7 @@ class AnalysisPage:
                 background-color: #BDBDBD;
             }
         """)
-        view_alteration_btn.clicked.connect(main_window.analysis_handler.view_alteration_analysis)
+        view_alteration_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
         view_button_panel.addWidget(view_alteration_btn)
         
         export_btn = QPushButton("导出Excel")
