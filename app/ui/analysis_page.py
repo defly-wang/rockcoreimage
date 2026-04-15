@@ -174,6 +174,22 @@ class AnalysisPage:
         alteration_btn.clicked.connect(main_window.analysis_handler.start_alteration_analysis)
         action_button_panel.addWidget(alteration_btn)
         
+        detail_btn = QPushButton("深入分析")
+        detail_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #E91E63;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #C2185B;
+            }
+        """)
+        detail_btn.clicked.connect(main_window.analysis_handler.start_detail_analysis)
+        action_button_panel.addWidget(detail_btn)
+        
         right_layout.addLayout(action_button_panel)
         
         right_panel.setLayout(right_layout)
@@ -465,6 +481,136 @@ class AnalysisHandler:
         
         self.main_window.analysis_table.resizeRowsToContents()
         self.main_window.analysis_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
+    
+    def start_detail_analysis(self):
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import json
+        import re
+        import os
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        self.main_window.analysis_status_label.setText("正在深入分析...")
+        self.main_window.analysis_progress.setValue(0)
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append(f"开始深入分析: {json_file}")
+        
+        config_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config')
+        rock_types_file = os.path.join(config_dir, 'rock_types_flat.json')
+        
+        rock_types = []
+        if os.path.exists(rock_types_file):
+            try:
+                with open(rock_types_file, 'r', encoding='utf-8') as f:
+                    rock_types = json.load(f)
+            except:
+                pass
+        
+        new_data = []
+        total = len(data)
+        
+        for idx, item in enumerate(data):
+            if idx % 100 == 0:
+                self.main_window.analysis_progress.setValue(int(idx * 100 / total))
+            
+            description = item.get('lithology_description', '')
+            start_depth = item.get('start_depth', 0)
+            end_depth = item.get('end_depth', 0)
+            
+            if description and ('。' in description or '\n' in description or '，' in description):
+                segments = re.split(r'[。\n]+', description)
+                segments = [s.strip() for s in segments if s.strip()]
+                
+                if len(segments) > 1:
+                    depth_range = end_depth - start_depth
+                    seg_count = len(segments)
+                    avg_depth = depth_range / seg_count if seg_count > 0 else 0
+                    
+                    for seg_idx, seg_desc in enumerate(segments):
+                        seg_start = start_depth + seg_idx * avg_depth
+                        seg_end = min(seg_start + avg_depth, end_depth)
+                        
+                        detected_lith = None
+                        for rock in rock_types:
+                            rock_name = rock.get('name', '')
+                            aliases = rock.get('aliases', [])
+                            all_names = [rock_name] + aliases
+                            for name in all_names:
+                                if name and name in seg_desc:
+                                    detected_lith = rock_name
+                                    break
+                            if detected_lith:
+                                break
+                        
+                        new_item = dict(item)
+                        new_item['lithology_description'] = seg_desc
+                        new_item['start_depth'] = seg_start
+                        new_item['end_depth'] = seg_end
+                        new_item['lithology'] = detected_lith if detected_lith else item.get('lithology', '')
+                        new_data.append(new_item)
+                else:
+                    new_data.append(item)
+            else:
+                new_data.append(item)
+        
+        output_file = json_file.replace('.json', '_detail.json')
+        
+        try:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(new_data, f, ensure_ascii=False, indent=2)
+            
+            self.main_window.analysis_progress.setValue(100)
+            self.main_window.analysis_status_label.setText(f"深入分析完成 - 共 {len(new_data)} 条记录")
+            self.main_window.analysis_log.append(f"深入分析完成!")
+            self.main_window.analysis_log.append(f"总记录数: {total} -> {len(new_data)}")
+            self.main_window.analysis_log.append(f"输出文件: {output_file}")
+            
+            self.main_window.analysis_log.append(f"显示分析结果...")
+            
+            rock_groups = {}
+            for item in new_data:
+                rock_name = item.get('lithology', '') or '未分类'
+                lithology = item.get('lithology', '')
+                if rock_name not in rock_groups:
+                    rock_groups[rock_name] = {'lithologies': set(), 'count': 0}
+                rock_groups[rock_name]['lithologies'].add(lithology)
+                rock_groups[rock_name]['count'] += 1
+            
+            self.main_window.analysis_table.setColumnCount(4)
+            self.main_window.analysis_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "对应原始岩性"])
+            self.main_window.analysis_table.setColumnWidth(0, 100)
+            self.main_window.analysis_table.setColumnWidth(1, 80)
+            self.main_window.analysis_table.setColumnWidth(2, 80)
+            self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+            
+            sorted_rocks = sorted(rock_groups.items(), key=lambda x: x[1]['count'], reverse=True)
+            self.main_window.analysis_table.setRowCount(len(sorted_rocks))
+            
+            for i, (rock_name, info) in enumerate(sorted_rocks):
+                self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(rock_name))
+                self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(str(info['count'])))
+                self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(str(len(info['lithologies']))))
+                lithologies_str = ", ".join(sorted(list(info['lithologies']))[:5])
+                if len(info['lithologies']) > 5:
+                    lithologies_str += f" 等{len(info['lithologies'])}种"
+                self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(lithologies_str))
+            
+            self.main_window.analysis_table.resizeRowsToContents()
+            self.main_window.status_bar.showMessage("深入分析完成")
+            
+        except Exception as e:
+            QMessageBox.critical(self.main_window, "错误", f"保存文件失败: {str(e)}")
+            self.main_window.analysis_status_label.setText(f"错误: {str(e)}")
     
     def view_lithology_classification(self):
         json_file, _ = QFileDialog.getOpenFileName(
