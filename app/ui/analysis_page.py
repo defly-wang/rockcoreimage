@@ -132,7 +132,7 @@ class AnalysisPage:
         right_layout.addWidget(QLabel("统计表格:"))
         right_layout.addWidget(main_window.analysis_table, 1)
         
-        action_button_panel = QHBoxLayout()
+action_button_panel = QHBoxLayout()
         action_button_panel.addStretch()
         
         stats_btn = QPushButton("岩性统计")
@@ -151,22 +151,6 @@ class AnalysisPage:
         stats_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
         action_button_panel.addWidget(stats_btn)
         
-        alteration_btn = QPushButton("蚀变分析")
-        alteration_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #9C27B0;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
-            }
-            QPushButton:hover {
-                background-color: #7B1FA2;
-            }
-        """)
-        alteration_btn.clicked.connect(main_window.analysis_handler.start_alteration_analysis)
-        action_button_panel.addWidget(alteration_btn)
-        
         classify_btn = QPushButton("岩性分类")
         classify_btn.setStyleSheet("""
             QPushButton {
@@ -182,6 +166,22 @@ class AnalysisPage:
         """)
         classify_btn.clicked.connect(main_window.analysis_handler.start_lithology_classify)
         action_button_panel.addWidget(classify_btn)
+        
+        alteration_btn = QPushButton("蚀变分析")
+        alteration_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #7B1FA2;
+            }
+        """)
+        alteration_btn.clicked.connect(main_window.analysis_handler.start_alteration_analysis)
+        action_button_panel.addWidget(alteration_btn)
         
         right_layout.addLayout(action_button_panel)
         
