@@ -43,44 +43,6 @@ class ProcessPage:
         
         view_button_panel.addStretch()
         
-        view_classify_btn = QPushButton("显示岩性分类")
-        view_classify_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2196F3;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
-            }
-            QPushButton:hover {
-                background-color: #1976D2;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
-            }
-        """)
-        view_classify_btn.clicked.connect(main_window.process_handler.view_lithology_classification)
-        view_button_panel.addWidget(view_classify_btn)
-        
-        view_alteration_btn = QPushButton("显示蚀变分析")
-        view_alteration_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #9C27B0;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
-            }
-            QPushButton:hover {
-                background-color: #7B1FA2;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
-            }
-        """)
-        view_alteration_btn.clicked.connect(main_window.process_handler.view_alteration_analysis)
-        view_button_panel.addWidget(view_alteration_btn)
-        
         export_btn = QPushButton("导出Excel")
         export_btn.setStyleSheet("""
             QPushButton {

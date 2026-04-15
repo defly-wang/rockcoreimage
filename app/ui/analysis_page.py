@@ -45,6 +45,38 @@ class AnalysisPage:
         
         view_button_panel.addStretch()
         
+        view_classify_btn = QPushButton("显示岩性分类")
+        view_classify_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+        """)
+        view_classify_btn.clicked.connect(main_window.analysis_handler.view_lithology_classification)
+        view_button_panel.addWidget(view_classify_btn)
+        
+        view_alteration_btn = QPushButton("显示蚀变分析")
+        view_alteration_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #7B1FA2;
+            }
+        """)
+        view_alteration_btn.clicked.connect(main_window.analysis_handler.view_alteration_analysis)
+        view_button_panel.addWidget(view_alteration_btn)
+        
         export_btn = QPushButton("导出Excel")
         export_btn.setStyleSheet("""
             QPushButton {
@@ -56,9 +88,6 @@ class AnalysisPage:
             }
             QPushButton:hover {
                 background-color: #45a049;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
             }
         """)
         export_btn.clicked.connect(main_window.analysis_handler.export_to_excel)
@@ -418,6 +447,105 @@ class AnalysisHandler:
         
         self.main_window.analysis_table.resizeRowsToContents()
         self.main_window.analysis_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
+    
+    def view_lithology_classification(self):
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择岩性分类后的JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import json
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append(f"已加载岩性分类结果: {json_file}")
+        self.main_window.analysis_log.append(f"总记录数: {len(data)}")
+        
+        rock_groups = {}
+        for item in data:
+            rock_name = item.get('岩性名称', '') or '未分类'
+            lithology = item.get('lithology', '')
+            if rock_name not in rock_groups:
+                rock_groups[rock_name] = {'lithologies': set(), 'count': 0}
+            rock_groups[rock_name]['lithologies'].add(lithology)
+            rock_groups[rock_name]['count'] += 1
+        
+        self.main_window.analysis_table.setColumnCount(4)
+        self.main_window.analysis_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "对应原始岩性"])
+        self.main_window.analysis_table.setColumnWidth(0, 100)
+        self.main_window.analysis_table.setColumnWidth(1, 80)
+        self.main_window.analysis_table.setColumnWidth(2, 80)
+        self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+        
+        sorted_rocks = sorted(rock_groups.items(), key=lambda x: x[1]['count'], reverse=True)
+        self.main_window.analysis_table.setRowCount(len(sorted_rocks))
+        
+        for row, (rock_name, info) in enumerate(sorted_rocks):
+            lithologies_str = ", ".join(sorted(info['lithologies']))
+            self.main_window.analysis_table.setItem(row, 0, QTableWidgetItem(rock_name))
+            self.main_window.analysis_table.setItem(row, 1, QTableWidgetItem(str(info['count'])))
+            self.main_window.analysis_table.setItem(row, 2, QTableWidgetItem(str(len(info['lithologies']))))
+            self.main_window.analysis_table.setItem(row, 3, QTableWidgetItem(lithologies_str))
+        
+        self.main_window.analysis_table.resizeRowsToContents()
+        self.main_window.analysis_status_label.setText(f"显示岩性分类 - 共 {len(rock_groups)} 种岩性")
+        self.main_window.status_bar.showMessage("已加载岩性分类结果")
+    
+    def view_alteration_analysis(self):
+        json_file, _ = QFileDialog.getOpenFileName(
+            self.main_window, "选择蚀变分析后的JSON文件", "", "JSON文件 (*.json)"
+        )
+        if not json_file:
+            return
+        
+        import json
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        records_with_alt = sum(1 for item in data if item.get('蚀变类型', ''))
+        
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append(f"已加载蚀变分析结果: {json_file}")
+        self.main_window.analysis_log.append(f"总记录数: {len(data)}")
+        self.main_window.analysis_log.append(f"含蚀变记录: {records_with_alt} 条")
+        
+        alteration_groups = {}
+        for item in data:
+            rock_name = item.get('岩性名称', '') or '未分类'
+            alteration = item.get('蚀变类型', '')
+            if alteration:
+                if rock_name not in alteration_groups:
+                    alteration_groups[rock_name] = {'alterations': set(), 'count': 0}
+                alteration_groups[rock_name]['alterations'].add(alteration)
+                alteration_groups[rock_name]['count'] += 1
+        
+        self.main_window.analysis_table.setColumnCount(3)
+        self.main_window.analysis_table.setHorizontalHeaderLabels(["岩性", "蚀变类型数", "含蚀变条数"])
+        self.main_window.analysis_table.setColumnWidth(0, 150)
+        self.main_window.analysis_table.setColumnWidth(1, 100)
+        self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+        
+        sorted_alterations = sorted(alteration_groups.items(), key=lambda x: x[1]['count'], reverse=True)
+        self.main_window.analysis_table.setRowCount(len(sorted_alterations))
+        
+        for i, (rock_name, info) in enumerate(sorted_alterations):
+            self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(rock_name))
+            self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(str(len(info['alterations']))))
+            self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
+        
+        self.main_window.analysis_table.resizeRowsToContents()
+        self.main_window.analysis_status_label.setText(f"显示蚀变分析 - {records_with_alt}/{len(data)} 条含蚀变")
+        self.main_window.status_bar.showMessage("已加载蚀变分析结果")
     
     def export_to_excel(self):
         file_path, _ = QFileDialog.getSaveFileName(
