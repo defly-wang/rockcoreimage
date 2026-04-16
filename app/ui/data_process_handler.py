@@ -135,52 +135,82 @@ class DataProcessHandler:
                     for d in desc_list:
                         desc_by_id[d['id']] = d
             
-            lithology_groups = {}
-            for item in image_data:
-                proj = item.get('project', '')
-                lith = item.get('lithology', '')
-                key = (proj, lith)
+            if desc_by_id:
+                for i, desc in desc_by_id.items():
+                    if 'id' not in desc:
+                        desc['id'] = i
                 
-                if key not in lithology_groups:
-                    lithology_groups[key] = {
-                        'project': proj,
-                        'lithology': lith,
-                        'count': 0,
-                        'desc_id': None,
-                        'start_depth': None,
-                        'end_depth': None,
-                        'description': ''
-                    }
+                desc_list_sorted = sorted(desc_by_id.values(), key=lambda x: x.get('id', 0))
                 
-                lithology_groups[key]['count'] += 1
-                
-                if lithology_groups[key]['desc_id'] is None:
+                image_counts = {}
+                for item in image_data:
                     desc_id = item.get('lithology_description_id')
-                    if desc_id is not None and desc_id in desc_by_id:
-                        lithology_groups[key]['desc_id'] = desc_id
-                        lithology_groups[key]['start_depth'] = desc_by_id[desc_id].get('start_depth', 0)
-                        lithology_groups[key]['end_depth'] = desc_by_id[desc_id].get('end_depth', 0)
-                        lithology_groups[key]['description'] = desc_by_id[desc_id].get('description', '')
-            
-            self.main_window.process_table.setColumnCount(6)
-            self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "起始深度(m)", "结束深度(m)", "图片数", "岩性描述"])
-            self.main_window.process_table.setColumnWidth(0, 100)
-            self.main_window.process_table.setColumnWidth(1, 100)
-            self.main_window.process_table.setColumnWidth(2, 80)
-            self.main_window.process_table.setColumnWidth(3, 80)
-            self.main_window.process_table.setColumnWidth(4, 60)
-            self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
-            
-            sorted_lith = sorted(lithology_groups.values(), key=lambda x: (x['project'], x['lithology']))
-            self.main_window.process_table.setRowCount(len(sorted_lith))
-            
-            for i, info in enumerate(sorted_lith):
-                self.main_window.process_table.setItem(i, 0, QTableWidgetItem(info['project']))
-                self.main_window.process_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
-                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info['start_depth']) if info['start_depth'] is not None else ''))
-                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(str(info['end_depth']) if info['end_depth'] is not None else ''))
-                self.main_window.process_table.setItem(i, 4, QTableWidgetItem(str(info['count'])))
-                self.main_window.process_table.setItem(i, 5, QTableWidgetItem(info['description'].replace('\n', ' ') if info['description'] else ''))
+                    if desc_id is not None:
+                        image_counts[desc_id] = image_counts.get(desc_id, 0) + 1
+                
+                self.main_window.process_table.setColumnCount(6)
+                self.main_window.process_table.setHorizontalHeaderLabels(["项目", "钻孔", "岩性名称", "深度范围(m)", "图片数", "岩性描述"])
+                self.main_window.process_table.setColumnWidth(0, 80)
+                self.main_window.process_table.setColumnWidth(1, 80)
+                self.main_window.process_table.setColumnWidth(2, 100)
+                self.main_window.process_table.setColumnWidth(3, 80)
+                self.main_window.process_table.setColumnWidth(4, 60)
+                self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+                self.main_window.process_table.setColumnWidth(2, 120)
+                self.main_window.process_table.setColumnWidth(3, 100)
+                self.main_window.process_table.setColumnWidth(4, 60)
+                self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+                
+                self.main_window.process_table.setRowCount(len(desc_list_sorted))
+                
+                for i, desc in enumerate(desc_list_sorted):
+                    proj = desc.get('project', '')
+                    borehole = desc.get('borehole', '')
+                    lith_name = desc.get('lithology', '')
+                    start = desc.get('start_depth', 0)
+                    end = desc.get('end_depth', 0)
+                    depth_range = f"{start}-{end}"
+                    count = image_counts.get(desc.get('id', i), 0)
+                    
+                    self.main_window.process_table.setItem(i, 0, QTableWidgetItem(proj))
+                    self.main_window.process_table.setItem(i, 1, QTableWidgetItem(borehole))
+                    self.main_window.process_table.setItem(i, 2, QTableWidgetItem(lith_name))
+                    self.main_window.process_table.setItem(i, 3, QTableWidgetItem(depth_range))
+                    self.main_window.process_table.setItem(i, 4, QTableWidgetItem(str(count)))
+                    desc_text = desc.get('description', '')
+                    if desc_text:
+                        desc_text = desc_text.replace('\r\n', ' ').replace('\n', ' ').replace('|', ' ')
+                    self.main_window.process_table.setItem(i, 5, QTableWidgetItem(desc_text)))
+            else:
+                lithology_groups = {}
+                for item in image_data:
+                    proj = item.get('project', '')
+                    lith = item.get('lithology', '')
+                    key = (proj, lith)
+                    
+                    if key not in lithology_groups:
+                        lithology_groups[key] = {
+                            'project': proj,
+                            'lithology': lith,
+                            'count': 0,
+                        }
+                    
+                    lithology_groups[key]['count'] += 1
+                
+                self.main_window.process_table.setColumnCount(3)
+                self.main_window.process_table.setHorizontalHeaderLabels(["项目", "岩性名称", "图片数"])
+                self.main_window.process_table.setColumnWidth(0, 150)
+                self.main_window.process_table.setColumnWidth(1, 150)
+                self.main_window.process_table.setColumnWidth(2, 80)
+                self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+                
+                sorted_lith = sorted(lithology_groups.values(), key=lambda x: (x['project'], x['lithology']))
+                self.main_window.process_table.setRowCount(len(sorted_lith))
+                
+                for i, info in enumerate(sorted_lith):
+                    self.main_window.process_table.setItem(i, 0, QTableWidgetItem(info['project']))
+                    self.main_window.process_table.setItem(i, 1, QTableWidgetItem(info['lithology']))
+                    self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(info['count'])))
             
             self.main_window.process_table.resizeRowsToContents()
         else:
