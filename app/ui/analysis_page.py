@@ -1,4 +1,6 @@
 import os
+import re
+import json
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
     QGroupBox, QProgressBar, QTextEdit, QTableWidget, QButtonGroup,
@@ -161,14 +163,14 @@ class AnalysisPage:
         alteration_btn = QPushButton("蚀变分析")
         alteration_btn.setStyleSheet("""
             QPushButton {
-                background-color: #9C27B0;
+                background-color: #FF9800;
                 color: white;
                 font-size: 14px;
                 font-weight: bold;
                 padding: 8px 16px;
             }
             QPushButton:hover {
-                background-color: #7B1FA2;
+                background-color: #F57C00;
             }
         """)
         alteration_btn.clicked.connect(main_window.analysis_handler.start_alteration_analysis)
@@ -483,19 +485,22 @@ class AnalysisHandler:
         self.main_window.analysis_log.append(f"已加载 {len(data)} 条记录，按项目/岩性统计共 {len(sorted_lith)} 项")
     
     def start_detail_analysis(self):
-        json_file, _ = QFileDialog.getOpenFileName(
-            self.main_window, "选择JSON文件", "", "JSON文件 (*.json)"
+        from PyQt6.QtWidgets import QFileDialog
+        dir_path = QFileDialog.getExistingDirectory(
+            self.main_window, "选择处理结果目录"
         )
-        if not json_file:
+        if not dir_path:
             return
         
-        import json
-        import re
-        import os
+        lithology_file = os.path.join(dir_path, 'lithology_descriptions.json')
+        
+        if not os.path.exists(lithology_file):
+            QMessageBox.warning(self.main_window, "错误", "找不到lithology_descriptions.json文件")
+            return
         
         try:
-            with open(json_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+            with open(lithology_file, 'r', encoding='utf-8') as f:
+                lithology_data = json.load(f)
         except Exception as e:
             QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
             return
@@ -503,147 +508,140 @@ class AnalysisHandler:
         self.main_window.analysis_status_label.setText("正在深入分析...")
         self.main_window.analysis_progress.setValue(0)
         self.main_window.analysis_log.clear()
-        self.main_window.analysis_log.append(f"开始深入分析: {json_file}")
+        self.main_window.analysis_log.append(f"开始深入分析: {lithology_file}")
         
-        config_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config')
-        rock_types_file = os.path.join(config_dir, 'rock_types_flat.json')
+        max_id = max((lith.get('id', 0) for lith in lithology_data), default=0)
         
-        rock_names = {}
-        if os.path.exists(rock_types_file):
-            try:
-                with open(rock_types_file, 'r', encoding='utf-8') as f:
-                    rock_types = json.load(f)
-                    for rock in rock_types:
-                        name = rock.get('name', '')
-                        rock_names[name] = True
-                        for alias in rock.get('aliases', []):
-                            rock_names[alias] = True
-            except:
-                pass
+        new_records = []
         
-        new_data = []
-        total = len(data)
+        depth_pattern = re.compile(r'(\d+\.?\d*)\s*[-–—至]\s*(\d+\.?\d*)\s*m')
+        lith_keywords = ['钾化花岗岩', '黄铁绢英岩化花岗岩', '黄铁绢英岩化碎裂岩', '黄铁绢英岩化花岗质碎裂岩', '闪长岩', '石英闪长岩', '辉长岩', '玄武岩', '安山岩', '流纹岩', '片麻岩', '片岩', '千枚岩', '板岩', '大理岩', '石英岩', '砂岩', '页岩', '灰岩', '白云岩', '粘土岩', '泥岩', '砾岩', '角砾岩', '凝灰岩', '断层泥', '碎裂岩', '糜棱岩', '斜长角闪石', '黑云变粒岩', '黑云角闪片岩', '含磁铁黑云角闪片岩', '磁铁角闪石英岩', '含海绿石石英砂岩', '二长花岗岩']
         
-        depth_pattern = re.compile(r'(\d+\.?\d*)\s*[-–—]\s*(\d+\.?\d*)\s*m')
-        
-        for idx, item in enumerate(data):
-            if idx % 500 == 0:
-                self.main_window.analysis_progress.setValue(int(idx * 100 / total))
+        for idx, lith in enumerate(lithology_data):
+            if idx % 100 == 0:
+                self.main_window.analysis_progress.setValue(int(idx * 100 / len(lithology_data)))
             
-            description = item.get('lithology_description', '')
-            record_start = item.get('start_depth', 0)
-            record_end = item.get('end_depth', 0)
+            original_id = lith.get('id', 0)
+            original_lith = lith.get('lithology', '')
+            project = lith.get('project', '')
+            borehole = lith.get('borehole', '')
+            start_depth = lith.get('start_depth', 0)
+            end_depth = lith.get('end_depth', 0)
+            desc = lith.get('description', '')
             
-            if not description:
-                new_data.append(item)
+            if not desc:
+                new_records.append({
+                    'id': max_id + len(new_records) + 1,
+                    'project': project,
+                    'borehole': borehole,
+                    'lithology': original_lith,
+                    'start_depth': start_depth,
+                    'end_depth': end_depth,
+                    'description': desc,
+                    'original_lithology': original_lith,
+                    'original_id': original_id
+                })
                 continue
             
-            lines = [l.strip() for l in description.split('\n') if l.strip() and l.strip() != '。']
+            temp_desc = desc.replace('|', '。').replace('\\n', '。')
+            segments = [s.strip() for s in re.split(r'[。；\n]', temp_desc) if s.strip()]
             
-            if not lines:
-                new_data.append(item)
+            if not segments:
+                new_records.append({
+                    'id': max_id + len(new_records) + 1,
+                    'project': project,
+                    'borehole': borehole,
+                    'lithology': original_lith,
+                    'start_depth': start_depth,
+                    'end_depth': end_depth,
+                    'description': desc,
+                    'original_lithology': original_lith,
+                    'original_id': original_id
+                })
                 continue
             
-            depth_segments = []
-            for line in lines:
-                match = depth_pattern.search(line)
-                if match:
-                    try:
-                        seg_start = float(match.group(1))
-                        seg_end = float(match.group(2))
-                        lith_part = line[match.end():].strip()
-                        
-                        detected_lith = None
-                        for rock_name in rock_names:
-                            if rock_name in lith_part:
-                                detected_lith = rock_name
-                                break
-                        
-                        depth_segments.append({
-                            'start': seg_start,
-                            'end': seg_end,
-                            'desc': lith_part if lith_part else line,
-                            'lithology': detected_lith
-                        })
-                    except:
-                        pass
+            found_segments = []
+            for seg in segments:
+                matches = list(depth_pattern.finditer(seg))
+                if matches:
+                    for m in matches:
+                        ds = float(m.group(1))
+                        de = float(m.group(2))
+                        if ds >= start_depth and de <= end_depth and ds < de:
+                            seg_text = seg[m.end():].strip() if m.end() < len(seg) else seg
+                            new_lith = original_lith
+                            for kw in lith_keywords:
+                                if kw in seg:
+                                    new_lith = kw
+                                    break
+                            found_segments.append({
+                                'start': ds,
+                                'end': de,
+                                'text': seg_text if seg_text else seg,
+                                'lithology': new_lith
+                            })
             
-            if depth_segments:
-                depth_segments.sort(key=lambda x: x['start'])
-                
-                for seg in depth_segments:
-                    new_item = dict(item)
-                    new_item['lithology_description'] = seg['desc']
-                    new_item['start_depth'] = seg['start']
-                    new_item['end_depth'] = seg['end']
-                    new_item['lithology'] = seg['lithology'] if seg['lithology'] else item.get('lithology', '')
-                    new_data.append(new_item)
+            if found_segments:
+                for seg in found_segments:
+                    new_records.append({
+                        'id': max_id + len(new_records) + 1,
+                        'project': project,
+                        'borehole': borehole,
+                        'lithology': seg['lithology'],
+                        'start_depth': seg['start'],
+                        'end_depth': seg['end'],
+                        'description': seg['text'],
+                        'original_lithology': original_lith,
+                        'original_id': original_id
+                    })
             else:
-                if len(lines) > 1:
-                    depth_range = record_end - record_start
-                    seg_count = len(lines)
-                    avg_depth = depth_range / seg_count if seg_count > 0 else 0
-                    
-                    for seg_idx, seg_desc in enumerate(lines):
-                        seg_start = record_start + seg_idx * avg_depth
-                        seg_end = min(seg_start + avg_depth, record_end)
-                        
-                        detected_lith = None
-                        for rock_name in rock_names:
-                            if rock_name in seg_desc:
-                                detected_lith = rock_name
-                                break
-                        
-                        new_item = dict(item)
-                        new_item['lithology_description'] = seg_desc
-                        new_item['start_depth'] = seg_start
-                        new_item['end_depth'] = seg_end
-                        new_item['lithology'] = detected_lith if detected_lith else item.get('lithology', '')
-                        new_data.append(new_item)
-                else:
-                    new_data.append(item)
+                new_records.append({
+                    'id': max_id + len(new_records) + 1,
+                    'project': project,
+                    'borehole': borehole,
+                    'lithology': original_lith,
+                    'start_depth': start_depth,
+                    'end_depth': end_depth,
+                    'description': desc,
+                    'original_lithology': original_lith,
+                    'original_id': original_id
+                })
         
-        output_file = json_file.replace('.json', '_detail.json')
+        output_file = os.path.join(dir_path, 'lithology_detail.json')
         
         try:
             with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(new_data, f, ensure_ascii=False, indent=2)
+                json.dump(new_records, f, ensure_ascii=False, indent=2)
             
             self.main_window.analysis_progress.setValue(100)
-            self.main_window.analysis_status_label.setText(f"深入分析完成 - 共 {len(new_data)} 条记录")
+            self.main_window.analysis_status_label.setText(f"深入分析完成 - 共 {len(new_records)} 条记录")
             self.main_window.analysis_log.append(f"深入分析完成!")
-            self.main_window.analysis_log.append(f"总记录数: {total} -> {len(new_data)}")
+            self.main_window.analysis_log.append(f"原记录: {len(lithology_data)} 条")
+            self.main_window.analysis_log.append(f"分析后: {len(new_records)} 条")
             self.main_window.analysis_log.append(f"输出文件: {output_file}")
             
-            self.main_window.analysis_log.append(f"显示分析结果...")
-            
-            rock_groups = {}
-            for item in new_data:
-                rock_name = item.get('lithology', '') or '未分类'
-                lithology = item.get('lithology', '')
-                if rock_name not in rock_groups:
-                    rock_groups[rock_name] = {'lithologies': set(), 'count': 0}
-                rock_groups[rock_name]['lithologies'].add(lithology)
-                rock_groups[rock_name]['count'] += 1
-            
-            self.main_window.analysis_table.setColumnCount(4)
-            self.main_window.analysis_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "对应原始岩性"])
-            self.main_window.analysis_table.setColumnWidth(0, 100)
+            self.main_window.analysis_table.setColumnCount(8)
+            self.main_window.analysis_table.setHorizontalHeaderLabels(["ID", "项目", "钻孔", "岩性名称", "开始深度", "结束深度", "原岩性", "描述"])
+            self.main_window.analysis_table.setColumnWidth(0, 40)
             self.main_window.analysis_table.setColumnWidth(1, 80)
             self.main_window.analysis_table.setColumnWidth(2, 80)
+            self.main_window.analysis_table.setColumnWidth(3, 100)
+            self.main_window.analysis_table.setColumnWidth(4, 80)
+            self.main_window.analysis_table.setColumnWidth(5, 80)
+            self.main_window.analysis_table.setColumnWidth(6, 100)
             self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
             
-            sorted_rocks = sorted(rock_groups.items(), key=lambda x: x[1]['count'], reverse=True)
-            self.main_window.analysis_table.setRowCount(len(sorted_rocks))
+            self.main_window.analysis_table.setRowCount(len(new_records))
             
-            for i, (rock_name, info) in enumerate(sorted_rocks):
-                self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(rock_name))
-                self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(str(info['count'])))
-                self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(str(len(info['lithologies']))))
-                lithologies_str = ", ".join(sorted(list(info['lithologies']))[:5])
-                if len(info['lithologies']) > 5:
-                    lithologies_str += f" 等{len(info['lithologies'])}种"
-                self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(lithologies_str))
+            for i, rec in enumerate(new_records):
+                self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(str(rec.get('id', ''))))
+                self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(rec.get('project', '')))
+                self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(rec.get('borehole', '')))
+                self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(rec.get('lithology', '')))
+                self.main_window.analysis_table.setItem(i, 4, QTableWidgetItem(str(rec.get('start_depth', 0))))
+                self.main_window.analysis_table.setItem(i, 5, QTableWidgetItem(str(rec.get('end_depth', 0))))
+                self.main_window.analysis_table.setItem(i, 6, QTableWidgetItem(rec.get('original_lithology', '')))
+                self.main_window.analysis_table.setItem(i, 7, QTableWidgetItem(rec.get('description', '')[:50] if rec.get('description', '') else ''))
             
             self.main_window.analysis_table.resizeRowsToContents()
             self.main_window.status_bar.showMessage("深入分析完成")
@@ -651,6 +649,8 @@ class AnalysisHandler:
         except Exception as e:
             QMessageBox.critical(self.main_window, "错误", f"保存文件失败: {str(e)}")
             self.main_window.analysis_status_label.setText(f"错误: {str(e)}")
+        
+        return
     
     def view_lithology_classification(self):
         json_file, _ = QFileDialog.getOpenFileName(
