@@ -15,12 +15,14 @@ class DataProcessor(QObject):
         super().__init__()
         self.source_dir = ""
         self.output_dir = ""
+        self.lithology_id_start = 1
         self.excel_processor = ExcelProcessor()
         self.html_processor = HtmlProcessor()
     
-    def process(self, source_dir, output_dir):
+    def process(self, source_dir, output_dir, lithology_id_start=1):
         self.source_dir = source_dir
         self.output_dir = output_dir
+        self.lithology_id_start = lithology_id_start
         self.excel_processor.source_dir = source_dir
         self.excel_processor.output_dir = output_dir
         self.html_processor.output_dir = output_dir
@@ -132,7 +134,7 @@ class DataProcessor(QObject):
         all_lithology_data = excel_lithology_data + html_lithology_data
         for idx, lith in enumerate(all_lithology_data):
             descriptions.append({
-                'id': idx,
+                'id': self.lithology_id_start + idx,
                 'project': lith.get('project', ''),
                 'borehole': lith.get('borehole', ''),
                 'lithology': lith.get('rock_name', ''),
@@ -141,7 +143,7 @@ class DataProcessor(QObject):
                 'description': lith.get('description', '')
             })
         
-        desc_lookup = {(d.get('project', ''), d.get('borehole', ''), d.get('start_depth', 0), d.get('end_depth', 0)): idx 
+        desc_lookup = {(d.get('project', ''), d.get('borehole', ''), d.get('start_depth', 0), d.get('end_depth', 0)): self.lithology_id_start + idx 
                       for idx, d in enumerate(all_lithology_data)}
         
         for item in all_data:
@@ -151,13 +153,13 @@ class DataProcessor(QObject):
             end_depth = item.get('end_depth', 0)
             
             desc_id = None
-            for (proj, bore, ds, de), lid in desc_lookup.items():
+            for (proj, bore, ds, de), lith_id in desc_lookup.items():
                 if proj == project and bore == borehole:
                     if start_depth >= ds and end_depth <= de:
-                        desc_id = lid
+                        desc_id = lith_id
                         break
                     if start_depth < de and end_depth > ds:
-                        desc_id = lid
+                        desc_id = lith_id
                         break
             
             item['lithology_description_id'] = desc_id

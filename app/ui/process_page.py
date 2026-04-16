@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
-    QGroupBox, QProgressBar, QTextEdit, QTableWidget, QButtonGroup
+    QGroupBox, QProgressBar, QTextEdit, QTableWidget, QButtonGroup,
+    QLineEdit
 )
 from PyQt6.QtWidgets import QHeaderView
 
@@ -179,6 +180,24 @@ class ProcessPage:
         main_window.process_type_group.addButton(main_window.html_radio)
         
         main_window.process_type = 'excel'
+        
+        button_layout.addSpacing(20)
+        
+        main_window.lithology_id_start_label = QLabel("岩性起始编号:")
+        main_window.lithology_id_start_label.setStyleSheet("color: #333; font-size: 12px;")
+        button_layout.addWidget(main_window.lithology_id_start_label)
+        
+        main_window.lithology_id_start_input = QLineEdit("1")
+        main_window.lithology_id_start_input.setFixedWidth(60)
+        main_window.lithology_id_start_input.setStyleSheet("""
+            QLineEdit {
+                padding: 6px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 12px;
+            }
+        """)
+        button_layout.addWidget(main_window.lithology_id_start_input)
         
         button_layout.addSpacing(20)
         

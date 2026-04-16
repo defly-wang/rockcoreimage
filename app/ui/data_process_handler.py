@@ -54,10 +54,17 @@ class DataProcessHandler:
         self.main_window.data_processor.processing_finished.connect(self.on_processing_finished)
         self.main_window.data_processor.error_occurred.connect(self.on_processing_error)
         
+        lithology_id_start = 1
+        if hasattr(self.main_window, 'lithology_id_start_input'):
+            try:
+                lithology_id_start = int(self.main_window.lithology_id_start_input.text()) or 1
+            except ValueError:
+                lithology_id_start = 1
+        
         from threading import Thread
         self.main_window.process_thread = Thread(
             target=self.main_window.data_processor.process,
-            args=(self.main_window.source_directory, self.main_window.output_directory),
+            args=(self.main_window.source_directory, self.main_window.output_directory, lithology_id_start),
             daemon=True
         )
         self.main_window.process_thread.start()
