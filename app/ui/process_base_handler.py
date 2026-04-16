@@ -51,7 +51,7 @@ class ProcessBaseHandler:
                 pass
         
         if lithology_data:
-            lithology_data_sorted = sorted(lithology_data, key=lambda x: x.get('id', 0))
+            lithology_data_sorted = lithology_data
             
             image_counts = {}
             for item in data:
