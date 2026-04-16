@@ -180,7 +180,7 @@ class DataProcessHandler:
                     desc_text = desc.get('description', '')
                     if desc_text:
                         desc_text = desc_text.replace('\r\n', ' ').replace('\n', ' ').replace('|', ' ')
-                    self.main_window.process_table.setItem(i, 5, QTableWidgetItem(desc_text)))
+                    self.main_window.process_table.setItem(i, 5, QTableWidgetItem(desc_text))
             else:
                 lithology_groups = {}
                 for item in image_data:
