@@ -23,6 +23,7 @@ from app.ui.preprocess_page import PreprocessPage
 from app.ui.training_page import TrainingPage
 from app.ui.recognition_page import RecognitionPage
 from app.ui.process_handler import ProcessHandler
+from app.ui.lithology_handler import LithologyHandler
 
 
 class MainWindow(QMainWindow):
@@ -52,6 +53,7 @@ class MainWindow(QMainWindow):
         
         self.process_handler = ProcessHandler(self)
         self.analysis_handler = AnalysisHandler(self)
+        self.lithology_handler = LithologyHandler(self)
         
         self.setup_ui()
         self.apply_stylesheet()

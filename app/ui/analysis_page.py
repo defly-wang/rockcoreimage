@@ -129,17 +129,17 @@ class AnalysisPage:
         stats_btn = QPushButton("岩性统计")
         stats_btn.setStyleSheet("""
             QPushButton {
-                background-color: #FF9800;
+                background-color: #2196F3;
                 color: white;
-                font-size: 14px;
-                font-weight: bold;
+                font-size: 12px;
                 padding: 8px 16px;
+                border-radius: 4px;
             }
             QPushButton:hover {
-                background-color: #F57C00;
+                background-color: #1976D2;
             }
         """)
-        stats_btn.clicked.connect(main_window.analysis_handler.show_process_stats)
+        stats_btn.clicked.connect(main_window.lithology_handler.show_lithology_stats)
         action_button_panel.addWidget(stats_btn)
         
         classify_btn = QPushButton("岩性分类")

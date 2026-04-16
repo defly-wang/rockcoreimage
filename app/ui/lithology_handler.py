@@ -1,4 +1,5 @@
 import os
+import json
 from PyQt6.QtWidgets import QMessageBox, QTableWidgetItem
 
 
@@ -187,3 +188,84 @@ class LithologyHandler:
         
         self.main_window.current_json_file = json_file
         self.main_window.status_bar.showMessage("已加载岩性分类结果")
+    
+    def show_lithology_stats(self):
+        from PyQt6.QtWidgets import QFileDialog
+        dir_path = QFileDialog.getExistingDirectory(
+            self.main_window, "选择处理结果目录"
+        )
+        if not dir_path:
+            return
+        
+        lithology_file = os.path.join(dir_path, 'lithology_descriptions.json')
+        image_file = os.path.join(dir_path, 'image_descriptions.json')
+        
+        if not os.path.exists(lithology_file):
+            QMessageBox.warning(self.main_window, "错误", "找不到lithology_descriptions.json文件")
+            return
+        if not os.path.exists(image_file):
+            QMessageBox.warning(self.main_window, "错误", "找不到image_descriptions.json文件")
+            return
+        
+        try:
+            with open(lithology_file, 'r', encoding='utf-8') as f:
+                lithology_data = json.load(f)
+            with open(image_file, 'r', encoding='utf-8') as f:
+                image_data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        image_counts = {}
+        for item in image_data:
+            desc_id = item.get('lithology_description_id')
+            if desc_id is not None:
+                image_counts[desc_id] = image_counts.get(desc_id, 0) + 1
+        
+        self.main_window.analysis_table.setColumnCount(7)
+        self.main_window.analysis_table.setHorizontalHeaderLabels(["项目", "钻孔", "岩性名称", "开始深度", "结束深度", "图片数量", "岩性描述"])
+        self.main_window.analysis_table.setColumnWidth(0, 80)
+        self.main_window.analysis_table.setColumnWidth(1, 80)
+        self.main_window.analysis_table.setColumnWidth(2, 100)
+        self.main_window.analysis_table.setColumnWidth(3, 80)
+        self.main_window.analysis_table.setColumnWidth(4, 80)
+        self.main_window.analysis_table.setColumnWidth(5, 80)
+        self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+        
+        lithology_data_sorted = sorted(lithology_data, key=lambda x: x.get('id', 0))
+        self.main_window.analysis_table.setRowCount(len(lithology_data_sorted))
+        
+        for i, lith in enumerate(lithology_data_sorted):
+            proj = lith.get('project', '')
+            borehole = lith.get('borehole', '')
+            lith_name = lith.get('lithology', '')
+            start = lith.get('start_depth', 0)
+            end = lith.get('end_depth', 0)
+            desc = lith.get('description', '')
+            count = image_counts.get(lith.get('id', i), 0)
+            
+            self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(proj))
+            self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(borehole))
+            self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(lith_name))
+            self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(str(start)))
+            self.main_window.analysis_table.setItem(i, 4, QTableWidgetItem(str(end)))
+            self.main_window.analysis_table.setItem(i, 5, QTableWidgetItem(str(count)))
+            self.main_window.analysis_table.setItem(i, 6, QTableWidgetItem(desc.replace('\r\n', ' ').replace('\n', ' ') if desc else ''))
+        
+        self.main_window.analysis_table.resizeRowsToContents()
+        
+        total_images = sum(image_counts.values())
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append(f"已加载岩性统计: {dir_path}")
+        self.main_window.analysis_log.append(f"共 {len(lithology_data)} 条岩性记录, {total_images} 张图片")
+        
+        self.main_window.analysis_status_label.setText(f"岩性统计 - {len(lithology_data)} 条记录")
+        self.main_window.analysis_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #2196F3;
+            padding: 8px;
+            background-color: #E3F2FD;
+            border: 1px solid #2196F3;
+            border-radius: 4px;
+        """)
