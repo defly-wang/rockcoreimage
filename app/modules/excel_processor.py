@@ -92,7 +92,11 @@ class ExcelProcessor:
             headers = [cell.value for cell in ws[1]]
             
             borehole_idx = headers.index('钻孔编号') if '钻孔编号' in headers else -1
-            filename_idx = headers.index('文件名') if '文件名' in headers else -1
+            filename_idx = -1
+            for col_name in ['文件名', '图片路径', '图片文件名']:
+                if col_name in headers:
+                    filename_idx = headers.index(col_name)
+                    break
             start_idx = headers.index('起始深度') if '起始深度' in headers else -1
             end_idx = headers.index('终止深度') if '终止深度' in headers else -1
             
@@ -103,6 +107,12 @@ class ExcelProcessor:
                 filename = row[filename_idx] if filename_idx >= 0 else None
                 if not filename:
                     continue
+                
+                filename = str(filename)
+                if '//' in filename:
+                    filename = filename.split('//', 1)[-1]
+                elif '/' in filename:
+                    filename = filename.split('/')[-1]
                 
                 data.append({
                     'borehole': row[borehole_idx] if borehole_idx >= 0 else None,
@@ -138,7 +148,29 @@ class ExcelProcessor:
         if borehole in image_index_cache:
             index = image_index_cache[borehole]
         else:
-            index = self.build_image_index(project_path)
+            search_dirs = [project_path]
+            for d in os.listdir(project_path):
+                d_path = os.path.join(project_path, d)
+                if os.path.isdir(d_path):
+                    search_dirs.append(d_path)
+            
+            index = {}
+            for search_dir in search_dirs:
+                if not os.path.isdir(search_dir):
+                    continue
+                for f in os.listdir(search_dir):
+                    if not f.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp')):
+                        continue
+                    
+                    match = re.match(r'(HC\d+)-(\d+)\.(\w+)', f, re.IGNORECASE)
+                    if match:
+                        hc_num = match.group(1).upper()
+                        suffix = match.group(2)
+                        
+                        if hc_num not in index:
+                            index[hc_num] = {}
+                        index[hc_num][suffix] = os.path.join(search_dir, f)
+            
             image_index_cache[borehole] = index
         
         for hc, files in index.items():

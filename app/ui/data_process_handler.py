@@ -55,20 +55,11 @@ class DataProcessHandler:
         self.main_window.data_processor.error_occurred.connect(self.on_processing_error)
         
         from threading import Thread
-        process_type = getattr(self.main_window, 'process_type', 'excel')
-        
-        if process_type == 'html':
-            self.main_window.process_thread = Thread(
-                target=self.main_window.data_processor.process_html_project,
-                args=(self.main_window.source_directory, self.main_window.output_directory),
-                daemon=True
-            )
-        else:
-            self.main_window.process_thread = Thread(
-                target=self.main_window.data_processor.process,
-                args=(self.main_window.source_directory, self.main_window.output_directory),
-                daemon=True
-            )
+        self.main_window.process_thread = Thread(
+            target=self.main_window.data_processor.process,
+            args=(self.main_window.source_directory, self.main_window.output_directory),
+            daemon=True
+        )
         self.main_window.process_thread.start()
     
     def on_processing_progress(self, value, message):

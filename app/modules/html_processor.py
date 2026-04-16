@@ -73,33 +73,46 @@ class HtmlProcessor:
         if not os.path.exists(html_file):
             return []
         
-        with open(html_file, 'r', encoding='utf-8') as f:
+        info_js = os.path.join(os.path.dirname(html_file), '白光平扫相册_files', 'Info.js')
+        if not os.path.exists(info_js):
+            return []
+        
+        with open(info_js, 'r', encoding='utf-8') as f:
             content = f.read()
         
         result = []
         
-        file_pattern = r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>'
-        matches = re.findall(file_pattern, content, re.IGNORECASE)
+        match = re.search(r'var\s+imgjson\s*=\s*(\[.*?\]);', content, re.DOTALL)
+        if not match:
+            return []
         
-        depth_pattern = r'(\d+\.?\d*)\s*[-–—]\s*(\d+\.?\d*)'
+        json_str = match.group(1)
         
-        for img_path in matches:
-            depth_match = re.search(depth_pattern, img_path)
-            if depth_match:
-                try:
-                    start = float(depth_match.group(1))
-                    end = float(depth_match.group(2))
-                    
-                    if start > end:
-                        start, end = end, start
-                    
-                    result.append({
-                        'start_depth': start,
-                        'end_depth': end,
-                        'path': img_path
-                    })
-                except ValueError:
-                    continue
+        try:
+            data = json.loads(json_str)
+        except json.JSONDecodeError:
+            return []
+        
+        if not data or len(data) == 0:
+            return []
+        
+        for item in data[0]:
+            img_path = item.get('Txlj', '')
+            if not img_path:
+                continue
+            
+            try:
+                start = float(item.get('QSSD', 0) or 0)
+                end = float(item.get('ZZSD', 0) or 0)
+            except (ValueError, TypeError):
+                start = 0
+                end = 0
+            
+            result.append({
+                'start_depth': start,
+                'end_depth': end,
+                'path': img_path
+            })
         
         return result
     

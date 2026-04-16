@@ -129,20 +129,20 @@ class DataProcessor(QObject):
         self.progress_updated.emit(95, "正在保存数据文件...")
         
         descriptions = []
-        if excel_lithology_data:
-            for idx, lith in enumerate(excel_lithology_data):
-                descriptions.append({
-                    'id': idx,
-                    'project': lith.get('project', ''),
-                    'borehole': lith.get('borehole', ''),
-                    'lithology': lith.get('rock_name', ''),
-                    'start_depth': lith.get('start_depth', 0),
-                    'end_depth': lith.get('end_depth', 0),
-                    'description': lith.get('description', '')
-                })
+        all_lithology_data = excel_lithology_data + html_lithology_data
+        for idx, lith in enumerate(all_lithology_data):
+            descriptions.append({
+                'id': idx,
+                'project': lith.get('project', ''),
+                'borehole': lith.get('borehole', ''),
+                'lithology': lith.get('rock_name', ''),
+                'start_depth': lith.get('start_depth', 0),
+                'end_depth': lith.get('end_depth', 0),
+                'description': lith.get('description', '')
+            })
         
         desc_lookup = {(d.get('project', ''), d.get('borehole', ''), d.get('start_depth', 0), d.get('end_depth', 0)): idx 
-                      for idx, d in enumerate(excel_lithology_data)}
+                      for idx, d in enumerate(all_lithology_data)}
         
         for item in all_data:
             project = item.get('project', '')
@@ -162,19 +162,6 @@ class DataProcessor(QObject):
             
             item['lithology_description_id'] = desc_id
             item.pop('lithology_description', None)
-        
-        if html_lithology_data:
-            base_id = len(descriptions)
-            for idx, lith in enumerate(html_lithology_data):
-                descriptions.append({
-                    'id': base_id + idx,
-                    'project': lith.get('project', ''),
-                    'borehole': lith.get('borehole', ''),
-                    'lithology': lith.get('rock_name', ''),
-                    'start_depth': lith.get('start_depth', 0),
-                    'end_depth': lith.get('end_depth', 0),
-                    'description': lith.get('description', '')
-                })
         
         lithology_stats = {}
         for item in all_data:
