@@ -133,10 +133,6 @@ class ExcelProcessor:
         parts = path.split('/')
         filename = parts[-1] if parts else path
         
-        filename = re.sub(r'[-_]?\d+[-_]?\d*\.jpg$', '.jpg', filename, flags=re.IGNORECASE)
-        filename = re.sub(r'[-_]?\d+[-_]?\d*\.png$', '.png', filename, flags=re.IGNORECASE)
-        filename = re.sub(r'[-_]?\d+[-_]?\d*\.bmp$', '.bmp', filename, flags=re.IGNORECASE)
-        
         return filename
     
     def find_image_file(self, project_path, borehole, filename, image_index_cache):

@@ -41,31 +41,79 @@ class ProcessBaseHandler:
         self.main_window.process_log.clear()
         self.main_window.process_log.append(f"正在加载: {json_file}")
         
-        project_stats = {}
-        for item in data:
-            proj = item.get('project', '未知')
-            if proj not in project_stats:
-                project_stats[proj] = {'count': 0, 'lithologies': set()}
-            project_stats[proj]['count'] += 1
-            lith = item.get('lithology', '')
-            if lith:
-                project_stats[proj]['lithologies'].add(lith)
+        lithology_file = json_file.replace('image_descriptions.json', 'lithology_descriptions.json')
+        lithology_data = []
+        if os.path.exists(lithology_file):
+            try:
+                with open(lithology_file, 'r', encoding='utf-8') as f:
+                    lithology_data = json.load(f)
+            except:
+                pass
         
-        self.main_window.process_table.setColumnCount(3)
-        self.main_window.process_table.setHorizontalHeaderLabels(["项目", "图片数", "岩性种类"])
-        self.main_window.process_table.setColumnWidth(0, 150)
-        self.main_window.process_table.setColumnWidth(1, 80)
-        self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
-        self.main_window.process_table.setRowCount(len(project_stats))
-        
-        for i, (proj, stats) in enumerate(sorted(project_stats.items())):
-            self.main_window.process_table.setItem(i, 0, QTableWidgetItem(proj))
-            self.main_window.process_table.setItem(i, 1, QTableWidgetItem(str(stats['count'])))
-            self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(len(stats['lithologies']))))
-        
-        self.main_window.process_table.resizeRowsToContents()
-        self.main_window.process_log.append(f"共 {len(project_stats)} 个项目")
-        self.main_window.status_bar.showMessage("统计完成")
+        if lithology_data:
+            lithology_data_sorted = sorted(lithology_data, key=lambda x: x.get('id', 0))
+            
+            image_counts = {}
+            for item in data:
+                desc_id = item.get('lithology_description_id')
+                if desc_id is not None:
+                    image_counts[desc_id] = image_counts.get(desc_id, 0) + 1
+            
+            self.main_window.process_table.setColumnCount(5)
+            self.main_window.process_table.setHorizontalHeaderLabels(["项目", "钻孔", "岩性名称", "深度范围", "图片数"])
+            self.main_window.process_table.setColumnWidth(0, 120)
+            self.main_window.process_table.setColumnWidth(1, 100)
+            self.main_window.process_table.setColumnWidth(2, 150)
+            self.main_window.process_table.setColumnWidth(3, 100)
+            self.main_window.process_table.setColumnWidth(4, 80)
+            self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+            self.main_window.process_table.setRowCount(len(lithology_data_sorted))
+            
+            for i, lith in enumerate(lithology_data_sorted):
+                proj = lith.get('project', '')
+                borehole = lith.get('borehole', '')
+                lith_name = lith.get('lithology', '')
+                start = lith.get('start_depth', 0)
+                end = lith.get('end_depth', 0)
+                depth_range = f"{start}-{end}"
+                count = image_counts.get(lith.get('id', i), 0)
+                
+                self.main_window.process_table.setItem(i, 0, QTableWidgetItem(proj))
+                self.main_window.process_table.setItem(i, 1, QTableWidgetItem(borehole))
+                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(lith_name))
+                self.main_window.process_table.setItem(i, 3, QTableWidgetItem(depth_range))
+                self.main_window.process_table.setItem(i, 4, QTableWidgetItem(str(count)))
+            
+            self.main_window.process_table.resizeRowsToContents()
+            total_images = sum(image_counts.values())
+            self.main_window.process_log.append(f"共 {len(lithology_data)} 条岩性记录, {total_images} 张图片")
+            self.main_window.status_bar.showMessage("统计完成")
+        else:
+            project_stats = {}
+            for item in data:
+                proj = item.get('project', '未知')
+                if proj not in project_stats:
+                    project_stats[proj] = {'count': 0, 'lithologies': set()}
+                project_stats[proj]['count'] += 1
+                lith = item.get('lithology', '')
+                if lith:
+                    project_stats[proj]['lithologies'].add(lith)
+            
+            self.main_window.process_table.setColumnCount(3)
+            self.main_window.process_table.setHorizontalHeaderLabels(["项目", "图片数", "岩性种类"])
+            self.main_window.process_table.setColumnWidth(0, 150)
+            self.main_window.process_table.setColumnWidth(1, 80)
+            self.main_window.process_table.horizontalHeader().setStretchLastSection(True)
+            self.main_window.process_table.setRowCount(len(project_stats))
+            
+            for i, (proj, stats) in enumerate(sorted(project_stats.items())):
+                self.main_window.process_table.setItem(i, 0, QTableWidgetItem(proj))
+                self.main_window.process_table.setItem(i, 1, QTableWidgetItem(str(stats['count'])))
+                self.main_window.process_table.setItem(i, 2, QTableWidgetItem(str(len(stats['lithologies']))))
+            
+            self.main_window.process_table.resizeRowsToContents()
+            self.main_window.process_log.append(f"共 {len(project_stats)} 个项目")
+            self.main_window.status_bar.showMessage("统计完成")
     
     def export_to_excel(self):
         from PyQt6.QtWidgets import QFileDialog
