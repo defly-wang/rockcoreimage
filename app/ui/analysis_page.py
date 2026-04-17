@@ -683,7 +683,7 @@ class AnalysisHandler:
             return
         
         api_key, ok = QInputDialog.getText(
-            self.main_window, "DeepSeek API", "请输入DeepSeek API Key:",
+            self.main_window, "硅基流动 API", "请输入硅基流动 API Key:",
         )
         if not ok or not api_key:
             return
@@ -723,18 +723,14 @@ class AnalysisHandler:
             end_depth = lith.get('end_depth', 0)
             desc = lith.get('description', '')
             
-            prompt = f"""根据以下岩性描述，分析并提取明确的岩性信息：
+            prompt = f"""根据以下岩性描述，分析并提取明确的岩性信息。请以JSON格式返回结果。
 原岩性名称: {original_lith}
 深度范围: {start_depth}m - {end_depth}m
 描述内容: {desc}
 
-请按以下JSON格式返回分析结果：
-{{"lithology": "岩性名称", "start_depth": 起始深度, "end_depth": 结束深度, "description": "简短的岩性特征描述"}}
+返回格式：{{"lithology": "岩性名称", "start_depth": 起始深度, "end_depth": 结束深度, "description": "简短的岩性特征描述"}}
 
-如果描述中没有明确的岩性变化，请返回：
-{{"lithology": "{original_lith}", "start_depth": {start_depth}, "end_depth": {end_depth}, "description": "{desc[:100] if desc else ''}"}}
-
-只返回JSON，不要其他内容。"""
+如果没有明确的岩性变化，返回：{{"lithology": "{original_lith}", "start_depth": {start_depth}, "end_depth": {end_depth}, "description": "{desc[:100] if desc else ''}"}}"""
             
             self.main_window.analysis_log.append(f"[API调用 {idx+1}/{total_calls}] {project} {borehole} {start_depth}-{end_depth}m [请求中...]")
             
@@ -742,17 +738,18 @@ class AnalysisHandler:
                 start_time = datetime.datetime.now()
                 
                 response = requests.post(
-                    "https://api.deepseek.com/v1/chat/completions",
+                    "https://api.siliconflow.cn/v1/chat/completions",
                     headers={
                         "Authorization": f"Bearer {api_key}",
                         "Content-Type": "application/json"
                     },
                     json={
-                        "model": "deepseek-chat",
+                        "model": "deepseek-ai/DeepSeek-V2.5",
                         "messages": [{"role": "user", "content": prompt}],
-                        "max_tokens": 500
+                        "max_tokens": 500,
+                        "response_format": {"type": "json_object"}
                     },
-                    timeout=30
+                    timeout=60
                 )
                 
                 end_time = datetime.datetime.now()
@@ -763,7 +760,6 @@ class AnalysisHandler:
                     success_count += 1
                     result = response.json()
                     content = result['choices'][0]['message']['content']
-                    content = content.strip().strip('```json').strip('```').strip()
                     
                     try:
                         ai_result = json.loads(content)
