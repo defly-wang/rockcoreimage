@@ -699,6 +699,7 @@ class AnalysisHandler:
         self.main_window.analysis_progress.setValue(0)
         self.main_window.analysis_log.clear()
         self.main_window.analysis_log.append(f"开始AI分析: {lithology_file}")
+        self.main_window.analysis_log.append(f"[信息] 共 {len(lithology_data)} 条记录，准备一次性上传处理")
         
         try:
             import requests
@@ -707,14 +708,8 @@ class AnalysisHandler:
             QMessageBox.warning(self.main_window, "错误", "请安装requests库: pip install requests")
             return
         
-        max_id = max((lith.get('id', 0) for lith in lithology_data), default=0)
-        new_records = []
-        total_calls = len(lithology_data)
-        success_count = 0
-        
+        records_text = []
         for idx, lith in enumerate(lithology_data):
-            self.main_window.analysis_progress.setValue(int(idx * 100 / total_calls))
-            
             original_id = lith.get('id', 0)
             original_lith = lith.get('lithology', '')
             project = lith.get('project', '')
@@ -722,93 +717,96 @@ class AnalysisHandler:
             start_depth = lith.get('start_depth', 0)
             end_depth = lith.get('end_depth', 0)
             desc = lith.get('description', '')
-            
-            user_content = f"""根据以下岩性描述，分析并提取明确的岩性信息。请以JSON格式返回结果。
-原岩性名称: {original_lith}
-深度范围: {start_depth}m - {end_depth}m
-描述内容: {desc}
+            records_text.append(f'{{"index": {idx}, "id": {original_id}, "project": "{project}", "borehole": "{borehole}", "original_lithology": "{original_lith}", "start_depth": {start_depth}, "end_depth": {end_depth}, "description": "{desc.replace(chr(34), chr(34)+chr(34))}"}}')
+        
+        records_json = "[" + ",\n".join(records_text) + "]"
+        
+        user_content = f"""请分析以下岩性数据列表，对每一条记录进行岩性分析。如果描述中包含明确的岩性变化，返回该层的分析结果；否则保持原始岩性。
 
-返回格式：{{"lithology": "岩性名称", "start_depth": 起始深度, "end_depth": 结束深度, "description": "简短的岩性特征描述"}}
+岩性数据列表：
+{records_json}
 
-如果没有明确的岩性变化，返回：{{"lithology": "{original_lith}", "start_depth": {start_depth}, "end_depth": {end_depth}, "description": "{desc[:100] if desc else ''}"}}"""
+返回格式要求：
+1. 返回一个JSON数组，包含所有记录的分析结果
+2. 每条结果包含：id, project, borehole, original_lithology, start_depth, end_depth, lithology(分析后的岩性), description(分析后的描述)
+3. 如果描述中有明确的岩性分层，按实际分层返回多条记录
+4. 如果没有明确的岩性变化，返回1条记录，保持原始岩性
+5. 只返回JSON，不要其他内容
+
+返回示例：
+{{"results": [{{"id": 1, "project": "项目", "borehole": "钻孔", "original_lithology": "花岗岩", "start_depth": 100, "end_depth": 105, "lithology": "花岗岩", "description": "描述"}}]}}"""
+        
+        self.main_window.analysis_log.append("[API调用] 正在发送请求...")
+        self.main_window.analysis_log.append(f"[输入] 记录数: {len(lithology_data)}")
+        
+        try:
+            start_time = datetime.datetime.now()
             
-            self.main_window.analysis_log.append(f"[API调用 {idx+1}/{total_calls}] {project} {borehole} {start_depth}-{end_depth}m [请求中...]")
+            response = requests.post(
+                "https://api.siliconflow.cn/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "deepseek-ai/DeepSeek-V3.2",
+                    "messages": [
+                        {"role": "system", "content": "你是一个专业的地质岩性分析助手，擅长从岩性描述中提取结构化的岩性信息。请仔细分析每一条记录的描述内容，识别其中的岩性变化，并始终以JSON格式返回结构化的分析结果。"},
+                        {"role": "user", "content": user_content}
+                    ],
+                    "max_tokens": 32000,
+                    "response_format": {"type": "json_object"}
+                },
+                timeout=120
+            )
             
-            try:
-                start_time = datetime.datetime.now()
+            end_time = datetime.datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            
+            if response.status_code == 200:
+                self.main_window.analysis_log.append(f"[成功] API调用成功 [耗时: {duration:.2f}s]")
+                result = response.json()
+                content = result['choices'][0]['message']['content']
                 
-                response = requests.post(
-                    "https://api.siliconflow.cn/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": "deepseek-ai/DeepSeek-V2.5",
-                        "messages": [
-                            {"role": "system", "content": "你是一个专业的地质岩性分析助手，擅长从岩性描述中提取结构化的岩性信息。请始终以JSON格式返回结果。"},
-                            {"role": "user", "content": user_content}
-                        ],
-                        "max_tokens": 500,
-                        "response_format": {"type": "json_object"}
-                    },
-                    timeout=60
-                )
+                self.main_window.analysis_log.append(f"[返回] {content[:300]}...")
                 
-                end_time = datetime.datetime.now()
-                duration = (end_time - start_time).total_seconds()
-                
-                if response.status_code == 200:
-                    self.main_window.analysis_log.append(f"[成功] {project} {borehole} {start_depth}-{end_depth}m [耗时: {duration:.2f}s]")
-                    success_count += 1
-                    result = response.json()
-                    content = result['choices'][0]['message']['content']
+                try:
+                    ai_result = json.loads(content)
+                    results = ai_result.get('results', [])
+                    self.main_window.analysis_log.append(f"[解析] 成功解析 {len(results)} 条结果")
                     
-                    self.main_window.analysis_log.append(f"[输入] 原岩性: {original_lith}, 深度: {start_depth}-{end_depth}m")
-                    self.main_window.analysis_log.append(f"[返回] {content[:200]}...")
+                    new_records = []
+                    for idx, res in enumerate(results):
+                        new_records.append({
+                            'id': res.get('id', idx + 1),
+                            'project': res.get('project', ''),
+                            'borehole': res.get('borehole', ''),
+                            'lithology': res.get('lithology', ''),
+                            'start_depth': res.get('start_depth', 0),
+                            'end_depth': res.get('end_depth', 0),
+                            'description': res.get('description', ''),
+                            'original_lithology': res.get('original_lithology', ''),
+                            'original_id': res.get('id', 0)
+                        })
+                    success_count = len(new_records)
                     
-                    try:
-                        ai_result = json.loads(content)
-                        new_lith = ai_result.get('lithology', original_lith)
-                        new_start = ai_result.get('start_depth', start_depth)
-                        new_end = ai_result.get('end_depth', end_depth)
-                        new_desc = ai_result.get('description', desc)
-                    except json.JSONDecodeError:
-                        new_lith = original_lith
-                        new_start = start_depth
-                        new_end = end_depth
-                        new_desc = content[:200] if content else desc
-                        self.main_window.analysis_log.append(f"[警告] JSON解析失败，使用原始描述")
-                else:
-                    self.main_window.analysis_log.append(f"[失败] {project} {borehole} {start_depth}-{end_depth}m [状态码: {response.status_code}]")
-                    new_lith = original_lith
-                    new_start = start_depth
-                    new_end = end_depth
-                    new_desc = desc
-            except requests.exceptions.Timeout:
-                self.main_window.analysis_log.append(f"[超时] {project} {borehole} {start_depth}-{end_depth}m [请求超时]")
-                new_lith = original_lith
-                new_start = start_depth
-                new_end = end_depth
-                new_desc = desc
-            except Exception as e:
-                self.main_window.analysis_log.append(f"[错误] {project} {borehole} {start_depth}-{end_depth}m [{str(e)}]")
-                new_lith = original_lith
-                new_start = start_depth
-                new_end = end_depth
-                new_desc = desc
-            
-            new_records.append({
-                'id': max_id + len(new_records) + 1,
-                'project': project,
-                'borehole': borehole,
-                'lithology': new_lith,
-                'start_depth': new_start,
-                'end_depth': new_end,
-                'description': new_desc,
-                'original_lithology': original_lith,
-                'original_id': original_id
-            })
+                except json.JSONDecodeError:
+                    self.main_window.analysis_log.append(f"[错误] JSON解析失败")
+                    QMessageBox.warning(self.main_window, "错误", f"AI返回的JSON格式无法解析:\n{content[:500]}")
+                    return
+            else:
+                self.main_window.analysis_log.append(f"[失败] 状态码: {response.status_code}")
+                QMessageBox.warning(self.main_window, "错误", f"API调用失败: {response.status_code}\n{response.text[:500]}")
+                return
+                
+        except requests.exceptions.Timeout:
+            self.main_window.analysis_log.append(f"[超时] 请求超时")
+            QMessageBox.warning(self.main_window, "错误", "请求超时，请增加超时时间或减少数据量")
+            return
+        except Exception as e:
+            self.main_window.analysis_log.append(f"[错误] {str(e)}")
+            QMessageBox.warning(self.main_window, "错误", f"请求失败: {str(e)}")
+            return
         
         output_file = os.path.join(dir_path, 'lithology_ai.json')
         
@@ -818,7 +816,7 @@ class AnalysisHandler:
             
             self.main_window.analysis_progress.setValue(100)
             self.main_window.analysis_status_label.setText(f"AI分析完成 - 共 {len(new_records)} 条记录")
-            self.main_window.analysis_log.append(f"[完成] 原记录: {total_calls} 条, 成功: {success_count} 条, 失败: {total_calls - success_count} 条")
+            self.main_window.analysis_log.append(f"[完成] 原记录: {len(lithology_data)} 条, 分析后: {len(new_records)} 条")
             self.main_window.analysis_log.append(f"[输出] {output_file}")
             
             self.main_window.analysis_table.setColumnCount(8)
