@@ -723,7 +723,7 @@ class AnalysisHandler:
             end_depth = lith.get('end_depth', 0)
             desc = lith.get('description', '')
             
-            prompt = f"""根据以下岩性描述，分析并提取明确的岩性信息。请以JSON格式返回结果。
+            user_content = f"""根据以下岩性描述，分析并提取明确的岩性信息。请以JSON格式返回结果。
 原岩性名称: {original_lith}
 深度范围: {start_depth}m - {end_depth}m
 描述内容: {desc}
@@ -745,7 +745,10 @@ class AnalysisHandler:
                     },
                     json={
                         "model": "deepseek-ai/DeepSeek-V2.5",
-                        "messages": [{"role": "user", "content": prompt}],
+                        "messages": [
+                            {"role": "system", "content": "你是一个专业的地质岩性分析助手，擅长从岩性描述中提取结构化的岩性信息。请始终以JSON格式返回结果。"},
+                            {"role": "user", "content": user_content}
+                        ],
                         "max_tokens": 500,
                         "response_format": {"type": "json_object"}
                     },
