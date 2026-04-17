@@ -190,6 +190,22 @@ class AnalysisPage:
             }
         """)
         detail_btn.clicked.connect(main_window.analysis_handler.start_detail_analysis)
+        
+        ai_btn = QPushButton("AI分析")
+        ai_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #7B1FA2;
+            }
+        """)
+        ai_btn.clicked.connect(main_window.analysis_handler.start_ai_analysis)
+        action_button_panel.addWidget(ai_btn)
         action_button_panel.addWidget(detail_btn)
         
         right_layout.addLayout(action_button_panel)
@@ -651,6 +667,187 @@ class AnalysisHandler:
             self.main_window.analysis_status_label.setText(f"错误: {str(e)}")
         
         return
+    
+    def start_ai_analysis(self):
+        from PyQt6.QtWidgets import QFileDialog, QInputDialog
+        dir_path = QFileDialog.getExistingDirectory(
+            self.main_window, "选择处理结果目录"
+        )
+        if not dir_path:
+            return
+        
+        lithology_file = os.path.join(dir_path, 'lithology_descriptions.json')
+        
+        if not os.path.exists(lithology_file):
+            QMessageBox.warning(self.main_window, "错误", "找不到lithology_descriptions.json文件")
+            return
+        
+        api_key, ok = QInputDialog.getText(
+            self.main_window, "DeepSeek API", "请输入DeepSeek API Key:",
+        )
+        if not ok or not api_key:
+            return
+        
+        try:
+            with open(lithology_file, 'r', encoding='utf-8') as f:
+                lithology_data = json.load(f)
+        except Exception as e:
+            QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
+            return
+        
+        self.main_window.analysis_status_label.setText("正在AI分析...")
+        self.main_window.analysis_progress.setValue(0)
+        self.main_window.analysis_log.clear()
+        self.main_window.analysis_log.append(f"开始AI分析: {lithology_file}")
+        
+        try:
+            import requests
+            import datetime
+        except ImportError:
+            QMessageBox.warning(self.main_window, "错误", "请安装requests库: pip install requests")
+            return
+        
+        max_id = max((lith.get('id', 0) for lith in lithology_data), default=0)
+        new_records = []
+        total_calls = len(lithology_data)
+        success_count = 0
+        
+        for idx, lith in enumerate(lithology_data):
+            self.main_window.analysis_progress.setValue(int(idx * 100 / total_calls))
+            
+            original_id = lith.get('id', 0)
+            original_lith = lith.get('lithology', '')
+            project = lith.get('project', '')
+            borehole = lith.get('borehole', '')
+            start_depth = lith.get('start_depth', 0)
+            end_depth = lith.get('end_depth', 0)
+            desc = lith.get('description', '')
+            
+            prompt = f"""根据以下岩性描述，分析并提取明确的岩性信息：
+原岩性名称: {original_lith}
+深度范围: {start_depth}m - {end_depth}m
+描述内容: {desc}
+
+请按以下JSON格式返回分析结果：
+{{"lithology": "岩性名称", "start_depth": 起始深度, "end_depth": 结束深度, "description": "简短的岩性特征描述"}}
+
+如果描述中没有明确的岩性变化，请返回：
+{{"lithology": "{original_lith}", "start_depth": {start_depth}, "end_depth": {end_depth}, "description": "{desc[:100] if desc else ''}"}}
+
+只返回JSON，不要其他内容。"""
+            
+            self.main_window.analysis_log.append(f"[API调用 {idx+1}/{total_calls}] {project} {borehole} {start_depth}-{end_depth}m [请求中...]")
+            
+            try:
+                start_time = datetime.datetime.now()
+                
+                response = requests.post(
+                    "https://api.deepseek.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": "deepseek-chat",
+                        "messages": [{"role": "user", "content": prompt}],
+                        "max_tokens": 500
+                    },
+                    timeout=30
+                )
+                
+                end_time = datetime.datetime.now()
+                duration = (end_time - start_time).total_seconds()
+                
+                if response.status_code == 200:
+                    self.main_window.analysis_log.append(f"[成功] {project} {borehole} {start_depth}-{end_depth}m [耗时: {duration:.2f}s]")
+                    success_count += 1
+                    result = response.json()
+                    content = result['choices'][0]['message']['content']
+                    content = content.strip().strip('```json').strip('```').strip()
+                    
+                    try:
+                        ai_result = json.loads(content)
+                        new_lith = ai_result.get('lithology', original_lith)
+                        new_start = ai_result.get('start_depth', start_depth)
+                        new_end = ai_result.get('end_depth', end_depth)
+                        new_desc = ai_result.get('description', desc)
+                    except json.JSONDecodeError:
+                        new_lith = original_lith
+                        new_start = start_depth
+                        new_end = end_depth
+                        new_desc = content[:200] if content else desc
+                        self.main_window.analysis_log.append(f"[警告] JSON解析失败，使用原始描述")
+                else:
+                    self.main_window.analysis_log.append(f"[失败] {project} {borehole} {start_depth}-{end_depth}m [状态码: {response.status_code}]")
+                    new_lith = original_lith
+                    new_start = start_depth
+                    new_end = end_depth
+                    new_desc = desc
+            except requests.exceptions.Timeout:
+                self.main_window.analysis_log.append(f"[超时] {project} {borehole} {start_depth}-{end_depth}m [请求超时]")
+                new_lith = original_lith
+                new_start = start_depth
+                new_end = end_depth
+                new_desc = desc
+            except Exception as e:
+                self.main_window.analysis_log.append(f"[错误] {project} {borehole} {start_depth}-{end_depth}m [{str(e)}]")
+                new_lith = original_lith
+                new_start = start_depth
+                new_end = end_depth
+                new_desc = desc
+            
+            new_records.append({
+                'id': max_id + len(new_records) + 1,
+                'project': project,
+                'borehole': borehole,
+                'lithology': new_lith,
+                'start_depth': new_start,
+                'end_depth': new_end,
+                'description': new_desc,
+                'original_lithology': original_lith,
+                'original_id': original_id
+            })
+        
+        output_file = os.path.join(dir_path, 'lithology_ai.json')
+        
+        try:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(new_records, f, ensure_ascii=False, indent=2)
+            
+            self.main_window.analysis_progress.setValue(100)
+            self.main_window.analysis_status_label.setText(f"AI分析完成 - 共 {len(new_records)} 条记录")
+            self.main_window.analysis_log.append(f"[完成] 原记录: {total_calls} 条, 成功: {success_count} 条, 失败: {total_calls - success_count} 条")
+            self.main_window.analysis_log.append(f"[输出] {output_file}")
+            
+            self.main_window.analysis_table.setColumnCount(8)
+            self.main_window.analysis_table.setHorizontalHeaderLabels(["ID", "项目", "钻孔", "岩性名称", "开始深度", "结束深度", "原岩性", "描述"])
+            self.main_window.analysis_table.setColumnWidth(0, 40)
+            self.main_window.analysis_table.setColumnWidth(1, 80)
+            self.main_window.analysis_table.setColumnWidth(2, 80)
+            self.main_window.analysis_table.setColumnWidth(3, 100)
+            self.main_window.analysis_table.setColumnWidth(4, 80)
+            self.main_window.analysis_table.setColumnWidth(5, 80)
+            self.main_window.analysis_table.setColumnWidth(6, 100)
+            self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+            
+            self.main_window.analysis_table.setRowCount(len(new_records))
+            
+            for i, rec in enumerate(new_records):
+                self.main_window.analysis_table.setItem(i, 0, QTableWidgetItem(str(rec.get('id', ''))))
+                self.main_window.analysis_table.setItem(i, 1, QTableWidgetItem(rec.get('project', '')))
+                self.main_window.analysis_table.setItem(i, 2, QTableWidgetItem(rec.get('borehole', '')))
+                self.main_window.analysis_table.setItem(i, 3, QTableWidgetItem(rec.get('lithology', '')))
+                self.main_window.analysis_table.setItem(i, 4, QTableWidgetItem(str(rec.get('start_depth', 0))))
+                self.main_window.analysis_table.setItem(i, 5, QTableWidgetItem(str(rec.get('end_depth', 0))))
+                self.main_window.analysis_table.setItem(i, 6, QTableWidgetItem(rec.get('original_lithology', '')))
+                self.main_window.analysis_table.setItem(i, 7, QTableWidgetItem(rec.get('description', '')[:50] if rec.get('description', '') else ''))
+            
+            self.main_window.analysis_table.resizeRowsToContents()
+            self.main_window.status_bar.showMessage("AI分析完成")
+            
+        except Exception as e:
+            QMessageBox.critical(self.main_window, "错误", f"保存文件失败: {str(e)}")
+            self.main_window.analysis_status_label.setText(f"错误: {str(e)}")
     
     def view_lithology_classification(self):
         json_file, _ = QFileDialog.getOpenFileName(
