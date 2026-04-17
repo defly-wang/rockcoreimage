@@ -764,6 +764,9 @@ class AnalysisHandler:
                     result = response.json()
                     content = result['choices'][0]['message']['content']
                     
+                    self.main_window.analysis_log.append(f"[输入] 原岩性: {original_lith}, 深度: {start_depth}-{end_depth}m")
+                    self.main_window.analysis_log.append(f"[返回] {content[:200]}...")
+                    
                     try:
                         ai_result = json.loads(content)
                         new_lith = ai_result.get('lithology', original_lith)
