@@ -9,9 +9,26 @@
 - **图像预处理** - 尺寸统一、数据增强（翻转、旋转、颜色抖动）
 - **模型训练** - 支持 ResNet18、ResNet50、VGG16、EfficientNet-B0
 - **图像识别** - 单图/批量识别，导出CSV/JSON结果
-- **数据处理** - 从图像目录批量处理数据，生成岩性分析JSON
+- **数据处理** - 从Excel/HTML目录批量处理数据
 - **岩性分类** - 根据岩性配置对岩性进行标准化分类
-- **蚀变分析** - 基于岩性名称检测蚀变类型（绢云母化、绿泥石化、硅化等）
+- **蚀变分析** - 基于岩性名称检测蚀变类型
+- **岩性描述管理** - 生成lithology_descriptions.json关联数据
+
+## 模块架构
+
+### 数据处理模块 (app/modules/)
+- `excel_processor.py` - Excel读取和处理
+- `html_processor.py` - HTML文件处理
+- `lithology_classifier.py` - 岩性分类
+- `alteration_analyzer.py` - 蚀变分析
+- `data_processor.py` - 主模块整合
+
+### UI处理器模块 (app/ui/)
+- `process_base_handler.py` - 基础功能
+- `data_process_handler.py` - 数据处理
+- `lithology_handler.py` - 岩性分类
+- `alteration_handler.py` - 蚀变分析
+- `process_handler.py` - 主模块整合
 
 ## 环境要求
 
