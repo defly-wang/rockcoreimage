@@ -940,7 +940,7 @@ class AnalysisHandler:
             end_depth = lith.get("end_depth", 0)
             desc = lith.get("description", "")
 
-            user_content = f"""分析以下岩性信息，根据岩性描述中内中包含的各个深度中的描述内容，提取各个深度的岩性，如果岩性与原始岩性不同,返回该层数据,并返回该层的描述。返回JSON数组，格式：{{"lithology": "岩性名称", "start_depth": 起始深度, "end_depth": 结束深度, "description": "岩性描述"}}
+            user_content = f"""分析以下岩性信息，根据岩性描述中内中包含的各个深度中的描述内容，提取各个深度的岩性，如果岩性与原始岩性不同,返回该层数据,并返回该层的描述。返回各种岩性JSON数据，格式：{{"lithology": "岩性名称", "start_depth": 起始深度, "end_depth": 结束深度, "description": "岩性描述"}}
 原岩性名称: {original_lith}
 起始深度: {start_depth} m
 结束深度: {end_depth} m 
@@ -973,7 +973,7 @@ class AnalysisHandler:
                         "Content-Type": "application/json",
                     },
                     json={
-                        "model": "Pro/zai-org/GLM-4.7",
+                        "model": "Pro/zai-org/GLM-5.1",
                         "messages": [
                             {
                                 "role": "system",
