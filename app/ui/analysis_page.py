@@ -940,13 +940,24 @@ class AnalysisHandler:
             end_depth = lith.get("end_depth", 0)
             desc = lith.get("description", "")
 
-            user_content = f"""分析以下岩性描述，根据其中各个深度中的描述内容，提取各个深度的岩性，如果岩性与原始岩性不同,返回该层数据,并返回该层的描述。
+            user_content = f"""分析以下岩性信息，根据岩性描述中内中包含的各个深度中的描述内容，提取各个深度的岩性，如果岩性与原始岩性不同,返回该层数据,并返回该层的描述。返回JSON数组，格式：{{"lithology": "岩性名称", "start_depth": 起始深度, "end_depth": 结束深度, "description": "岩性描述"}}
 原岩性名称: {original_lith}
-岩性描述： {desc}
 起始深度: {start_depth} m
 结束深度: {end_depth} m 
-请以JSON一维数组格式返回结果(1个元素也返回数组)。
-元素JSON格式：{{"lithology": "岩性名称", "start_depth": 起始深度, "end_depth": 结束深度, "description": "岩性描述"}}"""
+岩性描述： {desc}"""
+
+            ok1 = (
+                QMessageBox.question(
+                    self.main_window,
+                    "继续分析吗？",
+                    "是否继续分析下一条记录？",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                )
+                == QMessageBox.StandardButton.Yes
+            )
+
+            if not ok1:
+                continue
 
             self.main_window.analysis_log.append(
                 f"[API调用 {idx + 1}/{total_calls}] {project} {borehole} {start_depth}-{end_depth}m [请求中...]"
@@ -966,7 +977,7 @@ class AnalysisHandler:
                         "messages": [
                             {
                                 "role": "system",
-                                "content": "你是岩矿专家，负责分析岩性描述并提取岩性信息。",
+                                "content": "你是岩矿分析专家，负责分析岩性描述并提取岩性信息。",
                             },
                             {"role": "user", "content": user_content},
                         ],
@@ -994,6 +1005,28 @@ class AnalysisHandler:
                         ai_result = json.loads(content)
                         if isinstance(ai_result, list):
                             for item in ai_result:
+                                new_records.append(
+                                    {
+                                        "id": max_id + len(new_records) + 1,
+                                        "project": project,
+                                        "borehole": borehole,
+                                        "lithology": item.get(
+                                            "lithology", original_lith
+                                        ),
+                                        "start_depth": item.get(
+                                            "start_depth", start_depth
+                                        ),
+                                        "end_depth": item.get("end_depth", end_depth),
+                                        "description": item.get("description", desc),
+                                        "original_lithology": original_lith,
+                                        "original_id": original_id,
+                                    }
+                                )
+                            continue
+                        elif "result" in ai_result and isinstance(
+                            ai_result["result"], list
+                        ):
+                            for item in ai_result["result"]:
                                 new_records.append(
                                     {
                                         "id": max_id + len(new_records) + 1,
