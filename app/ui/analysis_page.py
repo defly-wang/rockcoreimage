@@ -178,6 +178,24 @@ class AnalysisPage:
         )
         action_button_panel.addWidget(classify_btn)
 
+        adjust_btn = QPushButton("岩性调整")
+        adjust_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #7B1FA2;
+            }
+        """)
+        adjust_btn.clicked.connect(
+            main_window.lithology_handler.adjust_lithology
+        )
+        action_button_panel.addWidget(adjust_btn)
+
         alteration_btn = QPushButton("蚀变分析")
         alteration_btn.setStyleSheet("""
             QPushButton {

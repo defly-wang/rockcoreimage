@@ -269,3 +269,97 @@ class LithologyHandler:
             border: 1px solid #2196F3;
             border-radius: 4px;
         """)
+
+    def adjust_lithology(self):
+        from PyQt6.QtWidgets import QFileDialog
+        dir_path = QFileDialog.getExistingDirectory(
+            self.main_window, "选择目录", ""
+        )
+        if not dir_path:
+            return
+        
+        diff_file = os.path.join(dir_path, 'lithology_descriptions_diff.json')
+        image_file = os.path.join(dir_path, 'image_descriptions.json')
+        
+        if not os.path.exists(diff_file):
+            QMessageBox.warning(self.main_window, "错误", f"找不到 {diff_file}")
+            return
+        
+        if not os.path.exists(image_file):
+            QMessageBox.warning(self.main_window, "错误", f"找不到 {image_file}")
+            return
+        
+        output_file = os.path.join(dir_path, 'image_descriptions_adjusted.json')
+        
+        try:
+            with open(diff_file, 'r', encoding='utf-8') as f:
+                diff_data = json.load(f)
+            
+            with open(image_file, 'r', encoding='utf-8') as f:
+                image_data = json.load(f)
+            
+            from collections import defaultdict
+            lithology_by_project = defaultdict(list)
+            for item in diff_data:
+                key = (item['project'], item['borehole'])
+                lithology_by_project[key].append({
+                    'start': item['start_depth'],
+                    'end': item['end_depth'],
+                    'lithology': item['lithology'],
+                    'description': item.get('description', ''),
+                    'description_id': item['id']
+                })
+            
+            def calculate_overlap(img_start, img_end, lith_start, lith_end):
+                overlap_start = max(img_start, lith_start)
+                overlap_end = min(img_end, lith_end)
+                if overlap_start >= overlap_end:
+                    return 0
+                overlap_depth = overlap_end - overlap_start
+                img_depth = img_end - img_start
+                if img_depth <= 0:
+                    return 0
+                return overlap_depth / img_depth
+            
+            update_count = 0
+            not_found_count = 0
+            
+            for img in image_data:
+                project = img['project']
+                borehole = img['borehole']
+                img_start = img['start_depth']
+                img_end = img['end_depth']
+                
+                key = (project, borehole)
+                if key not in lithology_by_project:
+                    not_found_count += 1
+                    continue
+                
+                best_match = None
+                best_overlap = 0
+                
+                for lith in lithology_by_project[key]:
+                    overlap = calculate_overlap(img_start, img_end, lith['start'], lith['end'])
+                    if overlap > best_overlap and overlap >= 0.6:
+                        best_overlap = overlap
+                        best_match = lith
+                
+                if best_match:
+                    img['lithology'] = best_match['lithology']
+                    img['lithology_description_id'] = best_match['description_id']
+                    update_count += 1
+                else:
+                    not_found_count += 1
+            
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(image_data, f, ensure_ascii=False, indent=2)
+            
+            QMessageBox.information(
+                self.main_window, "完成",
+                f"岩性调整完成!\n\n更新: {update_count} 条\n未匹配: {not_found_count} 条\n\n输出文件: {output_file}"
+            )
+            
+            self.main_window.analysis_log.append(f"岩性调整完成: 更新 {update_count} 条, 输出 {output_file}")
+            
+        except Exception as e:
+            QMessageBox.critical(self.main_window, "错误", f"处理失败: {str(e)}")
