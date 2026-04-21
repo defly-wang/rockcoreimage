@@ -149,9 +149,9 @@ class AnalysisPage:
             QPushButton {
                 background-color: #2196F3;
                 color: white;
-                font-size: 12px;
+                font-size: 14px;
+                font-weight: bold;
                 padding: 8px 16px;
-                border-radius: 4px;
             }
             QPushButton:hover {
                 background-color: #1976D2;

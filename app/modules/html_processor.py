@@ -30,6 +30,7 @@ class HtmlProcessor:
             filename = os.path.basename(full_path)
             start_depth = img['start_depth']
             end_depth = img['end_depth']
+            html_image_name = img.get('html_image_name', '')
             
             matched_lith = None
             for (s, e), lith in lithology_map.items():
@@ -46,7 +47,8 @@ class HtmlProcessor:
             source_img_path = self.find_image_in_tongci(borehole_dir, filename)
             
             if source_img_path:
-                new_filename = f"{project_name}_{os.path.basename(source_img_path)}"
+                image_name = html_image_name if html_image_name else os.path.basename(source_img_path)
+                new_filename = f"{project_name}_{image_name}"
                 dest_img_path = os.path.join(self.output_dir, 'images', new_filename)
                 os.makedirs(os.path.dirname(dest_img_path), exist_ok=True)
                 
@@ -56,7 +58,7 @@ class HtmlProcessor:
                     project_data.append({
                         'project': project_name,
                         'borehole': project_name,
-                        'image_file': os.path.basename(source_img_path),
+                        'image_file': image_name,
                         'new_filename': new_filename,
                         'start_depth': start_depth,
                         'end_depth': end_depth,
@@ -102,16 +104,19 @@ class HtmlProcessor:
                 continue
             
             try:
-                start = float(item.get('QSSD', 0) or 0)
-                end = float(item.get('ZZSD', 0) or 0)
+                start = float(item.get('Qsjs', 0) or 0)
+                end = float(item.get('Zzjs', 0) or 0)
             except (ValueError, TypeError):
                 start = 0
                 end = 0
             
+            html_image_name = item.get('Yxbh', '') + '.jpg' if item.get('Yxbh') else ''
+            
             result.append({
                 'start_depth': start,
                 'end_depth': end,
-                'path': img_path
+                'path': img_path,
+                'html_image_name': html_image_name
             })
         
         return result
