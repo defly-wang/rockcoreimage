@@ -65,31 +65,3 @@ class DataCleaner(QObject):
                 small_images.append(path)
         
         return blurry_images, corrupted_images, small_images
-    
-    def detect_duplicates(self, image_paths, threshold=0.95):
-        duplicates = []
-        hashes = {}
-        
-        for i, path in enumerate(image_paths):
-            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-            if img is None:
-                continue
-            
-            resized = cv2.resize(img, (64, 64))
-            img_hash = hash(resized.tobytes())
-            
-            for existing_hash, existing_path in hashes.items():
-                similarity = self._calculate_similarity(resized, hashes[existing_hash])
-                if similarity > threshold:
-                    duplicates.append((existing_path, path, similarity))
-            
-            hashes[img_hash] = resized
-        
-        return duplicates
-    
-    def _calculate_similarity(self, img1, img2):
-        if img1.shape != img2.shape:
-            img2 = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
-        
-        diff = cv2.absdiff(img1, img2)
-        return 1.0 - (np.mean(diff) / 255.0)

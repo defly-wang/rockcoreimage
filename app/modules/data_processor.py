@@ -1,9 +1,11 @@
 import os
+import re
 import json
 from PyQt6.QtCore import QObject, pyqtSignal
 
 from app.modules.excel_processor import ExcelProcessor
 from app.modules.html_processor import HtmlProcessor
+from app.modules.data_fetcher import DataFetcher
 
 
 class DataProcessor(QObject):
@@ -18,6 +20,7 @@ class DataProcessor(QObject):
         self.lithology_id_start = 1
         self.excel_processor = ExcelProcessor()
         self.html_processor = HtmlProcessor()
+        self.data_fetcher = DataFetcher()
     
     def process(self, source_dir, output_dir, lithology_id_start=1):
         self.source_dir = source_dir
@@ -190,3 +193,313 @@ class DataProcessor(QObject):
             'lithology_stats': lithology_stats,
             'descriptions_file': descriptions_file
         })
+    
+    def fetch_from_json(self, json_file, project_name, output_dir, lithology_id_start=1):
+        self.output_dir = output_dir
+        self.lithology_id_start = lithology_id_start
+        
+        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(os.path.join(output_dir, 'images'), exist_ok=True)
+        
+        self.progress_updated.emit(0, "正在读取图片列表...")
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                import json
+                image_list = json.load(f)
+            
+            self.progress_updated.emit(10, f"共 {len(image_list)} 张图片")
+            
+            project_data = self.data_fetcher.download_images_from_list(image_list, project_name, output_dir)
+            
+            lithology_info = []
+            
+            self.progress_updated.emit(50, f"已下载 {len(project_data)} 张岩心图片")
+            
+            all_lithology_data = []
+            for idx, lith in enumerate(lithology_info):
+                all_lithology_data.append({
+                    'id': lithology_id_start + idx,
+                    'project': project_name,
+                    'borehole': project_name,
+                    'rock_name': lith.get('rock_name', ''),
+                    'start_depth': lith.get('start_depth', 0),
+                    'end_depth': lith.get('end_depth', 0),
+                    'description': lith.get('description', '')
+                })
+            
+            for item in project_data:
+                lith = item.get('lithology', '')
+                start = item.get('start_depth', 0)
+                end = item.get('end_depth', 0)
+                
+                desc_id = None
+                for lith_item in all_lithology_data:
+                    ls = lith_item.get('start_depth', 0)
+                    le = lith_item.get('end_depth', 0)
+                    if start >= ls and end <= le:
+                        desc_id = lith_item.get('id')
+                        break
+                    if start < le and end > ls:
+                        desc_id = lith_item.get('id')
+                        break
+                
+                item['lithology_description_id'] = desc_id
+                item.pop('lithology_description', None)
+            
+            lithology_stats = {}
+            for item in project_data:
+                lith = item.get('lithology', '')
+                if lith:
+                    if lith not in lithology_stats:
+                        lithology_stats[lith] = {'lithology': lith, 'project': project_name, 'count': 0}
+                    lithology_stats[lith]['count'] += 1
+            
+            output_file = os.path.join(output_dir, 'image_descriptions.json')
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(project_data, f, ensure_ascii=False, indent=2)
+            
+            descriptions_file = os.path.join(output_dir, 'lithology_descriptions.json')
+            with open(descriptions_file, 'w', encoding='utf-8') as f:
+                json.dump(all_lithology_data, f, ensure_ascii=False, indent=2)
+            
+            self.progress_updated.emit(100, "抓取完成")
+            self.processing_finished.emit(output_file, {
+                'total_images': len(project_data),
+                'total_projects': 1,
+                'lithology_stats': lithology_stats,
+                'descriptions_file': descriptions_file
+            })
+            
+        except Exception as e:
+            self.error_occurred.emit(f"抓取数据失败: {str(e)}")
+    
+    def classify_lithology(self, json_file, config_file, output_file):
+        import json
+        
+        self.progress_updated.emit(0, "正在加载配置文件...")
+        
+        if not os.path.exists(config_file):
+            self.error_occurred.emit(f"找不到配置文件: {config_file}")
+            return
+        
+        if not os.path.exists(json_file):
+            self.error_occurred.emit(f"找不到JSON文件: {json_file}")
+            return
+        
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                rock_types = json.load(f)
+        except Exception as e:
+            self.error_occurred.emit(f"读取配置文件失败: {str(e)}")
+            return
+        
+        rocks = set()
+        for rock in rock_types.get('rocks', []):
+            rocks.add(rock['name'])
+            rocks.update(rock.get('aliases', []))
+        rocks = sorted(rocks, key=lambda x: -len(x))
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            self.error_occurred.emit(f"读取JSON文件失败: {str(e)}")
+            return
+        
+        total = len(data)
+        self.progress_updated.emit(10, f"共 {total} 条记录待分类")
+        
+        def extract_last_keyword(lithology):
+            lithology = lithology.strip()
+            if not lithology:
+                return ''
+            
+            paren_pairs = [('（', '）'), ('(', ')')]
+            color_terms = ['浅', '深', '淡', '暗', '灰', '白', '黑', '红', '黄', '绿', '蓝', '紫', '褐', '肉红色', '灰白色', '浅灰色', '深灰色', '浅肉红色', '灰绿色']
+            
+            def match_rock(text):
+                if not text:
+                    return None
+                text = text.strip()
+                if not text:
+                    return None
+                for rock in rocks:
+                    if text.endswith(rock):
+                        return rock
+                if text.endswith('脉'):
+                    text_no_mai = text[:-1]
+                    for rock in rocks:
+                        if text_no_mai.endswith(rock):
+                            return rock
+                return None
+            
+            def remove_parens(text):
+                result = text
+                for po, pc in paren_pairs:
+                    while True:
+                        start = result.find(po)
+                        if start == -1:
+                            break
+                        end = result.find(pc, start)
+                        if end == -1:
+                            break
+                        result = result[:start] + result[end+1:]
+                return result
+            
+            parts = lithology.replace('，', ',').replace('、', ',').split(',')
+            
+            for part in parts:
+                part = part.strip()
+                if not part:
+                    continue
+                
+                matched = match_rock(part)
+                if matched:
+                    return matched
+                
+                clean_part = remove_parens(part)
+                clean_part = clean_part.strip()
+                
+                matched = match_rock(clean_part)
+                if matched:
+                    return matched
+                
+                for po, pc in paren_pairs:
+                    match_inner = re.search(r'[{}]([^{}]+)[{}]'.format(po, pc, po, pc), part)
+                    if match_inner:
+                        inner = match_inner.group(1).strip()
+                        matched = match_rock(inner)
+                        if matched:
+                            return matched
+            
+            for part in parts:
+                part = part.strip()
+                for color in color_terms:
+                    if part.startswith(color):
+                        remaining = part[len(color):].strip()
+                        if remaining:
+                            matched = match_rock(remaining)
+                            if matched:
+                                return matched
+            
+            return ''
+        
+        mapping = {}
+        unmatched = {}
+        
+        for idx, item in enumerate(data):
+            lithology = item.get('lithology', '')
+            keyword = extract_last_keyword(lithology)
+            item['rock_name'] = keyword
+            
+            progress = int(10 + (idx + 1) / total * 80)
+            if idx % max(1, total // 10) == 0:
+                self.progress_updated.emit(progress, f"正在分类 [{idx+1}/{total}]: {lithology}")
+            
+            if keyword:
+                if keyword not in mapping:
+                    mapping[keyword] = {'lithologies': set(), 'count': 0}
+                mapping[keyword]['lithologies'].add(lithology)
+                mapping[keyword]['count'] += 1
+            else:
+                if lithology not in unmatched:
+                    unmatched[lithology] = 0
+                unmatched[lithology] += 1
+        
+        self.progress_updated.emit(95, "正在保存结果...")
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        matched = sum(v['count'] for v in mapping.values())
+        
+        stats = {
+            'total': total,
+            'matched': matched,
+            'types': len(mapping),
+            'mapping': mapping,
+            'unmatched': unmatched
+        }
+        
+        self.progress_updated.emit(100, "分类完成")
+        self.processing_finished.emit(output_file, stats)
+    
+    def analyze_alteration(self, json_file, config_file, output_file):
+        import json
+        
+        self.progress_updated.emit(0, "正在加载蚀变配置文件...")
+        
+        if not os.path.exists(config_file):
+            self.error_occurred.emit(f"找不到配置文件: {config_file}")
+            return
+        
+        if not os.path.exists(json_file):
+            self.error_occurred.emit(f"找不到JSON文件: {json_file}")
+            return
+        
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                alt_types = json.load(f)
+        except Exception as e:
+            self.error_occurred.emit(f"读取配置文件失败: {str(e)}")
+            return
+        
+        alterations = {}
+        for alt in alt_types.get('alterations', []):
+            alterations[alt['name']] = alt.get('minerals', [])
+            for alias in alt.get('aliases', []):
+                alterations[alias] = alt.get('minerals', [])
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            self.error_occurred.emit(f"读取JSON文件失败: {str(e)}")
+            return
+        
+        total = len(data)
+        self.progress_updated.emit(10, f"共 {total} 条记录待分析")
+        
+        def find_alteration(description):
+            if not description:
+                return None
+            found = set()
+            for alt_name, minerals in alterations.items():
+                if alt_name in description:
+                    found.add(alt_name)
+            return list(found) if found else None
+        
+        records_with_alteration = 0
+        total_alterations = 0
+        alteration_type_count = set()
+        
+        for idx, item in enumerate(data):
+            description = item.get('lithology_description', '') or ''
+            found = find_alteration(description)
+            item['蚀变类型'] = ', '.join(found) if found else ''
+            
+            if found:
+                records_with_alteration += 1
+                total_alterations += len(found)
+                for alt in found:
+                    alteration_type_count.add(alt)
+            
+            progress = int(10 + (idx + 1) / total * 80)
+            if idx % max(1, total // 10) == 0:
+                self.progress_updated.emit(progress, f"正在分析 [{idx+1}/{total}]")
+        
+        self.progress_updated.emit(95, "正在保存结果...")
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        stats = {
+            'total_records': total,
+            'records_with_alteration': records_with_alteration,
+            'total_alterations': total_alterations,
+            'alteration_types': len(alteration_type_count)
+        }
+        
+        self.progress_updated.emit(100, "蚀变分析完成")
+        self.processing_finished.emit(output_file, stats)

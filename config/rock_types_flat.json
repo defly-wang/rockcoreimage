@@ -59,6 +59,17 @@
       ]
     },
     {
+      "name": "辉绿岩",
+      "category": "岩浆岩",
+      "importance": true,
+      "name_en": "Diabase",
+      "description_en": "Fine-grained mafic igneous rock with ophitic texture, composed of plagioclase and pyroxene. Commonly occurs as dikes and sills.",
+      "description": "细粒基性侵入岩，具辉绿结构，由斜长石和辉石组成。常呈岩脉或岩床产出。",
+      "aliases": [
+        "辉绿玢岩"
+      ]
+    },
+    {
       "name": "闪长岩",
       "category": "岩浆岩",
       "importance": true,
@@ -67,6 +78,28 @@
       "description": "中性侵入岩，主要由斜长石和角闪石组成。颜色较深，含少量或不含石英。",
       "aliases": [
         "闪长石"
+      ]
+    },
+    {
+      "name": "闪长玢岩",
+      "category": "岩浆岩",
+      "importance": true,
+      "name_en": "Diorite-porphyrite",
+      "description_en": "Porphyritic diorite with large plagioclase and hornblende phenocrysts in finer groundmass.",
+      "description": "斑状闪长岩，斜长石和角闪石斑晶。",
+      "aliases": [
+        "闪长斑岩"
+      ]
+    },
+    {
+      "name": "二长闪长岩",
+      "category": "岩浆岩",
+      "importance": true,
+      "name_en": "Monzodiorite",
+      "description_en": "Coarse-grained intermediate intrusive rock between diorite and monzonite. Contains nearly equal amounts of plagioclase and alkali feldspar with hornblende and biotite.",
+      "description": "闪长岩和二长岩之间的过渡类型中性侵入岩。斜长石和碱性长石含量相近，含角闪石和黑云母。",
+      "aliases": [
+        "二长闪长岩"
       ]
     },
     {
@@ -146,6 +179,17 @@
       "description": "火山碎屑岩，角砾状碎屑大于64毫米。",
       "aliases": [
         "火山集块岩"
+      ]
+    },
+    {
+      "name": "凝灰岩",
+      "category": "岩浆岩",
+      "importance": true,
+      "name_en": "Tuff",
+      "description_en": "Fine-grained volcanic sedimentary rock composed of volcanic ash (fragments <64mm) cemented together. Forms from explosive volcanic eruptions.",
+      "description": "火山碎屑沉积岩，由火山灰（碎屑<64毫米）固结而成。形成于火山爆发。",
+      "aliases": [
+        "火山灰岩"
       ]
     },
     {
@@ -245,6 +289,18 @@
       "description": "斑状辉长岩，斜长石和辉石斑晶。",
       "aliases": [
         "辉长斑岩"
+      ]
+    },
+    {
+      "name": "变辉长岩",
+      "category": "变质岩",
+      "importance": true,
+      "name_en": "Metagabbro",
+      "description_en": "Metamorphosed gabbro, typically under greenschist to amphibolite facies conditions. Preserves original gabbroic texture and mineral assemblage of plagioclase and pyroxene.",
+      "description": "辉长岩的变质产物，通常在绿片岩相到角闪岩相条件下形成。保留原始辉长岩的结构和矿物组合（斜长石和辉石）。",
+      "aliases": [
+        "变质辉长岩",
+        "metagabbro"
       ]
     },
     {
@@ -1259,7 +1315,7 @@
     }
   ],
   "metadata": {
-    "total": 113,
+    "total": 118,
     "source": "Based on 常见岩性列表.xlsx",
     "version": "1.0"
   }

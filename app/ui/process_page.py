@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
     QGroupBox, QProgressBar, QTextEdit, QTableWidget, QButtonGroup,
-    QLineEdit
+    QLineEdit, QDialog, QFormLayout, QDialogButtonBox
 )
 from PyQt6.QtWidgets import QHeaderView
 
@@ -178,6 +178,23 @@ class ProcessPage:
         main_window.html_radio.clicked.connect(lambda: setattr(main_window, 'process_type', 'html'))
         button_layout.addWidget(main_window.html_radio)
         main_window.process_type_group.addButton(main_window.html_radio)
+        
+        main_window.web_radio = QPushButton("网络抓取模式")
+        main_window.web_radio.setCheckable(True)
+        main_window.web_radio.setStyleSheet("""
+            QPushButton {
+                background-color: #1E3A5F;
+                color: white;
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            QPushButton:checked {
+                background-color: #4CAF50;
+            }
+        """)
+        main_window.web_radio.clicked.connect(lambda: setattr(main_window, 'process_type', 'web'))
+        button_layout.addWidget(main_window.web_radio)
+        main_window.process_type_group.addButton(main_window.web_radio)
         
         main_window.process_type = 'excel'
         

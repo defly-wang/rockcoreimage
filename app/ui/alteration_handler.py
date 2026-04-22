@@ -98,7 +98,7 @@ class AlterationHandler:
         with open(output_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
+        records = [(item.get('rock_name', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
         records.sort(key=lambda x: (x[0], x[1]))
         
         self.main_window.process_table.setColumnCount(6)
@@ -164,7 +164,7 @@ class AlterationHandler:
         self.main_window.process_log.append(f"已加载蚀变分析结果: {json_file}")
         self.main_window.process_log.append(f"总记录数: {len(data)}")
         
-        records = [(item.get('岩性名称', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
+        records = [(item.get('rock_name', '') or '未分类', item.get('lithology', ''), item.get('蚀变类型', ''), item.get('lithology_description', '')) for item in data]
         records.sort(key=lambda x: (x[0], x[1]))
         
         self.main_window.process_table.setColumnCount(6)

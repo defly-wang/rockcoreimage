@@ -1,6 +1,7 @@
 import os
 import json
-from PyQt6.QtWidgets import QMessageBox, QTableWidgetItem
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QMessageBox, QTableWidgetItem, QLabel, QFileDialog, QHBoxLayout
 
 
 class DataProcessHandler:
@@ -8,6 +9,12 @@ class DataProcessHandler:
         self.main_window = main_window
     
     def start_data_processing(self):
+        process_type = getattr(self.main_window, 'process_type', 'excel')
+        
+        if process_type == 'web':
+            self.start_web_fetching()
+            return
+        
         if not hasattr(self.main_window, 'source_directory') or not self.main_window.source_directory:
             QMessageBox.warning(self.main_window, "警告", "请先选择数据源目录")
             return
@@ -15,8 +22,6 @@ class DataProcessHandler:
         if not hasattr(self.main_window, 'output_directory') or not self.main_window.output_directory:
             QMessageBox.warning(self.main_window, "警告", "请先选择输出目录")
             return
-        
-        process_type = getattr(self.main_window, 'process_type', 'excel')
         
         self.main_window.process_btn.setEnabled(False)
         if hasattr(self.main_window, 'classify_btn'):
@@ -263,3 +268,117 @@ class DataProcessHandler:
             border: 1px solid #F44336;
             border-radius: 4px;
         """)
+    
+    def start_web_fetching(self):
+        from PyQt6.QtWidgets import QDialog, QFormLayout, QLineEdit, QDialogButtonBox, QCheckBox, QPushButton
+        
+        dialog = QDialog(self.main_window)
+        dialog.setWindowTitle("网络抓取 - 全国数字岩心平台")
+        dialog.setModal(True)
+        dialog.setFixedSize(550, 280)
+        
+        layout = QFormLayout()
+        
+        info_label = QLabel("请选择数据来源:")
+        info_label.setStyleSheet("font-weight: bold; color: #1E3A5F;")
+        layout.addRow("", info_label)
+        
+        use_json_check = QCheckBox("从JSON文件导入图片列表")
+        use_json_check.setChecked(True)
+        layout.addRow("", use_json_check)
+        
+        project_name_input = QLineEdit()
+        project_name_input.setPlaceholderText("项目名称，如 ZK13-4-2")
+        layout.addRow("项目名称:", project_name_input)
+        
+        json_file_input = QLineEdit()
+        json_file_input.setPlaceholderText("JSON文件路径")
+        
+        def select_json_file():
+            file_path, _ = QFileDialog.getOpenFileName(
+                self.main_window, "选择JSON文件", "", "JSON Files (*.json)"
+            )
+            if file_path:
+                json_file_input.setText(file_path)
+        
+        json_btn = QPushButton("浏览...")
+        json_btn.clicked.connect(select_json_file)
+        
+        json_layout = QHBoxLayout()
+        json_layout.addWidget(json_file_input, 1)
+        json_layout.addWidget(json_btn)
+        layout.addRow("图片列表文件:", json_layout)
+        
+        help_label = QLabel("在浏览器打开综合数据展示页面，按F12，在Console中运行：\nvar d=[];document.querySelectorAll('img.yanxinImage').forEach(i=>{if(i.dataset.options){var o={},s=i.dataset.options.split(',');s.forEach(x=>{var p=x.split(':');o[p[0]]=p[1]});d.push({yxtpbh:o.yxtpbh,qssd:o.qssd,zzsd:o.zzsd})}});console.log(JSON.stringify(d));")
+        help_label.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addRow("帮助:", help_label)
+        
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addRow("", buttons)
+        
+        dialog.setLayout(layout)
+        
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        
+        project_name = project_name_input.text().strip()
+        json_file = json_file_input.text().strip()
+        output_dir = self.main_window.output_directory if hasattr(self.main_window, 'output_directory') and self.main_window.output_directory else ""
+        
+        if not project_name or not json_file or not output_dir:
+            QMessageBox.warning(self.main_window, "警告", "请选择JSON文件和输出目录")
+            return
+        
+        if not os.path.exists(json_file):
+            QMessageBox.warning(self.main_window, "警告", "JSON文件不存在")
+            return
+        
+        self.main_window.process_btn.setEnabled(False)
+        if hasattr(self.main_window, 'classify_btn'):
+            self.main_window.classify_btn.setEnabled(False)
+        if hasattr(self.main_window, 'alteration_btn'):
+            self.main_window.alteration_btn.setEnabled(False)
+        if hasattr(self.main_window, 'stats_btn'):
+            self.main_window.stats_btn.setEnabled(False)
+        
+        self.main_window.process_status_label.setText("正在从互联网抓取数据...")
+        self.main_window.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #FF9800;
+            padding: 8px;
+            background-color: #FFF3E0;
+            border: 1px solid #FF9800;
+            border-radius: 4px;
+        """)
+        self.main_window.process_progress.setValue(0)
+        self.main_window.process_log.clear()
+        self.main_window.process_log.append("开始从互联网抓取数据...")
+        
+        try:
+            self.main_window.data_processor.progress_updated.disconnect()
+            self.main_window.data_processor.processing_finished.disconnect()
+            self.main_window.data_processor.error_occurred.disconnect()
+        except TypeError:
+            pass
+        
+        self.main_window.data_processor.progress_updated.connect(self.on_processing_progress)
+        self.main_window.data_processor.processing_finished.connect(self.on_processing_finished)
+        self.main_window.data_processor.error_occurred.connect(self.on_processing_error)
+        
+        lithology_id_start = 1
+        if hasattr(self.main_window, 'lithology_id_start_input'):
+            try:
+                lithology_id_start = int(self.main_window.lithology_id_start_input.text()) or 1
+            except ValueError:
+                lithology_id_start = 1
+        
+        from threading import Thread
+        self.main_window.process_thread = Thread(
+            target=self.main_window.data_processor.fetch_from_json,
+            args=(json_file, project_name, output_dir, lithology_id_start),
+            daemon=True
+        )
+        self.main_window.process_thread.start()

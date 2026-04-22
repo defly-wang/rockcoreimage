@@ -136,6 +136,7 @@ class LithologyHandler:
             return
         
         import json
+        import os
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -143,18 +144,37 @@ class LithologyHandler:
             QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
             return
         
+        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        project_root = os.path.dirname(app_dir)
+        config_file = os.path.join(project_root, 'config', 'rock_types_flat.json')
+        
+        rock_category_map = {}
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                config_data = json.load(f)
+            for rock in config_data.get('rocks', []):
+                rock_category_map[rock['name']] = rock.get('category', '')
+        except Exception:
+            pass
+        
         self.main_window.process_log.clear()
         self.main_window.process_log.append(f"已加载岩性分类结果: {json_file}")
         self.main_window.process_log.append(f"总记录数: {len(data)}")
         
         rock_groups = {}
         for item in data:
-            rock_name = item.get('岩性名称', '') or '未分类'
+            rock_name = item.get('rock_name', '') or '未分类'
             lithology = item.get('lithology', '')
             if rock_name not in rock_groups:
                 rock_groups[rock_name] = {'lithologies': set(), 'count': 0}
             rock_groups[rock_name]['lithologies'].add(lithology)
             rock_groups[rock_name]['count'] += 1
+        
+        category_counts = {'岩浆岩': 0, '沉积岩': 0, '变质岩': 0}
+        for rock_name in rock_groups.keys():
+            category = rock_category_map.get(rock_name, '')
+            if category in category_counts:
+                category_counts[category] += 1
         
         self.main_window.process_table.setColumnCount(4)
         self.main_window.process_table.setHorizontalHeaderLabels(["标准岩性", "图片数", "分类数", "对应原始岩性"])
@@ -175,7 +195,8 @@ class LithologyHandler:
         
         self.main_window.process_table.resizeRowsToContents()
         
-        self.main_window.process_status_label.setText(f"显示岩性分类 - 共 {len(rock_groups)} 种岩性")
+        cat_stat = f"岩浆岩{category_counts['岩浆岩']}种/沉积岩{category_counts['沉积岩']}种/变质岩{category_counts['变质岩']}种"
+        self.main_window.process_status_label.setText(f"显示岩性分类 - 共 {len(rock_groups)} 种岩性（{cat_stat}）")
         self.main_window.process_status_label.setStyleSheet("""
             font-size: 14px;
             font-weight: bold;
