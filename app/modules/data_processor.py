@@ -273,3 +273,82 @@ class DataProcessor(QObject):
         
         self.progress_updated.emit(100, "分类完成")
         self.processing_finished.emit(output_file, stats)
+    
+    def analyze_alteration(self, json_file, config_file, output_file):
+        import json
+        
+        self.progress_updated.emit(0, "正在加载蚀变配置文件...")
+        
+        if not os.path.exists(config_file):
+            self.error_occurred.emit(f"找不到配置文件: {config_file}")
+            return
+        
+        if not os.path.exists(json_file):
+            self.error_occurred.emit(f"找不到JSON文件: {json_file}")
+            return
+        
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                alt_types = json.load(f)
+        except Exception as e:
+            self.error_occurred.emit(f"读取配置文件失败: {str(e)}")
+            return
+        
+        alterations = {}
+        for alt in alt_types.get('alterations', []):
+            alterations[alt['name']] = alt.get('minerals', [])
+            for alias in alt.get('aliases', []):
+                alterations[alias] = alt.get('minerals', [])
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            self.error_occurred.emit(f"读取JSON文件失败: {str(e)}")
+            return
+        
+        total = len(data)
+        self.progress_updated.emit(10, f"共 {total} 条记录待分析")
+        
+        def find_alteration(description):
+            if not description:
+                return None
+            found = set()
+            for alt_name, minerals in alterations.items():
+                if alt_name in description:
+                    found.add(alt_name)
+            return list(found) if found else None
+        
+        records_with_alteration = 0
+        total_alterations = 0
+        alteration_type_count = set()
+        
+        for idx, item in enumerate(data):
+            description = item.get('lithology_description', '') or ''
+            found = find_alteration(description)
+            item['蚀变类型'] = ', '.join(found) if found else ''
+            
+            if found:
+                records_with_alteration += 1
+                total_alterations += len(found)
+                for alt in found:
+                    alteration_type_count.add(alt)
+            
+            progress = int(10 + (idx + 1) / total * 80)
+            if idx % max(1, total // 10) == 0:
+                self.progress_updated.emit(progress, f"正在分析 [{idx+1}/{total}]")
+        
+        self.progress_updated.emit(95, "正在保存结果...")
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        stats = {
+            'total_records': total,
+            'records_with_alteration': records_with_alteration,
+            'total_alterations': total_alterations,
+            'alteration_types': len(alteration_type_count)
+        }
+        
+        self.progress_updated.emit(100, "蚀变分析完成")
+        self.processing_finished.emit(output_file, stats)
