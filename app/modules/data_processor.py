@@ -190,3 +190,86 @@ class DataProcessor(QObject):
             'lithology_stats': lithology_stats,
             'descriptions_file': descriptions_file
         })
+    
+    def classify_lithology(self, json_file, config_file, output_file):
+        import json
+        
+        self.progress_updated.emit(0, "正在加载配置文件...")
+        
+        if not os.path.exists(config_file):
+            self.error_occurred.emit(f"找不到配置文件: {config_file}")
+            return
+        
+        if not os.path.exists(json_file):
+            self.error_occurred.emit(f"找不到JSON文件: {json_file}")
+            return
+        
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                rock_types = json.load(f)
+        except Exception as e:
+            self.error_occurred.emit(f"读取配置文件失败: {str(e)}")
+            return
+        
+        rocks = set()
+        for rock in rock_types.get('rocks', []):
+            rocks.add(rock['name'])
+            rocks.update(rock.get('aliases', []))
+        rocks = sorted(rocks, key=lambda x: -len(x))
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            self.error_occurred.emit(f"读取JSON文件失败: {str(e)}")
+            return
+        
+        total = len(data)
+        self.progress_updated.emit(10, f"共 {total} 条记录待分类")
+        
+        def extract_last_keyword(lithology):
+            lithology = lithology.strip()
+            for rock in rocks:
+                if lithology.endswith(rock):
+                    return rock
+            return ''
+        
+        mapping = {}
+        unmatched = {}
+        
+        for idx, item in enumerate(data):
+            lithology = item.get('lithology', '')
+            keyword = extract_last_keyword(lithology)
+            item['岩性名称'] = keyword
+            
+            progress = int(10 + (idx + 1) / total * 80)
+            if idx % max(1, total // 10) == 0:
+                self.progress_updated.emit(progress, f"正在分类 [{idx+1}/{total}]: {lithology}")
+            
+            if keyword:
+                if keyword not in mapping:
+                    mapping[keyword] = {'lithologies': set(), 'count': 0}
+                mapping[keyword]['lithologies'].add(lithology)
+                mapping[keyword]['count'] += 1
+            else:
+                if lithology not in unmatched:
+                    unmatched[lithology] = 0
+                unmatched[lithology] += 1
+        
+        self.progress_updated.emit(95, "正在保存结果...")
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        matched = sum(v['count'] for v in mapping.values())
+        
+        stats = {
+            'total': total,
+            'matched': matched,
+            'types': len(mapping),
+            'mapping': mapping,
+            'unmatched': unmatched
+        }
+        
+        self.progress_updated.emit(100, "分类完成")
+        self.processing_finished.emit(output_file, stats)
