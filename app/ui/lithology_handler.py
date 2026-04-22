@@ -163,7 +163,7 @@ class LithologyHandler:
         
         rock_groups = {}
         for item in data:
-            rock_name = item.get('岩性名称', '') or '未分类'
+            rock_name = item.get('rock_name', '') or '未分类'
             lithology = item.get('lithology', '')
             if rock_name not in rock_groups:
                 rock_groups[rock_name] = {'lithologies': set(), 'count': 0}

@@ -309,7 +309,7 @@ class DataProcessor(QObject):
         for idx, item in enumerate(data):
             lithology = item.get('lithology', '')
             keyword = extract_last_keyword(lithology)
-            item['岩性名称'] = keyword
+            item['rock_name'] = keyword
             
             progress = int(10 + (idx + 1) / total * 80)
             if idx % max(1, total // 10) == 0:
