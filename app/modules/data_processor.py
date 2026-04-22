@@ -233,26 +233,24 @@ class DataProcessor(QObject):
             if not lithology:
                 return ''
             
+            paren_open = '('
+            paren_close = ')'
+            paren_pairs = [('（', '）'), ('(', ')')]
+            
             for rock in rocks:
                 if lithology.endswith(rock):
                     return rock
             
-            paren_depth = 0
-            clean_lith = []
-            for ch in lithology:
-                if ch == '(':
-                    paren_depth += 1
-                elif ch == ')':
-                    paren_depth -= 1
-                elif paren_depth == 0:
-                    clean_lith.append(ch)
-            clean_lith = ''.join(clean_lith).strip()
+            clean_lith = lithology
+            for po, pc in paren_pairs:
+                clean_lith = clean_lith.replace(po, '').replace(pc, '')
+            clean_lith = clean_lith.strip()
             
             for rock in rocks:
                 if clean_lith.endswith(rock):
                     return rock
             
-            match = re.search(r'([^()]+)\s*$', lithology)
+            match = re.search(r'[（(]([^）)]+)[）)]\s*$', lithology)
             if match:
                 inner = match.group(1).strip()
                 for rock in rocks:
