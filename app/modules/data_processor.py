@@ -233,29 +233,68 @@ class DataProcessor(QObject):
             if not lithology:
                 return ''
             
-            paren_open = '('
-            paren_close = ')'
             paren_pairs = [('（', '）'), ('(', ')')]
+            color_terms = ['浅', '深', '淡', '暗', '灰', '白', '黑', '红', '黄', '绿', '蓝', '紫', '褐', '肉红色', '灰白色', '浅灰色', '深灰色', '浅肉红色', '灰绿色']
             
-            for rock in rocks:
-                if lithology.endswith(rock):
-                    return rock
-            
-            clean_lith = lithology
-            for po, pc in paren_pairs:
-                clean_lith = clean_lith.replace(po, '').replace(pc, '')
-            clean_lith = clean_lith.strip()
-            
-            for rock in rocks:
-                if clean_lith.endswith(rock):
-                    return rock
-            
-            match = re.search(r'[（(]([^）)]+)[）)]\s*$', lithology)
-            if match:
-                inner = match.group(1).strip()
+            def match_rock(text):
+                if not text:
+                    return None
+                text = text.strip()
+                if not text:
+                    return None
                 for rock in rocks:
-                    if inner.endswith(rock):
+                    if text.endswith(rock):
                         return rock
+                return None
+            
+            def remove_parens(text):
+                result = text
+                for po, pc in paren_pairs:
+                    while True:
+                        start = result.find(po)
+                        if start == -1:
+                            break
+                        end = result.find(pc, start)
+                        if end == -1:
+                            break
+                        result = result[:start] + result[end+1:]
+                return result
+            
+            parts = lithology.replace('，', ',').replace('、', ',').split(',')
+            
+            for part in parts:
+                part = part.strip()
+                if not part:
+                    continue
+                
+                matched = match_rock(part)
+                if matched:
+                    return matched
+                
+                clean_part = remove_parens(part)
+                clean_part = clean_part.strip()
+                
+                matched = match_rock(clean_part)
+                if matched:
+                    return matched
+                
+                for po, pc in paren_pairs:
+                    match_inner = re.search(r'[{}]([^{}]+)[{}]'.format(po, pc, po, pc), part)
+                    if match_inner:
+                        inner = match_inner.group(1).strip()
+                        matched = match_rock(inner)
+                        if matched:
+                            return matched
+            
+            for part in parts:
+                part = part.strip()
+                for color in color_terms:
+                    if part.startswith(color):
+                        remaining = part[len(color):].strip()
+                        if remaining:
+                            matched = match_rock(remaining)
+                            if matched:
+                                return matched
             
             return ''
         
