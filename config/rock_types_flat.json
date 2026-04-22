@@ -59,6 +59,17 @@
       ]
     },
     {
+      "name": "辉绿岩",
+      "category": "岩浆岩",
+      "importance": true,
+      "name_en": "Diabase",
+      "description_en": "Fine-grained mafic igneous rock with ophitic texture, composed of plagioclase and pyroxene. Commonly occurs as dikes and sills.",
+      "description": "细粒基性侵入岩，具辉绿结构，由斜长石和辉石组成。常呈岩脉或岩床产出。",
+      "aliases": [
+        "辉绿玢岩"
+      ]
+    },
+    {
       "name": "闪长岩",
       "category": "岩浆岩",
       "importance": true,
@@ -1304,7 +1315,7 @@
     }
   ],
   "metadata": {
-    "total": 117,
+    "total": 118,
     "source": "Based on 常见岩性列表.xlsx",
     "version": "1.0"
   }
