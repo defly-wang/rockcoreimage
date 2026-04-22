@@ -5,6 +5,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 
 from app.modules.excel_processor import ExcelProcessor
 from app.modules.html_processor import HtmlProcessor
+from app.modules.data_fetcher import DataFetcher
 
 
 class DataProcessor(QObject):
@@ -19,6 +20,7 @@ class DataProcessor(QObject):
         self.lithology_id_start = 1
         self.excel_processor = ExcelProcessor()
         self.html_processor = HtmlProcessor()
+        self.data_fetcher = DataFetcher()
     
     def process(self, source_dir, output_dir, lithology_id_start=1):
         self.source_dir = source_dir
@@ -191,6 +193,86 @@ class DataProcessor(QObject):
             'lithology_stats': lithology_stats,
             'descriptions_file': descriptions_file
         })
+    
+    def fetch_from_json(self, json_file, project_name, output_dir, lithology_id_start=1):
+        self.output_dir = output_dir
+        self.lithology_id_start = lithology_id_start
+        
+        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(os.path.join(output_dir, 'images'), exist_ok=True)
+        
+        self.progress_updated.emit(0, "正在读取图片列表...")
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                import json
+                image_list = json.load(f)
+            
+            self.progress_updated.emit(10, f"共 {len(image_list)} 张图片")
+            
+            project_data = self.data_fetcher.download_images_from_list(image_list, project_name, output_dir)
+            
+            lithology_info = []
+            
+            self.progress_updated.emit(50, f"已下载 {len(project_data)} 张岩心图片")
+            
+            all_lithology_data = []
+            for idx, lith in enumerate(lithology_info):
+                all_lithology_data.append({
+                    'id': lithology_id_start + idx,
+                    'project': project_name,
+                    'borehole': project_name,
+                    'rock_name': lith.get('rock_name', ''),
+                    'start_depth': lith.get('start_depth', 0),
+                    'end_depth': lith.get('end_depth', 0),
+                    'description': lith.get('description', '')
+                })
+            
+            for item in project_data:
+                lith = item.get('lithology', '')
+                start = item.get('start_depth', 0)
+                end = item.get('end_depth', 0)
+                
+                desc_id = None
+                for lith_item in all_lithology_data:
+                    ls = lith_item.get('start_depth', 0)
+                    le = lith_item.get('end_depth', 0)
+                    if start >= ls and end <= le:
+                        desc_id = lith_item.get('id')
+                        break
+                    if start < le and end > ls:
+                        desc_id = lith_item.get('id')
+                        break
+                
+                item['lithology_description_id'] = desc_id
+                item.pop('lithology_description', None)
+            
+            lithology_stats = {}
+            for item in project_data:
+                lith = item.get('lithology', '')
+                if lith:
+                    if lith not in lithology_stats:
+                        lithology_stats[lith] = {'lithology': lith, 'project': project_name, 'count': 0}
+                    lithology_stats[lith]['count'] += 1
+            
+            output_file = os.path.join(output_dir, 'image_descriptions.json')
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(project_data, f, ensure_ascii=False, indent=2)
+            
+            descriptions_file = os.path.join(output_dir, 'lithology_descriptions.json')
+            with open(descriptions_file, 'w', encoding='utf-8') as f:
+                json.dump(all_lithology_data, f, ensure_ascii=False, indent=2)
+            
+            self.progress_updated.emit(100, "抓取完成")
+            self.processing_finished.emit(output_file, {
+                'total_images': len(project_data),
+                'total_projects': 1,
+                'lithology_stats': lithology_stats,
+                'descriptions_file': descriptions_file
+            })
+            
+        except Exception as e:
+            self.error_occurred.emit(f"抓取数据失败: {str(e)}")
     
     def classify_lithology(self, json_file, config_file, output_file):
         import json
