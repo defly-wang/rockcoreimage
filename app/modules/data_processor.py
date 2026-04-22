@@ -245,6 +245,11 @@ class DataProcessor(QObject):
                 for rock in rocks:
                     if text.endswith(rock):
                         return rock
+                if text.endswith('脉'):
+                    text_no_mai = text[:-1]
+                    for rock in rocks:
+                        if text_no_mai.endswith(rock):
+                            return rock
                 return None
             
             def remove_parens(text):
