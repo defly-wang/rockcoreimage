@@ -313,6 +313,7 @@ class AnalysisHandler:
 
     def on_classify_finished(self, output_file, stats):
         import json
+        import os
 
         self.main_window.analysis_progress.setValue(100)
         self.main_window.analysis_status_label.setText(
@@ -325,6 +326,18 @@ class AnalysisHandler:
             with open(output_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
+            app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            project_root = os.path.dirname(app_dir)
+            config_file = os.path.join(project_root, 'config', 'rock_types_flat.json')
+            rock_category_map = {}
+            try:
+                with open(config_file, "r", encoding="utf-8") as f:
+                    config_data = json.load(f)
+                for rock in config_data.get('rocks', []):
+                    rock_category_map[rock['name']] = rock.get('category', '')
+            except Exception:
+                pass
+
             rock_groups = {}
             for item in data:
                 rock_name = item.get("岩性名称", "") or "未分类"
@@ -333,6 +346,12 @@ class AnalysisHandler:
                     rock_groups[rock_name] = {"lithologies": set(), "count": 0}
                 rock_groups[rock_name]["lithologies"].add(lithology)
                 rock_groups[rock_name]["count"] += 1
+
+            category_counts = {'岩浆岩': 0, '沉积岩': 0, '变质岩': 0}
+            for rock_name in rock_groups.keys():
+                category = rock_category_map.get(rock_name, '')
+                if category in category_counts:
+                    category_counts[category] += 1
 
             self.main_window.analysis_table.setColumnCount(4)
             self.main_window.analysis_table.setHorizontalHeaderLabels(
@@ -366,8 +385,9 @@ class AnalysisHandler:
                 )
 
             self.main_window.analysis_table.resizeRowsToContents()
+            cat_stat = f"岩浆岩{category_counts['岩浆岩']}种/沉积岩{category_counts['沉积岩']}种/变质岩{category_counts['变质岩']}种"
             self.main_window.analysis_log.append(
-                f"显示分类结果 - 共 {len(rock_groups)} 种岩性"
+                f"显示分类结果 - 共 {len(rock_groups)} 种岩性（{cat_stat}）"
             )
 
         except Exception as e:
@@ -1203,6 +1223,7 @@ class AnalysisHandler:
             return
 
         import json
+        import os
 
         try:
             with open(json_file, "r", encoding="utf-8") as f:
@@ -1210,6 +1231,18 @@ class AnalysisHandler:
         except Exception as e:
             QMessageBox.warning(self.main_window, "错误", f"无法读取文件: {str(e)}")
             return
+
+        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        project_root = os.path.dirname(app_dir)
+        config_file = os.path.join(project_root, 'config', 'rock_types_flat.json')
+        rock_category_map = {}
+        try:
+            with open(config_file, "r", encoding="utf-8") as f:
+                config_data = json.load(f)
+            for rock in config_data.get('rocks', []):
+                rock_category_map[rock['name']] = rock.get('category', '')
+        except Exception:
+            pass
 
         self.main_window.analysis_log.clear()
         self.main_window.analysis_log.append(f"已加载岩性分类结果: {json_file}")
@@ -1224,9 +1257,40 @@ class AnalysisHandler:
             rock_groups[rock_name]["lithologies"].add(lithology)
             rock_groups[rock_name]["count"] += 1
 
+        category_counts = {'岩浆岩': 0, '沉积岩': 0, '变质岩': 0}
+        for rock_name in rock_groups.keys():
+            category = rock_category_map.get(rock_name, '')
+            if category in category_counts:
+                category_counts[category] += 1
+
         self.main_window.analysis_table.setColumnCount(4)
         self.main_window.analysis_table.setHorizontalHeaderLabels(
             ["标准岩性", "图片数", "分类数", "对应原始岩性"]
+        )
+        self.main_window.analysis_table.setColumnWidth(0, 100)
+        self.main_window.analysis_table.setColumnWidth(1, 80)
+        self.main_window.analysis_table.setColumnWidth(2, 80)
+        self.main_window.analysis_table.horizontalHeader().setStretchLastSection(True)
+
+        sorted_rocks = sorted(
+            rock_groups.items(), key=lambda x: x[1]["count"], reverse=True
+        )
+        self.main_window.analysis_table.setRowCount(len(sorted_rocks))
+
+        for row, (rock_name, info) in enumerate(sorted_rocks):
+            lithologies_str = ", ".join(sorted(info["lithologies"]))
+            self.main_window.analysis_table.setItem(row, 0, QTableWidgetItem(rock_name))
+            self.main_window.analysis_table.setItem(
+                row, 1, QTableWidgetItem(str(info["count"]))
+            )
+            self.main_window.analysis_table.setItem(
+                row, 2, QTableWidgetItem(str(len(info["lithologies"])))
+            )
+
+        self.main_window.analysis_table.resizeRowsToContents()
+        cat_stat = f"岩浆岩{category_counts['岩浆岩']}种/沉积岩{category_counts['沉积岩']}种/变质岩{category_counts['变质岩']}种"
+        self.main_window.analysis_status_label.setText(
+            f"显示岩性分类 - 共 {len(rock_groups)} 种岩性（{cat_stat}）"
         )
         self.main_window.analysis_table.setColumnWidth(0, 100)
         self.main_window.analysis_table.setColumnWidth(1, 80)
