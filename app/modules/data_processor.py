@@ -1,4 +1,5 @@
 import os
+import re
 import json
 from PyQt6.QtCore import QObject, pyqtSignal
 
@@ -229,9 +230,35 @@ class DataProcessor(QObject):
         
         def extract_last_keyword(lithology):
             lithology = lithology.strip()
+            if not lithology:
+                return ''
+            
             for rock in rocks:
                 if lithology.endswith(rock):
                     return rock
+            
+            paren_depth = 0
+            clean_lith = []
+            for ch in lithology:
+                if ch == '(':
+                    paren_depth += 1
+                elif ch == ')':
+                    paren_depth -= 1
+                elif paren_depth == 0:
+                    clean_lith.append(ch)
+            clean_lith = ''.join(clean_lith).strip()
+            
+            for rock in rocks:
+                if clean_lith.endswith(rock):
+                    return rock
+            
+            match = re.search(r'([^()]+)\s*$', lithology)
+            if match:
+                inner = match.group(1).strip()
+                for rock in rocks:
+                    if inner.endswith(rock):
+                        return rock
+            
             return ''
         
         mapping = {}
