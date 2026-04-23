@@ -460,10 +460,10 @@ class DataProcessHandler:
                 img_matches = img_pattern.findall(content)
                 self.main_window.process_log.append(f"原始匹配: {len(img_matches)} 个")
                 
-                img_pattern2 = re.compile(r'yxtpbh:([^,"]+)')
+                img_pattern2 = re.compile(r'yxtpbh:([^,.]+\.jpg)')
                 for m in img_pattern2.finditer(content):
                     yxtpbh = m.group(1).strip()
-                    if yxtpbh.endswith('.jpg'):
+                    if yxtpbh and yxtpbh not in [img.get('yxtpbh') for img in images]:
                         images.append({
                             'imgName': '',
                             'qssd': 0.0,
