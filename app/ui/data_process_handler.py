@@ -385,83 +385,31 @@ class DataProcessHandler:
         self.main_window.process_thread.start()
     
     def start_local_fetching(self):
-        """从本地综合数据展示.htm文件处理数据"""
-        from PyQt6.QtWidgets import QDialog, QFormLayout, QLineEdit, QDialogButtonBox, QPushButton
+        """从本地综合数据展示.htm文件处理数据 - 使用已选择的目录"""
         
-        dialog = QDialog(self.main_window)
-        dialog.setWindowTitle("实物中心本地数据处理")
-        dialog.setModal(True)
-        dialog.setFixedSize(550, 250)
+        source_dir = getattr(self.main_window, 'source_directory', '')
+        output_dir = getattr(self.main_window, 'output_directory', '')
         
-        layout = QFormLayout()
-        
-        info_label = QLabel("选择包含综合数据展示.htm的目录")
-        info_label.setStyleSheet("font-weight: bold; color: #1E3A5F;")
-        layout.addRow("", info_label)
-        
-        source_input = QLineEdit()
-        source_input.setPlaceholderText("综合数据展示.htm文件路径")
-        
-        def select_source():
-            file_path, _ = QFileDialog.getOpenFileName(
-                self.main_window, "选择综合数据展示.htm", "",
-                "HTML Files (*.htm *.html)"
-            )
-            if file_path:
-                source_input.setText(file_path)
-        
-        source_btn = QPushButton("浏览...")
-        source_btn.clicked.connect(select_source)
-        
-        source_layout = QHBoxLayout()
-        source_layout.addWidget(source_input, 1)
-        source_layout.addWidget(source_btn)
-        layout.addRow("数据文件:", source_layout)
-        
-        output_input = QLineEdit()
-        output_input.setPlaceholderText("输出目录")
-        
-        def select_output():
-            folder = QFileDialog.getExistingDirectory(self.main_window, "选择输出目录")
-            if folder:
-                output_input.setText(folder)
-        
-        output_btn = QPushButton("浏览...")
-        output_btn.clicked.connect(select_output)
-        
-        output_layout = QHBoxLayout()
-        output_layout.addWidget(output_input, 1)
-        output_layout.addWidget(output_btn)
-        layout.addRow("输出目录:", output_layout)
-        
-        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-        buttons.accepted.connect(dialog.accept)
-        buttons.rejected.connect(dialog.reject)
-        layout.addRow("", buttons)
-        
-        dialog.setLayout(layout)
-        
-        if dialog.exec() != QDialog.DialogCode.Accepted:
-            return
-        
-        html_file = source_input.text().strip()
-        output_dir = output_input.text().strip()
-        
-        if not html_file:
-            QMessageBox.warning(self.main_window, "警告", "请选择综合数据展示.htm文件")
+        if not source_dir:
+            QMessageBox.warning(self.main_window, "警告", "请先选择数据源目录")
             return
         
         if not output_dir:
-            QMessageBox.warning(self.main_window, "警告", "请选择输出目录")
+            QMessageBox.warning(self.main_window, "警告", "请先选择输出目录")
             return
         
-        if not os.path.exists(html_file):
-            QMessageBox.warning(self.main_window, "警告", "文件不存在")
+        html_files = []
+        for root, dirs, files in os.walk(source_dir):
+            if '综合数据展示.htm' in files:
+                html_files.append(os.path.join(root, '综合数据展示.htm'))
+        
+        if not html_files:
+            QMessageBox.warning(self.main_window, "警告", f"数据目录中找不到综合数据展示.htm文件\n{source_dir}")
             return
         
-        self.process_local_data(html_file, output_dir)
+        self.process_local_data(html_files, source_dir, output_dir)
     
-    def process_local_data(self, html_file, output_dir):
+    def process_local_data(self, html_files, source_dir, output_dir):
         """处理本地HTML文件"""
         self.main_window.process_btn.setEnabled(False)
         
@@ -477,132 +425,244 @@ class DataProcessHandler:
         """)
         self.main_window.process_progress.setValue(0)
         self.main_window.process_log.clear()
-        self.main_window.process_log.append("开始处理本地数据...")
-        self.main_window.process_log.append(f"HTML文件: {html_file}")
+        self.main_window.process_log.append(f"找到 {len(html_files)} 个HTML文件")
+        
+        if html_files:
+            self.main_window.process_log.append(f"示例文件: {html_files[0]}")
         
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(os.path.join(output_dir, 'images'), exist_ok=True)
         
-        try:
-            with open(html_file, 'r', encoding='utf-8', errors='replace') as f:
-                content = f.read()
-            
-            self.main_window.process_log.append("正在解析图片数据...")
-            self.main_window.process_progress.setValue(20)
-            
-            images = []
-            img_pattern = re.compile(r'class="yanxinImage ([^"]+)"[^>]*data-options="qssd:([0-9.]+),zzsd:([0-9.]+),yxtpbh:([^"]+)"')
-            for m in img_pattern.finditer(content):
-                images.append({
-                    'imgName': m.group(1).strip(),
-                    'qssd': float(m.group(2)),
-                    'zzsd': float(m.group(3)),
-                    'yxtpbh': m.group(4).strip()
-                })
-            
-            self.main_window.process_log.append(f"找到 {len(images)} 张图片")
-            self.main_window.process_progress.setValue(40)
-            
-            self.main_window.process_log.append("正在解析岩性数据...")
-            
-            fch_matches = re.findall(r'class="field-fch move-field(\d+)" title="([^"]+)"', content)
-            hd_matches = re.findall(r'class="field-hd move-field(\d+)" title="([^"]+)"', content)
-            ysmc_matches = re.findall(r'class="field-ysmc move-field(\d+)" title="([^"]+)"', content)
-            dzms_matches = re.findall(r'class="field-dzms move-field(\d+)" title="([^"]+)"', content)
-            
-            self.main_window.process_log.append(f"找到 {len(ysmc_matches)} 层岩性数据")
-            self.main_window.process_progress.setValue(60)
-            
-            lithology_data = []
-            start_depth = 0.0
-            for i, (idx, ysmc) in enumerate(ysmc_matches):
-                hd = 0.0
-                if i < len(hd_matches):
-                    try:
-                        hd = float(hd_matches[i][1])
-                    except:
-                        pass
-                
-                if hd > 0:
-                    end_depth = start_depth + hd
-                    dzms = dzms_matches[i][1] if i < len(dzms_matches) else ''
-                    
-                    lithology_data.append({
-                        '分层号': i + 1,
-                        '起始孔深(m)': round(start_depth, 2),
-                        '终止孔深(m)': round(end_depth, 2),
-                        '厚度(m)': hd,
-                        '岩石名称': ysmc,
-                        '地质描述': dzms
-                    })
-                    start_depth = end_depth
-            
-            lithology_file = os.path.join(output_dir, 'lithology_descriptions.json')
-            with open(lithology_file, 'w', encoding='utf-8') as f:
-                json.dump(lithology_data, f, ensure_ascii=False, indent=2)
-            
-            self.main_window.process_log.append(f"已保存岩性数据到: {lithology_file}")
-            self.main_window.process_progress.setValue(80)
-            
-            image_descriptions = []
-            for img in images:
-                qssd = img['qssd']
-                zzsd = img['zzsd']
-                
-                matched_lith = None
-                for lith in lithology_data:
-                    if qssd >= lith['起始孔深(m)'] and zzsd <= lith['终止孔深(m)']:
-                        matched_lith = lith
-                        break
-                    if qssd < lith['终止孔深(m)'] and zzsd > lith['起始孔深(m)']:
-                        matched_lith = lith
-                        break
-                
-                image_descriptions.append({
-                    'image_file': img['yxtpbh'],
-                    'qssd': qssd,
-                    'zzsd': zzsd,
-                    '岩石名称': matched_lith['岩石名称'] if matched_lith else '',
-                    '地质描述': matched_lith['地质描述'] if matched_lith else ''
-                })
-            
-            image_file = os.path.join(output_dir, 'image_descriptions.json')
-            with open(image_file, 'w', encoding='utf-8') as f:
-                json.dump(image_descriptions, f, ensure_ascii=False, indent=2)
-            
-            self.main_window.process_log.append(f"已保存图片数据到: {image_file}")
-            self.main_window.process_progress.setValue(100)
-            
-            self.main_window.process_status_label.setText("处理完成！")
-            self.main_window.process_status_label.setStyleSheet("""
-                font-size: 14px;
-                font-weight: bold;
-                color: #4CAF50;
-                padding: 8px;
-                background-color: #E8F5E9;
-                border: 1px solid #4CAF50;
-                border-radius: 4px;
-            """)
-            
-            self.main_window.process_log.append("=" * 50)
-            self.main_window.process_log.append(f"处理完成！")
-            self.main_window.process_log.append(f"图片数量: {len(images)}")
-            self.main_window.process_log.append(f"岩性层数: {len(lithology_data)}")
-            self.main_window.process_log.append(f"岩性数据: {lithology_file}")
-            self.main_window.process_log.append(f"图片数据: {image_file}")
-            
-        except Exception as e:
-            self.main_window.process_status_label.setText(f"处理失败: {str(e)}")
-            self.main_window.process_status_label.setStyleSheet("""
-                font-size: 14px;
-                font-weight: bold;
-                color: #F44336;
-                padding: 8px;
-                background-color: #FFEBEE;
-                border: 1px solid #F44336;
-                border-radius: 4px;
-            """)
-            self.main_window.process_log.append(f"错误: {str(e)}")
+        total_files = len(html_files)
+        all_lithology = []
+        all_images = []
+        lithology_id = 0
         
-        finally:
-            self.main_window.process_btn.setEnabled(True)
+        for idx, html_file in enumerate(html_files):
+            file_dir = os.path.dirname(html_file)
+            relative_path = os.path.relpath(file_dir, source_dir)
+            path_parts = relative_path.split(os.sep)
+            
+            project = path_parts[0] if len(path_parts) > 0 else ''
+            borehole = path_parts[1] if len(path_parts) > 1 else ''
+            
+            self.main_window.process_log.append(f"\n处理 [{idx+1}/{total_files}]: {relative_path}")
+            self.main_window.process_progress.setValue(int((idx / total_files) * 50))
+            
+            try:
+                with open(html_file, 'r', encoding='utf-8', errors='replace') as f:
+                    content = f.read()
+                
+                self.main_window.process_log.append("正在解析图片数据...")
+                
+                images = []
+                img_pattern = re.compile(r'class="yanxinImage ([^"]+)"')
+                img_matches = img_pattern.findall(content)
+                self.main_window.process_log.append(f"原始匹配: {len(img_matches)} 个")
+                
+                img_pattern2 = re.compile(r'data-options="qssd:([0-9.]+),zzsd:([0-9.]+),yxtpbh:([^,"]+\.jpg)"')
+                for m in img_pattern2.finditer(content):
+                    images.append({
+                        'imgName': '',
+                        'qssd': float(m.group(1)),
+                        'zzsd': float(m.group(2)),
+                        'yxtpbh': m.group(3).strip()
+                    })
+                
+                self.main_window.process_log.append(f"找到 {len(images)} 张图片")
+                
+                self.main_window.process_log.append("正在解析岩性数据...")
+                
+                fch_matches = re.findall(r'class="field-fch move-field(\d+)" title="([^"]+)"', content)
+                hd_matches = re.findall(r'class="field-hd move-field(\d+)" title="([^"]+)"', content)
+                ysmc_matches = re.findall(r'class="field-ysmc move-field(\d+)" title="([^"]+)"', content)
+                dzms_matches = re.findall(r'class="field-dzms move-field(\d+)" title="([^"]+)"', content)
+                
+                self.main_window.process_log.append(f"找到 {len(ysmc_matches)} 层岩性数据")
+                
+                start_depth = 0.0
+                for i, (idx, ysmc) in enumerate(ysmc_matches):
+                    hd = 0.0
+                    if i < len(hd_matches):
+                        try:
+                            hd = float(hd_matches[i][1])
+                        except:
+                            pass
+                    
+                    if hd > 0:
+                        end_depth = start_depth + hd
+                        dzms = dzms_matches[i][1] if i < len(dzms_matches) else ''
+                        lithology_id += 1
+                        
+                        lith_item = {
+                            'id': lithology_id,
+                            'project': project,
+                            'borehole': borehole,
+                            'lithology': ysmc,
+                            'start_depth': round(start_depth, 2),
+                            'end_depth': round(end_depth, 2),
+                            'description': dzms
+                        }
+                        all_lithology.append(lith_item)
+                        start_depth = end_depth
+                
+                for img in images:
+                    img['project'] = project
+                    img['borehole'] = borehole
+                    img['source_path'] = file_dir
+                
+                all_images.extend(images)
+                
+            except Exception as e:
+                self.main_window.process_log.append(f"处理失败: {str(e)}")
+        
+        self.main_window.process_progress.setValue(70)
+        
+        lithology_file = os.path.join(output_dir, 'lithology_descriptions.json')
+        with open(lithology_file, 'w', encoding='utf-8') as f:
+            json.dump(all_lithology, f, ensure_ascii=False, indent=2)
+        self.main_window.process_log.append(f"已保存岩性数据: {lithology_file}")
+        
+        self.main_window.process_log.append("正在关联图片与岩性数据...")
+        self.main_window.process_progress.setValue(80)
+        
+        image_descriptions = []
+        for img in all_images:
+            qssd = img['qssd']
+            zzsd = img['zzsd']
+            
+            matched_lith = None
+            matched_id = None
+            for lith in all_lithology:
+                if lith['project'] == img['project'] and lith['borehole'] == img['borehole']:
+                    if qssd >= lith['start_depth'] and zzsd <= lith['end_depth']:
+                        matched_lith = lith
+                        matched_id = lith['id']
+                        break
+                    if qssd < lith['end_depth'] and zzsd > lith['start_depth']:
+                        matched_lith = lith
+                        matched_id = lith['id']
+                        break
+            
+            image_descriptions.append({
+                'project': img['project'],
+                'borehole': img['borehole'],
+                'image_file': img['yxtpbh'],
+                'new_filename': f"{img['project']}_{img['borehole']}_{img['yxtpbh']}",
+                'start_depth': qssd,
+                'end_depth': zzsd,
+                'lithology': matched_lith['lithology'] if matched_lith else '',
+                'source_path': img['source_path'],
+                'lithology_description_id': matched_id
+            })
+        
+        image_file = os.path.join(output_dir, 'image_descriptions.json')
+        with open(image_file, 'w', encoding='utf-8') as f:
+            json.dump(image_descriptions, f, ensure_ascii=False, indent=2)
+        self.main_window.process_log.append(f"已保存图片数据: {image_file}")
+        
+        self.main_window.process_status_label.setText("处理完成！")
+        self.main_window.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #4CAF50;
+            padding: 8px;
+            background-color: #E8F5E9;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        """)
+        self.main_window.process_progress.setValue(100)
+        self.main_window.process_log.append("=" * 50)
+        self.main_window.process_log.append(f"处理完成！")
+        self.main_window.process_log.append(f"图片数量: {len(all_images)}")
+        self.main_window.process_log.append(f"岩性层数: {len(all_lithology)}")
+        self.main_window.process_btn.setEnabled(True)
+    
+    def download_images(self):
+        """下载岩心图片"""
+        import requests
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        output_dir = getattr(self.main_window, 'output_directory', '')
+        if not output_dir:
+            QMessageBox.warning(self.main_window, "警告", "请先设置输出目录")
+            return
+        
+        image_json_file = os.path.join(output_dir, 'image_descriptions.json')
+        if not os.path.exists(image_json_file):
+            QMessageBox.warning(self.main_window, "警告", "请先运行数据处理生成图片列表")
+            return
+        
+        with open(image_json_file, 'r', encoding='utf-8') as f:
+            images = json.load(f)
+        
+        if not images:
+            QMessageBox.warning(self.main_window, "警告", "没有图片需要下载")
+            return
+        
+        ZZJGDM = '12100000400014276N'
+        
+        first_img = images[0]
+        dh = first_img.get('project', '')
+        zkbh = first_img.get('borehole', '')
+        
+        self.main_window.process_log.append(f"项目: {dh}, 钻孔: {zkbh}")
+        
+        def get_url(filename, dh, zkbh):
+            base = f'https://ndcp.cgsi.cn/SWZXFILE/file/yanxinImages/{ZZJGDM}/{dh}_{zkbh}/'
+            return base + "YT_IMG/" + filename
+        
+        first_img_fn = images[0].get('image_file', '')
+        first_url = get_url(first_img_fn, dh, zkbh)
+        self.main_window.process_log.append(f"图片URL: {first_url}")
+        
+        images_dir = os.path.join(output_dir, 'images')
+        os.makedirs(images_dir, exist_ok=True)
+        
+        def download_single(img_info):
+            filename = img_info.get('image_file', '')
+            if not filename:
+                return False
+            
+            dh = img_info.get('project', '')
+            zkbh = img_info.get('borehole', '')
+            
+            output_path = os.path.join(images_dir, filename)
+            if os.path.exists(output_path):
+                return True
+            
+            url = get_url(filename, dh, zkbh)
+            try:
+                r = requests.get(url, timeout=30)
+                if r.status_code == 200 and len(r.content) > 1000:
+                    with open(output_path, 'wb') as f:
+                        f.write(r.content)
+                    return True
+            except:
+                pass
+            return False
+        
+        success_count = 0
+        total = len(images)
+        
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = {executor.submit(download_single, img): img for img in images}
+            for i, future in enumerate(as_completed(futures)):
+                if future.result():
+                    success_count += 1
+                self.main_window.process_progress.setValue(int((i + 1) * 100 / total))
+                self.main_window.process_log.append(f"下载 [{i+1}/{total}]: {futures[future].get('image_file', '')}")
+        
+        self.main_window.process_status_label.setText("下载完成！")
+        self.main_window.process_status_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #4CAF50;
+            padding: 8px;
+            background-color: #E8F5E9;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        """)
+        self.main_window.process_log.append("=" * 50)
+        self.main_window.process_log.append(f"下载完成: {success_count}/{total}")
+        self.main_window.download_btn.setEnabled(True)
