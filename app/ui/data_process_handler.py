@@ -562,7 +562,7 @@ class DataProcessHandler:
                 'start_depth': qssd,
                 'end_depth': zzsd,
                 'lithology': matched_lith['lithology'] if matched_lith else '',
-                'source_path': img['source_path'],
+                'source_path': f"https://ndcp.cgsi.cn/SWZXFILE/file/yanxinImages/12100000400014276N/{img['project']}_{img['borehole']}/YT_IMG/{img['yxtpbh']}",
                 'lithology_description_id': matched_id
             })
         
