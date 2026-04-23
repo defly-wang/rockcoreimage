@@ -652,7 +652,6 @@ class DataProcessHandler:
         
         success_count = 0
         total = len(images)
-log_count = 0
         
         with ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(download_single, img, download_queue) for img in images]
