@@ -237,27 +237,6 @@ class ProcessPage:
         main_window.process_btn.clicked.connect(main_window.process_handler.start_data_processing)
         button_layout.addWidget(main_window.process_btn)
         
-        button_layout.addSpacing(20)
-        
-        main_window.download_btn = QPushButton("下载图片")
-        main_window.download_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2196F3;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                padding: 12px 30px;
-            }
-            QPushButton:hover {
-                background-color: #1976D2;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
-            }
-        """)
-        main_window.download_btn.clicked.connect(main_window.process_handler.download_images)
-        button_layout.addWidget(main_window.download_btn)
-        
         button_panel.setLayout(button_layout)
         layout.addWidget(button_panel)
         

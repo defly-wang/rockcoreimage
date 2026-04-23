@@ -569,6 +569,8 @@ class DataProcessHandler:
             json.dump(image_descriptions, f, ensure_ascii=False, indent=2)
         self.main_window.process_log.append(f"已保存图片数据: {image_file}")
         
+        self.download_images(all_images)
+        
         self.main_window.process_status_label.setText("处理完成！")
         self.main_window.process_status_label.setStyleSheet("""
             font-size: 14px;
@@ -586,7 +588,7 @@ class DataProcessHandler:
         self.main_window.process_log.append(f"岩性层数: {len(all_lithology)}")
         self.main_window.process_btn.setEnabled(True)
     
-    def download_images(self):
+    def download_images(self, images=None):
         """下载岩心图片"""
         import requests
         from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -596,13 +598,14 @@ class DataProcessHandler:
             QMessageBox.warning(self.main_window, "警告", "请先设置输出目录")
             return
         
-        image_json_file = os.path.join(output_dir, 'image_descriptions.json')
-        if not os.path.exists(image_json_file):
-            QMessageBox.warning(self.main_window, "警告", "请先运行数据处理生成图片列表")
-            return
-        
-        with open(image_json_file, 'r', encoding='utf-8') as f:
-            images = json.load(f)
+        if images is None:
+            image_json_file = os.path.join(output_dir, 'image_descriptions.json')
+            if not os.path.exists(image_json_file):
+                QMessageBox.warning(self.main_window, "警告", "请先运行数据处理生成图片列表")
+                return
+            
+            with open(image_json_file, 'r', encoding='utf-8') as f:
+                images = json.load(f)
         
         if not images:
             QMessageBox.warning(self.main_window, "警告", "没有图片需要下载")
