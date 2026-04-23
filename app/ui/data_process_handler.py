@@ -460,14 +460,22 @@ class DataProcessHandler:
                 img_matches = img_pattern.findall(content)
                 self.main_window.process_log.append(f"原始匹配: {len(img_matches)} 个")
                 
-                img_pattern2 = re.compile(r'data-options="qssd:([0-9.]+),zzsd:([0-9.]+),yxtpbh:([^,"]+\.jpg)"')
+                img_pattern2 = re.compile(r'yxtpbh:([^,"]+)')
                 for m in img_pattern2.finditer(content):
-                    images.append({
-                        'imgName': '',
-                        'qssd': float(m.group(1)),
-                        'zzsd': float(m.group(2)),
-                        'yxtpbh': m.group(3).strip()
-                    })
+                    yxtpbh = m.group(1).strip()
+                    if yxtpbh.endswith('.jpg'):
+                        images.append({
+                            'imgName': '',
+                            'qssd': 0.0,
+                            'zzsd': 0.0,
+                            'yxtpbh': yxtpbh
+                        })
+                
+                depth_pattern = re.compile(r'qssd:([0-9.]+),zzsd:([0-9.]+)')
+                for i, m in enumerate(depth_pattern.finditer(content)):
+                    if i < len(images):
+                        images[i]['qssd'] = float(m.group(1))
+                        images[i]['zzsd'] = float(m.group(2))
                 
                 self.main_window.process_log.append(f"找到 {len(images)} 张图片")
                 
