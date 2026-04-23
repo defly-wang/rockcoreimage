@@ -179,7 +179,7 @@ class ProcessPage:
         button_layout.addWidget(main_window.html_radio)
         main_window.process_type_group.addButton(main_window.html_radio)
         
-        main_window.web_radio = QPushButton("网络抓取模式")
+        main_window.web_radio = QPushButton("实物中心数据")
         main_window.web_radio.setCheckable(True)
         main_window.web_radio.setStyleSheet("""
             QPushButton {

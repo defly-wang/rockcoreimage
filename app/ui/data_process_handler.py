@@ -273,7 +273,7 @@ class DataProcessHandler:
         from PyQt6.QtWidgets import QDialog, QFormLayout, QLineEdit, QDialogButtonBox, QCheckBox, QPushButton
         
         dialog = QDialog(self.main_window)
-        dialog.setWindowTitle("网络抓取 - 全国数字岩心平台")
+        dialog.setWindowTitle("实物中心数据 - 全国数字岩心平台")
         dialog.setModal(True)
         dialog.setFixedSize(550, 280)
         
