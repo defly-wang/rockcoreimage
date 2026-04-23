@@ -651,7 +651,7 @@ def download_single(img_info, download_queue):
                     return
             except Exception as e:
                 download_queue.put((False, filename, str(e)))
-            download_queue.put((False, filename, 'failed'))
+download_queue.put((False, filename, 'failed'))
         
         success_count = 0
         total = len(images)
