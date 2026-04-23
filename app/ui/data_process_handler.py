@@ -676,4 +676,4 @@ class DataProcessHandler:
         """)
         self.main_window.process_log.append("=" * 50)
         self.main_window.process_log.append(f"下载完成: {success_count}/{total}")
-        self.main_window.download_btn.setEnabled(True)
+        self.main_window.process_btn.setEnabled(True)
