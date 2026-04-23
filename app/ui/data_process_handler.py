@@ -556,6 +556,8 @@ class DataProcessHandler:
                 'project': img['project'],
                 'borehole': img['borehole'],
                 'image_file': img['yxtpbh'],
+                'qssd': img['qssd'],
+                'zzsd': img['zzsd'],
                 'new_filename': f"{img['project']}_{img['borehole']}_{img['yxtpbh']}",
                 'start_depth': qssd,
                 'end_depth': zzsd,
@@ -618,6 +620,7 @@ class DataProcessHandler:
         zkbh = first_img.get('borehole', '')
         
         self.main_window.process_log.append(f"项目: {dh}, 钻孔: {zkbh}")
+        self.main_window.process_log.append(f"图片数量: {len(images)}")
         
         def get_url(filename, dh, zkbh):
             base = f'https://ndcp.cgsi.cn/SWZXFILE/file/yanxinImages/{ZZJGDM}/{dh}_{zkbh}/'
@@ -644,13 +647,16 @@ class DataProcessHandler:
             
             url = get_url(filename, dh, zkbh)
             try:
+                self.main_window.process_log.append(f"正在下载: {url}")
                 r = requests.get(url, timeout=30)
+                self.main_window.process_log.append(f"状态码: {r.status_code}, 内容长度: {len(r.content)}")
                 if r.status_code == 200 and len(r.content) > 1000:
                     with open(output_path, 'wb') as f:
                         f.write(r.content)
                     return True
-            except:
-                pass
+            except Exception as e:
+                self.main_window.process_log.append(f"下载失败: {str(e)}")
+            
             return False
         
         success_count = 0
