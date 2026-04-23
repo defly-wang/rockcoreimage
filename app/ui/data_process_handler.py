@@ -524,7 +524,7 @@ class DataProcessHandler:
             except Exception as e:
                 self.main_window.process_log.append(f"处理失败: {str(e)}")
         
-        self.main_window.process_progress.setValue(70)
+        self.main_window.process_progress.setValue(10)
         
         lithology_file = os.path.join(output_dir, 'lithology_descriptions.json')
         with open(lithology_file, 'w', encoding='utf-8') as f:
@@ -532,7 +532,7 @@ class DataProcessHandler:
         self.main_window.process_log.append(f"已保存岩性数据: {lithology_file}")
         
         self.main_window.process_log.append("正在关联图片与岩性数据...")
-        self.main_window.process_progress.setValue(80)
+        self.main_window.process_progress.setValue(10)
         
         image_descriptions = []
         for img in all_images:
@@ -584,15 +584,10 @@ class DataProcessHandler:
             border-radius: 4px;
         """)
         self.main_window.process_progress.setValue(100)
-        self.main_window.process_log.append("=" * 50)
-        self.main_window.process_log.append(f"处理完成！")
-        self.main_window.process_log.append(f"图片数量: {len(all_images)}")
-        self.main_window.process_log.append(f"岩性层数: {len(all_lithology)}")
-        self.main_window.process_btn.setEnabled(True)
     
     def download_images(self, images=None):
         """下载岩心图片"""
-        import requests
+        from threading import Thread
         from concurrent.futures import ThreadPoolExecutor, as_completed
         
         output_dir = getattr(self.main_window, 'output_directory', '')
@@ -612,6 +607,8 @@ class DataProcessHandler:
         if not images:
             QMessageBox.warning(self.main_window, "警告", "没有图片需要下载")
             return
+        
+        self.main_window.process_log.clear()
         
         ZZJGDM = '12100000400014276N'
         
@@ -647,16 +644,13 @@ class DataProcessHandler:
             
             url = get_url(filename, dh, zkbh)
             try:
-                self.main_window.process_log.append(f"正在下载: {url}")
                 r = requests.get(url, timeout=30)
-                self.main_window.process_log.append(f"状态码: {r.status_code}, 内容长度: {len(r.content)}")
                 if r.status_code == 200 and len(r.content) > 1000:
                     with open(output_path, 'wb') as f:
                         f.write(r.content)
                     return True
-            except Exception as e:
-                self.main_window.process_log.append(f"下载失败: {str(e)}")
-            
+            except:
+                pass
             return False
         
         success_count = 0
@@ -667,8 +661,7 @@ class DataProcessHandler:
             for i, future in enumerate(as_completed(futures)):
                 if future.result():
                     success_count += 1
-                self.main_window.process_progress.setValue(int((i + 1) * 100 / total))
-                self.main_window.process_log.append(f"下载 [{i+1}/{total}]: {futures[future].get('yxtpbh', '')}")
+                self.main_window.process_progress.setValue(10 + int((i + 1) * 90 / total))
         
         self.main_window.process_status_label.setText("下载完成！")
         self.main_window.process_status_label.setStyleSheet("""
@@ -680,6 +673,5 @@ class DataProcessHandler:
             border: 1px solid #4CAF50;
             border-radius: 4px;
         """)
-        self.main_window.process_log.append("=" * 50)
         self.main_window.process_log.append(f"下载完成: {success_count}/{total}")
         self.main_window.process_btn.setEnabled(True)
