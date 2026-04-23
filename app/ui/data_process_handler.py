@@ -652,21 +652,23 @@ class DataProcessHandler:
         
         success_count = 0
         total = len(images)
-        log_count = 0
+log_count = 0
         
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = {executor.submit(download_single, img, download_queue): img for img in images}
-            while any(f.running() or f.done() for f in futures):
-                while not download_queue.empty():
-                    result, filename, error = download_queue.get()
+            futures = [executor.submit(download_single, img, download_queue) for img in images]
+            
+            completed = 0
+            while completed < total:
+                try:
+                    result, filename, error = download_queue.get(timeout=1)
                     if result:
                         success_count += 1
-                    log_count += 1
-                    if log_count % 50 == 0 or log_count == total:
-                        self.main_window.process_log.append(f"进度: {log_count}/{total}")
-                    self.main_window.process_progress.setValue(10 + int(log_count * 90 / total))
-                import time
-                time.sleep(0.1)
+                    completed += 1
+                    self.main_window.process_progress.setValue(10 + int(completed * 90 / total))
+                    if completed % 50 == 0:
+                        self.main_window.process_log.append(f"进度: {completed}/{total}")
+                except:
+                    pass
         
         self.main_window.process_status_label.setText("下载完成！")
         self.main_window.process_status_label.setStyleSheet("""
