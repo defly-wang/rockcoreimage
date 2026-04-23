@@ -618,6 +618,7 @@ class DataProcessHandler:
         
         self.main_window.process_log.append(f"项目: {dh}, 钻孔: {zkbh}")
         self.main_window.process_log.append(f"图片数量: {len(images)}")
+        self.main_window.process_log.append(f"第一个文件: {images[0].get('yxtpbh', '')}")
         
         def get_url(filename, dh, zkbh):
             base = f'https://ndcp.cgsi.cn/SWZXFILE/file/yanxinImages/{ZZJGDM}/{dh}_{zkbh}/'
@@ -640,6 +641,7 @@ class DataProcessHandler:
             
             output_path = os.path.join(images_dir, filename)
             if os.path.exists(output_path):
+                self.main_window.process_log.append(f"已存在: {filename}")
                 return True
             
             url = get_url(filename, dh, zkbh)
@@ -648,9 +650,12 @@ class DataProcessHandler:
                 if r.status_code == 200 and len(r.content) > 1000:
                     with open(output_path, 'wb') as f:
                         f.write(r.content)
+                    self.main_window.process_log.append(f"成功: {filename}")
                     return True
-            except:
-                pass
+                else:
+                    self.main_window.process_log.append(f"失败({r.status_code}): {filename}")
+            except Exception as e:
+                self.main_window.process_log.append(f"错误: {str(e)}")
             return False
         
         success_count = 0
