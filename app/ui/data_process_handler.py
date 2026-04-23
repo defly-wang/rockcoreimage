@@ -585,9 +585,10 @@ class DataProcessHandler:
         """)
         self.main_window.process_progress.setValue(100)
     
-    def download_images(self, images=None):
+def download_images(self, images=None):
         """下载岩心图片"""
         import requests
+        from queue import Queue
         from threading import Thread
         from concurrent.futures import ThreadPoolExecutor, as_completed
         
@@ -619,23 +620,21 @@ class DataProcessHandler:
         
         self.main_window.process_log.append(f"项目: {dh}, 钻孔: {zkbh}")
         self.main_window.process_log.append(f"图片数量: {len(images)}")
-        self.main_window.process_log.append(f"第一个文件: {images[0].get('yxtpbh', '')}")
         
         def get_url(filename, dh, zkbh):
             base = f'https://ndcp.cgsi.cn/SWZXFILE/file/yanxinImages/{ZZJGDM}/{dh}_{zkbh}/'
             return base + "YT_IMG/" + filename
         
-        first_img_fn = images[0].get('yxtpbh', '')
-        first_url = get_url(first_img_fn, dh, zkbh)
-        self.main_window.process_log.append(f"图片URL: {first_url}")
-        
         images_dir = os.path.join(output_dir, 'images')
         os.makedirs(images_dir, exist_ok=True)
         
-        def download_single(img_info):
+        download_queue = Queue()
+        
+def download_single(img_info, download_queue):
             filename = img_info.get('yxtpbh', '')
             if not filename:
-                return False
+                download_queue.put((False, filename, ''))
+                return
             
             dh = img_info.get('project', '')
             zkbh = img_info.get('borehole', '')
@@ -648,21 +647,29 @@ class DataProcessHandler:
                 if r.status_code == 200 and len(r.content) > 1000:
                     with open(output_path, 'wb') as f:
                         f.write(r.content)
-                    self.main_window.process_log.append(f"下载: {filename}")
-                    return True
+                    download_queue.put((True, filename, ''))
+                    return
             except Exception as e:
-                self.main_window.process_log.append(f"失败: {filename}")
-            return False
+                download_queue.put((False, filename, str(e)))
+            download_queue.put((False, filename, 'failed'))
         
         success_count = 0
         total = len(images)
+        log_count = 0
         
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = {executor.submit(download_single, img): img for img in images}
-            for i, future in enumerate(as_completed(futures)):
-                if future.result():
-                    success_count += 1
-                self.main_window.process_progress.setValue(10 + int((i + 1) * 90 / total))
+            futures = {executor.submit(download_single, img, download_queue): img for img in images}
+            while any(f.running() or f.done() for f in futures):
+                while not download_queue.empty():
+                    result, filename, error = download_queue.get()
+                    if result:
+                        success_count += 1
+                    log_count += 1
+                    if log_count % 50 == 0 or log_count == total:
+                        self.main_window.process_log.append(f"进度: {log_count}/{total}")
+                    self.main_window.process_progress.setValue(10 + int(log_count * 90 / total))
+                import time
+                time.sleep(0.1)
         
         self.main_window.process_status_label.setText("下载完成！")
         self.main_window.process_status_label.setStyleSheet("""
