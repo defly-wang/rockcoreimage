@@ -641,9 +641,6 @@ class DataProcessHandler:
             zkbh = img_info.get('borehole', '')
             
             output_path = os.path.join(images_dir, filename)
-            if os.path.exists(output_path):
-                self.main_window.process_log.append(f"已存在: {filename}")
-                return True
             
             url = get_url(filename, dh, zkbh)
             try:
@@ -651,12 +648,10 @@ class DataProcessHandler:
                 if r.status_code == 200 and len(r.content) > 1000:
                     with open(output_path, 'wb') as f:
                         f.write(r.content)
-                    self.main_window.process_log.append(f"成功: {filename}")
+                    self.main_window.process_log.append(f"下载: {filename}")
                     return True
-                else:
-                    self.main_window.process_log.append(f"失败({r.status_code}): {filename}")
             except Exception as e:
-                self.main_window.process_log.append(f"错误: {str(e)}")
+                self.main_window.process_log.append(f"失败: {filename}")
             return False
         
         success_count = 0
