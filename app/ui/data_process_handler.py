@@ -626,7 +626,7 @@ class DataProcessHandler:
             base = f'https://ndcp.cgsi.cn/SWZXFILE/file/yanxinImages/{ZZJGDM}/{dh}_{zkbh}/'
             return base + "YT_IMG/" + filename
         
-        first_img_fn = images[0].get('image_file', '')
+        first_img_fn = images[0].get('yxtpbh', '')
         first_url = get_url(first_img_fn, dh, zkbh)
         self.main_window.process_log.append(f"图片URL: {first_url}")
         
@@ -634,7 +634,7 @@ class DataProcessHandler:
         os.makedirs(images_dir, exist_ok=True)
         
         def download_single(img_info):
-            filename = img_info.get('image_file', '')
+            filename = img_info.get('yxtpbh', '')
             if not filename:
                 return False
             
@@ -668,7 +668,7 @@ class DataProcessHandler:
                 if future.result():
                     success_count += 1
                 self.main_window.process_progress.setValue(int((i + 1) * 100 / total))
-                self.main_window.process_log.append(f"下载 [{i+1}/{total}]: {futures[future].get('image_file', '')}")
+                self.main_window.process_log.append(f"下载 [{i+1}/{total}]: {futures[future].get('yxtpbh', '')}")
         
         self.main_window.process_status_label.setText("下载完成！")
         self.main_window.process_status_label.setStyleSheet("""
