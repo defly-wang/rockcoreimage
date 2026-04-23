@@ -585,7 +585,7 @@ class DataProcessHandler:
         """)
         self.main_window.process_progress.setValue(100)
     
-def download_images(self, images=None):
+    def download_images(self, images=None):
         """下载岩心图片"""
         import requests
         from queue import Queue
