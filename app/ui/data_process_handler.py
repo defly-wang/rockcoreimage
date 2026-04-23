@@ -630,7 +630,7 @@ def download_images(self, images=None):
         
         download_queue = Queue()
         
-def download_single(img_info, download_queue):
+        def download_single(img_info, download_queue):
             filename = img_info.get('yxtpbh', '')
             if not filename:
                 download_queue.put((False, filename, ''))
