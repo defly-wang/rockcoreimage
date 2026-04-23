@@ -587,6 +587,7 @@ class DataProcessHandler:
     
     def download_images(self, images=None):
         """下载岩心图片"""
+        import requests
         from threading import Thread
         from concurrent.futures import ThreadPoolExecutor, as_completed
         
