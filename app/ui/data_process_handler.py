@@ -1,7 +1,6 @@
 import os
 import json
 import re
-from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QMessageBox, QTableWidgetItem, QLabel, QFileDialog, QHBoxLayout
 
 
@@ -458,7 +457,6 @@ class DataProcessHandler:
                 images = []
                 img_pattern = re.compile(r'class="yanxinImage ([^"]+)"')
                 img_matches = img_pattern.findall(content)
-                self.main_window.process_log.append(f"原始匹配: {len(img_matches)} 个")
                 
                 img_pattern2 = re.compile(r'yxtpbh:([^,.]+\.jpg)')
                 for m in img_pattern2.finditer(content):
@@ -589,8 +587,7 @@ class DataProcessHandler:
         """下载岩心图片"""
         import requests
         from queue import Queue
-        from threading import Thread
-        from concurrent.futures import ThreadPoolExecutor, as_completed
+        from concurrent.futures import ThreadPoolExecutor
         
         output_dir = getattr(self.main_window, 'output_directory', '')
         if not output_dir:
