@@ -384,7 +384,7 @@ class DataProcessHandler:
         self.main_window.process_thread.start()
     
     def start_local_fetching(self):
-        """从本地综合数据展示.htm文件处理数据 - 使用已选择的目录"""
+        """从本地综合数据展示.htm/html文件处理数据 - 使用已选择的目录"""
         
         source_dir = getattr(self.main_window, 'source_directory', '')
         output_dir = getattr(self.main_window, 'output_directory', '')
@@ -399,11 +399,13 @@ class DataProcessHandler:
         
         html_files = []
         for root, dirs, files in os.walk(source_dir):
-            if '综合数据展示.htm' in files:
-                html_files.append(os.path.join(root, '综合数据展示.htm'))
+            for f in files:
+                if f in ('综合数据展示.htm', '综合数据展示.html'):
+                    html_files.append(os.path.join(root, f))
+                    break
         
         if not html_files:
-            QMessageBox.warning(self.main_window, "警告", f"数据目录中找不到综合数据展示.htm文件\n{source_dir}")
+            QMessageBox.warning(self.main_window, "警告", f"数据目录中找不到综合数据展示.htm或.html文件\n{source_dir}")
             return
         
         self.process_local_data(html_files, source_dir, output_dir)
@@ -569,7 +571,7 @@ class DataProcessHandler:
             json.dump(image_descriptions, f, ensure_ascii=False, indent=2)
         self.main_window.process_log.append(f"已保存图片数据: {image_file}")
         
-        self.download_images(all_images)
+        self.download_images(image_descriptions)
         
         self.main_window.process_status_label.setText("处理完成！")
         self.main_window.process_status_label.setStyleSheet("""
@@ -628,15 +630,16 @@ class DataProcessHandler:
         download_queue = Queue()
         
         def download_single(img_info, download_queue):
-            filename = img_info.get('yxtpbh', '')
+            filename = img_info.get('image_file', img_info.get('yxtpbh', ''))
             if not filename:
                 download_queue.put((False, filename, ''))
                 return
             
             dh = img_info.get('project', '')
             zkbh = img_info.get('borehole', '')
+            new_filename = img_info.get('new_filename', filename)
             
-            output_path = os.path.join(images_dir, filename)
+            output_path = os.path.join(images_dir, new_filename)
             
             url = get_url(filename, dh, zkbh)
             try:
@@ -646,9 +649,12 @@ class DataProcessHandler:
                         f.write(r.content)
                     download_queue.put((True, filename, ''))
                     return
+                else:
+                    download_queue.put((False, filename, f'HTTP {r.status_code}'))
             except Exception as e:
                 download_queue.put((False, filename, str(e)))
-            download_queue.put((False, filename, 'failed'))
+            if not os.path.exists(output_path):
+                download_queue.put((False, filename, 'failed'))
         
         success_count = 0
         total = len(images)
@@ -657,17 +663,28 @@ class DataProcessHandler:
             futures = [executor.submit(download_single, img, download_queue) for img in images]
             
             completed = 0
+            failed_files = []
             while completed < total:
                 try:
                     result, filename, error = download_queue.get(timeout=1)
                     if result:
                         success_count += 1
+                    else:
+                        failed_files.append(f"{filename}: {error}")
+                        self.main_window.process_log.append(f"下载失败: {filename} - {error}")
                     completed += 1
                     self.main_window.process_progress.setValue(10 + int(completed * 90 / total))
                     if completed % 50 == 0:
                         self.main_window.process_log.append(f"进度: {completed}/{total}")
                 except:
                     pass
+        
+        if failed_files:
+            self.main_window.process_log.append(f"\n失败文件列表 ({len(failed_files)}个):")
+            for f in failed_files[:100]:
+                self.main_window.process_log.append(f"  {f}")
+            if len(failed_files) > 100:
+                self.main_window.process_log.append(f"  ... 还有 {len(failed_files) - 100} 个")
         
         self.main_window.process_status_label.setText("下载完成！")
         self.main_window.process_status_label.setStyleSheet("""
