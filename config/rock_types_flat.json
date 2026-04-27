@@ -281,6 +281,17 @@
       ]
     },
     {
+      "name": "英安斑岩",
+      "category": "岩浆岩",
+      "importance": true,
+      "name_en": "Dacite-porphyry",
+      "description_en": "Porphyritic dacite with large plagioclase and quartz phenocrysts in fine-grained matrix. Volcanic equivalent of granodiorite, intermediate intrusive rock.",
+      "description": "斑状英安岩，斜长石和石英斑晶。英安岩的浅成对应岩石，花岗闪长岩和闪长岩之间的过渡类型。",
+      "aliases": [
+        "英安玢岩"
+      ]
+    },
+    {
       "name": "辉长玢岩",
       "category": "岩浆岩",
       "importance": true,
@@ -449,6 +460,17 @@
       "description": "砂岩，几乎全部由石英颗粒组成。成熟度高的沉积岩。",
       "aliases": [
         "石英砂岩"
+      ]
+    },
+    {
+      "name": "粉砂岩",
+      "category": "沉积岩",
+      "importance": true,
+      "name_en": "Siltstone",
+      "description_en": "Clastic sedimentary rock with grain size between 0.004-0.06mm. Finer than sandstone but coarser than shale.",
+      "description": "碎屑沉积岩，粒度0.004-0.06毫米。比砂岩细，比页岩粗。",
+      "aliases": [
+        "粉砂石"
       ]
     },
     {
@@ -1311,6 +1333,17 @@
       "description": "中级变质岩，主要由石英和碱性长石组成，含少量云母。细至中粒片麻状构造，浅色。",
       "aliases": [
         "浅色片麻岩"
+      ]
+    },
+    {
+      "name": "变质粉砂岩",
+      "category": "变质岩",
+      "importance": true,
+      "name_en": "Metasiltstone",
+      "description_en": "Metamorphosed siltstone. Weakly foliated metamorphic rock preserving original clastic texture. Low-grade regional metamorphism of siltstone.",
+      "description": "粉砂岩的变质产物。弱片理，保留原始碎屑结构。低区域变质作用形成。",
+      "aliases": [
+        "变质粉砂石"
       ]
     }
   ],
