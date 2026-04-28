@@ -4,6 +4,84 @@ import re
 from PyQt6.QtWidgets import QMessageBox, QTableWidgetItem, QLabel, QFileDialog, QHBoxLayout
 
 
+def calculate_lithology_stats(image_data, desc_by_id=None):
+    """计算岩性统计信息 - 与analysis_page.py中的show_process_stats复用"""
+    lithology_stats = {}
+    lith_order = {}
+    proj_order = {}
+    for idx, item in enumerate(image_data):
+        lith = item.get("lithology", "")
+        proj = item.get("project", "")
+        start_depth = item.get("start_depth", 0)
+        end_depth = item.get("end_depth", 0)
+        if lith:
+            if proj not in proj_order:
+                proj_order[proj] = len(proj_order)
+            key = (lith, proj)
+            if key not in lithology_stats:
+                description = item.get("lithology_description", "")
+                if not description and desc_by_id:
+                    desc_id = item.get("lithology_description_id")
+                    if desc_id is not None and desc_id in desc_by_id:
+                        description = desc_by_id[desc_id].get("description", "")
+                
+                lithology_stats[key] = {
+                    "lithology": lith,
+                    "project": proj,
+                    "count": 0,
+                    "description": description,
+                    "start_depth": start_depth,
+                    "end_depth": end_depth,
+                }
+                lith_order[key] = len(lith_order)
+            else:
+                if start_depth < lithology_stats[key]["start_depth"]:
+                    lithology_stats[key]["start_depth"] = start_depth
+                if end_depth > lithology_stats[key]["end_depth"]:
+                    lithology_stats[key]["end_depth"] = end_depth
+            lithology_stats[key]["count"] += 1
+    
+    for key in lithology_stats:
+        lithology_stats[key]["order"] = lith_order[key]
+        lithology_stats[key]["proj_order"] = proj_order[key[1]]
+    
+    return lithology_stats
+
+
+def display_lithology_table(table_widget, lithology_stats):
+    """显示岩性统计表格 - 与analysis_page.py中的格式一致"""
+    sorted_lith = sorted(
+        lithology_stats.values(),
+        key=lambda x: (x.get("proj_order", 0), x.get("order", 0)),
+    )
+    
+    table_widget.setColumnCount(6)
+    table_widget.setHorizontalHeaderLabels(
+        ["项目", "岩性名称", "起始深度(m)", "结束深度(m)", "图片数", "岩性描述"]
+    )
+    table_widget.setColumnWidth(0, 100)
+    table_widget.setColumnWidth(1, 100)
+    table_widget.setColumnWidth(2, 80)
+    table_widget.setColumnWidth(3, 80)
+    table_widget.setColumnWidth(4, 60)
+    table_widget.horizontalHeader().setStretchLastSection(True)
+    
+    table_widget.setRowCount(len(sorted_lith))
+    
+    for i, info in enumerate(sorted_lith):
+        table_widget.setItem(i, 0, QTableWidgetItem(info["project"]))
+        table_widget.setItem(i, 1, QTableWidgetItem(info["lithology"]))
+        table_widget.setItem(i, 2, QTableWidgetItem(str(info.get("start_depth", 0))))
+        table_widget.setItem(i, 3, QTableWidgetItem(str(info.get("end_depth", 0))))
+        table_widget.setItem(i, 4, QTableWidgetItem(str(info["count"])))
+        desc = info.get("description", "")
+        table_widget.setItem(i, 5, QTableWidgetItem(desc.replace("\n", " ") if desc else ""))
+    
+    table_widget.resizeRowsToContents()
+    
+    return len(sorted_lith)
+
+
 class DataProcessHandler:
     def __init__(self, main_window):
         self.main_window = main_window
@@ -408,9 +486,16 @@ class DataProcessHandler:
             QMessageBox.warning(self.main_window, "警告", f"数据目录中找不到综合数据展示.htm或.html文件\n{source_dir}")
             return
         
-        self.process_local_data(html_files, source_dir, output_dir)
+        lithology_id_start = 1
+        if hasattr(self.main_window, 'lithology_id_start_input'):
+            try:
+                lithology_id_start = int(self.main_window.lithology_id_start_input.text()) or 1
+            except ValueError:
+                lithology_id_start = 1
+        
+        self.process_local_data(html_files, source_dir, output_dir, lithology_id_start)
     
-    def process_local_data(self, html_files, source_dir, output_dir):
+    def process_local_data(self, html_files, source_dir, output_dir, lithology_id_start=1):
         """处理本地HTML文件"""
         self.main_window.process_btn.setEnabled(False)
         
@@ -437,7 +522,7 @@ class DataProcessHandler:
         total_files = len(html_files)
         all_lithology = []
         all_images = []
-        lithology_id = 0
+        lithology_id = lithology_id_start - 1
         
         for idx, html_file in enumerate(html_files):
             file_dir = os.path.dirname(html_file)
@@ -573,6 +658,31 @@ class DataProcessHandler:
         
         self.download_images(image_descriptions)
         
+        image_file = os.path.join(output_dir, 'image_descriptions.json')
+        with open(image_file, 'r', encoding='utf-8') as f:
+            image_data = json.load(f)
+        
+        desc_file = os.path.join(output_dir, 'lithology_descriptions.json')
+        desc_by_id = {}
+        if os.path.exists(desc_file):
+            with open(desc_file, 'r', encoding='utf-8') as f:
+                desc_list = json.load(f)
+                for d in desc_list:
+                    desc_by_id[d['id']] = d
+        
+        # 使用公共函数计算岩性统计（与岩性分析模块复用）
+        lithology_stats = calculate_lithology_stats(image_data, desc_by_id)
+        
+        # 使用公共函数显示表格（与岩性分析模块格式一致）
+        total_lithology = display_lithology_table(self.main_window.process_table, lithology_stats)
+        
+        # 在日志中输出统计信息
+        total_images = len(image_data)
+        self.main_window.process_log.append(f"处理完成!")
+        self.main_window.process_log.append(f"共处理图片: {total_images} 张")
+        self.main_window.process_log.append(f"岩性种类: {total_lithology} 种")
+        self.main_window.process_log.append(f"描述文件: {desc_file}")
+        
         self.main_window.process_status_label.setText("处理完成！")
         self.main_window.process_status_label.setStyleSheet("""
             font-size: 14px;
@@ -584,6 +694,7 @@ class DataProcessHandler:
             border-radius: 4px;
         """)
         self.main_window.process_progress.setValue(100)
+        self.main_window.process_btn.setEnabled(True)
     
     def download_images(self, images=None):
         """下载岩心图片"""
@@ -640,6 +751,10 @@ class DataProcessHandler:
             new_filename = img_info.get('new_filename', filename)
             
             output_path = os.path.join(images_dir, new_filename)
+            
+            if os.path.exists(output_path):
+                download_queue.put((True, filename, '已存在'))
+                return
             
             url = get_url(filename, dh, zkbh)
             try:
