@@ -141,6 +141,7 @@ class AnalysisPage:
         right_layout.addWidget(QLabel("统计表格:"))
         right_layout.addWidget(main_window.analysis_table, 1)
 
+        action_group = QGroupBox("操作")
         action_button_panel = QHBoxLayout()
         action_button_panel.addStretch()
 
@@ -149,9 +150,8 @@ class AnalysisPage:
             QPushButton {
                 background-color: #2196F3;
                 color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
+                font-size: 13px;
+                padding: 8px;
             }
             QPushButton:hover {
                 background-color: #1976D2;
@@ -165,9 +165,8 @@ class AnalysisPage:
             QPushButton {
                 background-color: #2196F3;
                 color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
+                font-size: 13px;
+                padding: 8px;
             }
             QPushButton:hover {
                 background-color: #1976D2;
@@ -183,9 +182,8 @@ class AnalysisPage:
             QPushButton {
                 background-color: #9C27B0;
                 color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
+                font-size: 13px;
+                padding: 8px;
             }
             QPushButton:hover {
                 background-color: #7B1FA2;
@@ -201,9 +199,8 @@ class AnalysisPage:
             QPushButton {
                 background-color: #FF9800;
                 color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
+                font-size: 13px;
+                padding: 8px;
             }
             QPushButton:hover {
                 background-color: #F57C00;
@@ -219,9 +216,8 @@ class AnalysisPage:
             QPushButton {
                 background-color: #E91E63;
                 color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
+                font-size: 13px;
+                padding: 8px;
             }
             QPushButton:hover {
                 background-color: #C2185B;
@@ -234,9 +230,8 @@ class AnalysisPage:
             QPushButton {
                 background-color: #9C27B0;
                 color: white;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 16px;
+                font-size: 13px;
+                padding: 8px;
             }
             QPushButton:hover {
                 background-color: #7B1FA2;
@@ -246,7 +241,8 @@ class AnalysisPage:
         action_button_panel.addWidget(ai_btn)
         action_button_panel.addWidget(detail_btn)
 
-        right_layout.addLayout(action_button_panel)
+        action_group.setLayout(action_button_panel)
+        right_layout.addWidget(action_group)
 
         right_panel.setLayout(right_layout)
 

@@ -16,9 +16,6 @@ class PreprocessPage:
         page = QWidget()
         layout = QVBoxLayout()
         
-        info_panel = QGroupBox("信息")
-        info_layout = QVBoxLayout()
-        
         main_window.preprocess_status_label = QLabel("等待开始...")
         main_window.preprocess_status_label.setStyleSheet("""
             font-size: 14px;
@@ -29,16 +26,13 @@ class PreprocessPage:
             border: 1px solid #E0E0E0;
             border-radius: 4px;
         """)
-        info_layout.addWidget(main_window.preprocess_status_label)
+        layout.addWidget(main_window.preprocess_status_label)
         
         main_window.preprocess_progress = QProgressBar()
         main_window.preprocess_progress.setTextVisible(True)
         main_window.preprocess_progress.setFormat("%p%")
         main_window.preprocess_progress.setVisible(False)
-        info_layout.addWidget(main_window.preprocess_progress)
-        
-        info_panel.setLayout(info_layout)
-        layout.addWidget(info_panel)
+        layout.addWidget(main_window.preprocess_progress)
         
         main_content = QHBoxLayout()
         
@@ -371,7 +365,7 @@ class PreprocessPage:
             from app.modules.preprocessor import ImagePreprocessor
             preprocessor = ImagePreprocessor()
             
-            split_images = preprocessor.split_image(img_path, target_size)
+            split_images = preprocessor.split_image(img_path, target_size, cols=1)
             
             augmented_images = []
             for split_img in split_images:
@@ -389,13 +383,34 @@ class PreprocessPage:
                     )
                     augmented_images.extend(augmented)
             
-            cols = 4
+            # 根据预览窗口宽度自动计算列数
+            preview_container = main_window.preview_container
+            available_width = preview_container.width()
+            if available_width <= 0:
+                parent = preview_container.parent()
+                from PyQt6.QtWidgets import QScrollArea
+                if isinstance(parent, QScrollArea):
+                    available_width = parent.viewport().width()
+                else:
+                    available_width = 600
+            
+            # 计算单张图片占用宽度（图片宽度 + frame边距 + spacing）
+            if augmented_images:
+                first_img = augmented_images[0]
+                img_width = first_img.size[0]
+                frame_margin = 10
+                spacing = main_window.preview_grid.spacing()
+                single_width = img_width + frame_margin * 2 + spacing
+            else:
+                single_width = 100
+            
+            cols = max(1, available_width // single_width) if single_width > 0 else 1
+            
             for i, img in enumerate(augmented_images):
                 row = i // cols
                 col = i % cols
                 
                 frame = QFrame()
-                frame.setFixedWidth(130)
                 frame.setStyleSheet("background-color: white; border: 1px solid #ddd; border-radius: 4px;")
                 layout = QVBoxLayout()
                 
@@ -404,9 +419,7 @@ class PreprocessPage:
                 qimg = QImage(img_rgb.data, width, height, 3 * width, QImage.Format.Format_RGB888)
                 pixmap = QPixmap.fromImage(qimg)
                 
-                if pixmap.width() > 120:
-                    pixmap = pixmap.scaled(120, 120, Qt.AspectRatioMode.KeepAspectRatio)
-                
+                # 按原始尺寸显示
                 label = QLabel()
                 label.setPixmap(pixmap)
                 label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -416,7 +429,6 @@ class PreprocessPage:
                 name_label.setStyleSheet("font-size: 10px;")
                 name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 name_label.setWordWrap(True)
-                name_label.setMaximumWidth(120)
                 layout.addWidget(name_label)
                 
                 frame.setLayout(layout)
